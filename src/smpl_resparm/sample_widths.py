@@ -17,9 +17,11 @@ def sample_chisquare(N_samples, DOF):
     samples = np.random.chisquare(DOF, size=N_samples)
     return samples
     
-def chisquare_PDF(x, DOF):
+def chisquare_PDF(x, DOF, avg_reduced_width_square):
+    x = x/avg_reduced_width_square
     y = stats.chi2.pdf(x, DOF)
-    return y
+    y_norm = y/avg_reduced_width_square
+    return y_norm
 
 def sample_resonance_widths(DOF, N_levels, avg_reduced_width_square):
     
@@ -34,7 +36,7 @@ def compare_pdf_to_samples(reduced_widths_square_vector, avg_reduced_width_squar
     fig = plt.figure(num=1,frameon=True); ax = fig.gca()
     
     x = np.linspace(0,max(reduced_widths_square_vector),10000)
-    plt.plot(x, chisquare_PDF(x,dof), color='r', label='$\chi^2$ PDF', zorder=10)
+    plt.plot(x, chisquare_PDF(x,dof,avg_reduced_width_square), color='r', label='$\chi^2$ PDF', zorder=10)
     
     if avg_reduced_width_square != 1:
         print(); print('WARNING: ')
@@ -48,7 +50,3 @@ def compare_pdf_to_samples(reduced_widths_square_vector, avg_reduced_width_squar
     plt.show(); plt.close()
     
     return
-
-
-
-
