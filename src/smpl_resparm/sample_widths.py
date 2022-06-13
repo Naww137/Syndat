@@ -42,7 +42,7 @@ def compare_pdf_to_samples(reduced_widths_square_vector, avg_reduced_width_squar
         print(); print('WARNING: ')
         print('pdf has not been transformed for <D> other than 1 - will not match samples'); print()
         
-    plt.hist(reduced_widths_square_vector, bins=75, density=True, ec='k', linewidth=0.75,color='pink', zorder=2, label='samples')
+    plt.hist(reduced_widths_square_vector, bins=75, density=True, ec='k', linewidth=0.75,color='cornflowerblue', zorder=2, label='samples')
     
     ax.set_facecolor('whitesmoke'); ax.grid(color='w', linestyle='-', linewidth=2, zorder=1, alpha=1)
     ax.set_xlabel('Reduced Widths Squared ($\gamma^2$)'); ax.set_ylabel('Normalized Frequency'); plt.title('Reduced Widths Squared ($\gamma^2$)')
