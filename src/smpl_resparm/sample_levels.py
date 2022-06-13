@@ -62,7 +62,7 @@ def compare_pdf_to_samples(level_spacing_vector, avg_level_spacing, method):
         
     if method == 'GOE':
         print(); print('WARNING: ')
-        print('GOE sampling has not been transformed by factor of pi - will not match pdf or invCDF sampling'); print()
+        print('GOE sampling does not match wigner pdf exactly'); print()
         plt.hist(level_spacing_vector, bins=75, density=True, ec='k', linewidth=0.75,color='cornflowerblue', zorder=2, label='GOE')
 
     elif method == 'invCDF':
@@ -78,15 +78,5 @@ def compare_pdf_to_samples(level_spacing_vector, avg_level_spacing, method):
     plt.show(); plt.close()
     
     return
-
-
-
-avg_level_spacing = 1
-starting_energy = 10
-samples = 10000
-
-[levels, level_spacing] = sample_resonance_levels(starting_energy, samples, avg_level_spacing, 'GOE')
-
-compare_pdf_to_samples(level_spacing, avg_level_spacing, 'GOE')
 
 
