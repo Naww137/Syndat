@@ -88,8 +88,8 @@ starting_energy = 10
 samples = 10000
 
 
-[levels, level_spacing] = sample_resonance_levels(starting_energy, samples, avg_level_spacing, 'invCDF')
-#[levels, level_spacing] = sample_resonance_levels(starting_energy, samples, avg_level_spacing, 'GOE')
+#[levels, level_spacing] = sample_resonance_levels(starting_energy, samples, avg_level_spacing, 'invCDF')
+[levels, level_spacing] = sample_resonance_levels(starting_energy, samples, avg_level_spacing, 'GOE')
 
 compare_pdf_to_samples(level_spacing, avg_level_spacing, 'invCDF')
 
