@@ -77,6 +77,7 @@ def compare_pdf_to_samples(level_spacing_vector, avg_level_spacing, method):
     ax.set_facecolor('whitesmoke'); ax.grid(color='w', linestyle='-', linewidth=2, zorder=1, alpha=1)
     ax.set_xlabel('Level Spacing'); ax.set_ylabel('Normalized Frequency'); plt.title('Distribution of Level Spacing Samples')
     plt.legend()
+    plt.show(); plt.close()
     
     return
 
