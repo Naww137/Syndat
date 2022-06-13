@@ -55,7 +55,7 @@ def compare_pdf_to_samples(level_spacing_vector, avg_level_spacing, method):
     
     fig = plt.figure(num=1,frameon=True); ax = fig.gca()
     
-    x = np.linspace(0,5,10000)
+    x = np.linspace(0,max(level_spacing_vector),10000)
     plt.plot(x, wigner_PDF(x), color='r', label='Wigner PDF', zorder=10)
     
     if avg_level_spacing != 1:
@@ -77,23 +77,8 @@ def compare_pdf_to_samples(level_spacing_vector, avg_level_spacing, method):
     ax.set_facecolor('whitesmoke'); ax.grid(color='w', linestyle='-', linewidth=2, zorder=1, alpha=1)
     ax.set_xlabel('Level Spacing'); ax.set_ylabel('Normalized Frequency'); plt.title('Distribution of Level Spacing Samples')
     plt.legend()
-
-
-
-
-#%%
-
-avg_level_spacing = 1
-starting_energy = 10
-samples = 10000
-
-
-#[levels, level_spacing] = sample_resonance_levels(starting_energy, samples, avg_level_spacing, 'invCDF')
-[levels, level_spacing] = sample_resonance_levels(starting_energy, samples, avg_level_spacing, 'GOE')
-
-compare_pdf_to_samples(level_spacing, avg_level_spacing, 'invCDF')
-
-
+    
+    return
 
 
 
