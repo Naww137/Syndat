@@ -38,8 +38,8 @@ def sample_resonance_levels(E0, N_levels, avg_level_spacing, method):
         for ilevel in range(N_levels):
             X = generate_GOE(2)
             eigenvalues = np.linalg.eigvals(X)
-            spacing = avg_level_spacing*abs(np.diff(eigenvalues))
-            level_spacing.append(spacing.item()*avg_level_spacing/(np.pi/2))
+            spacing = avg_level_spacing*abs(np.diff(eigenvalues))/(np.pi/2)
+            level_spacing.append(spacing.item())
     else:
         print('method for sampling resonance levels is not recognized')
         os.sys.exit()
@@ -66,7 +66,7 @@ def compare_pdf_to_samples(level_spacing_vector, avg_level_spacing, method):
         plt.hist(level_spacing_vector, bins=75, density=True, ec='k', linewidth=0.75,color='cornflowerblue', zorder=2, label='GOE')
 
     elif method == 'invCDF':
-        plt.hist(level_spacing_vector, bins=75, density=True, ec='k', linewidth=0.75,color='pink', zorder=2, label='invCDF')
+        plt.hist(level_spacing_vector, bins=75, density=True, ec='k', linewidth=0.75,color='cornflowerblue', zorder=2, label='invCDF')
         
     else:
         print(); print('WARNING: ')
