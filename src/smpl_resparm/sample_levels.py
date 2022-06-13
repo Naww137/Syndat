@@ -21,9 +21,11 @@ def generate_GOE(N):
     X = A + np.transpose(A)
     return X
 
-def wigner_PDF(x):
+def wigner_PDF(x, avg_level_spacing):
+    x = x/avg_level_spacing
     y = (np.pi/2) * x * np.exp(-np.pi*(x**2)/4)
     #y = (1/2) * x * np.exp(-(x**2)/4)   # remove the pi terms to match GOE
+    y = y/avg_level_spacing
     return y
 
 def sample_resonance_levels(E0, N_levels, avg_level_spacing, method):
@@ -37,7 +39,7 @@ def sample_resonance_levels(E0, N_levels, avg_level_spacing, method):
             X = generate_GOE(2)
             eigenvalues = np.linalg.eigvals(X)
             spacing = avg_level_spacing*abs(np.diff(eigenvalues))
-            level_spacing.append(spacing.item())
+            level_spacing.append(spacing.item()*avg_level_spacing/(np.pi/2))
     else:
         print('method for sampling resonance levels is not recognized')
         os.sys.exit()
@@ -56,11 +58,7 @@ def compare_pdf_to_samples(level_spacing_vector, avg_level_spacing, method):
     fig = plt.figure(num=1,frameon=True); ax = fig.gca()
     
     x = np.linspace(0,max(level_spacing_vector),10000)
-    plt.plot(x, wigner_PDF(x), color='r', label='Wigner PDF', zorder=10)
-    
-    if avg_level_spacing != 1:
-        print(); print('WARNING: ')
-        print('pdf has not been transformed for <D> other than 1 - will not match samples'); print()
+    plt.plot(x, wigner_PDF(x,avg_level_spacing), color='r', label='Wigner PDF', zorder=10)
         
     if method == 'GOE':
         print(); print('WARNING: ')
@@ -82,5 +80,13 @@ def compare_pdf_to_samples(level_spacing_vector, avg_level_spacing, method):
     return
 
 
+
+avg_level_spacing = 1
+starting_energy = 10
+samples = 10000
+
+[levels, level_spacing] = sample_resonance_levels(starting_energy, samples, avg_level_spacing, 'GOE')
+
+compare_pdf_to_samples(level_spacing, avg_level_spacing, 'GOE')
 
 
