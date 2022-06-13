@@ -1,1 +1,1 @@
-# nuc-syndat
+# nuc-syndatInsert a more detailed README.md here
