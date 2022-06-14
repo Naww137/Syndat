@@ -4,11 +4,11 @@ Insert desciption of this project.
 
 ## Installation & Setup
 
-#### nuc_syndat package
+#### Setup & Use nuc_syndat Package
 steps to install python package
 
 #### Documentation with sphinx
-This project uses sphinx with autodoc to read documentation embeded with pandas [docstrings](https://pandas.pydata.org/docs/development/contributing_docstring.html#plots-in-examples). 
+This project uses sphinx with autodoc to read documentation embeded with pandas [docstrings](https://pandas.pydata.org/docs/development/contributing_docstring.html#plots-in-examples).
 Sphinx can be installed with `pip install -U sphinx`
 
 
