@@ -12,7 +12,7 @@ This project uses sphinx with autodoc to read documentation embeded with pandas 
 
 Sphinx can be installed with `pip install -U sphinx`
 
-The next step is to build with `sphinx-build -b html sourcedir builddir`
+The next step is to build with `sphinx-quickstart` or `sphinx-build -b html sourcedir builddir`
 
 
 
