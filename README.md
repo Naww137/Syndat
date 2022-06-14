@@ -7,6 +7,8 @@ Insert desciption of this project.
 #### Setup & Use nuc_syndat Package
 steps to install python package
 
+to install editable version of the package use `-e` s.t. you do not have to re-build to reflect updates.
+
 #### Documentation with sphinx
 This project uses sphinx with autodoc to read documentation embeded with pandas [docstrings](https://pandas.pydata.org/docs/development/contributing_docstring.html#plots-in-examples).
 
