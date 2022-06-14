@@ -9,7 +9,10 @@ steps to install python package
 
 #### Documentation with sphinx
 This project uses sphinx with autodoc to read documentation embeded with pandas [docstrings](https://pandas.pydata.org/docs/development/contributing_docstring.html#plots-in-examples).
+
 Sphinx can be installed with `pip install -U sphinx`
+
+The next step is to build with `sphinx-build -b html sourcedir builddir`
 
 
 
