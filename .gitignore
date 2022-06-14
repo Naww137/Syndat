@@ -72,6 +72,9 @@ instance/
 docs/_build/
 docs/*
 !*.html
+sphinx/*
+!*.rst
+!conf.py
 
 # PyBuilder
 target/
