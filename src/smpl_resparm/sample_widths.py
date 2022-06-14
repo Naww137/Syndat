@@ -14,6 +14,32 @@ import scipy.stats as stats
 
 
 def sample_chisquare(N_samples, DOF):
+    """
+    Sample the chi-squared distribution.
+
+    This function returns a vector of samples from the chi-square distribution 
+    given the number of samples desired and the degrees of freedom for the 
+    distribution.
+
+    Parameters
+    ----------
+    N_samples : int
+        Number of samples and/or length of sample vector.
+    DOF : float
+        Degrees of freedom for the chi-squared distribution.
+
+    Returns
+    -------
+    array
+        Array of i.i.d. samples from $\chi^2$ distribution.
+
+    See Also
+    --------
+    chisquare_PDF : $\chi^2$ probability density function.
+
+    Examples
+    --------
+    """
     samples = np.random.chisquare(DOF, size=N_samples)
     return samples
     
