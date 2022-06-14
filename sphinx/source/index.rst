@@ -7,7 +7,7 @@ Welcome to nuc_syndat's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    modules
