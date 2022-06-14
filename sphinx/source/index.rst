@@ -11,6 +11,7 @@ Welcome to nuc_syndat's documentation!
    :caption: Contents:
 
    modules
+   sample_resparm
 
 
 
