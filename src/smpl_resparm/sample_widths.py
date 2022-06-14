@@ -17,9 +17,8 @@ def sample_chisquare(N_samples, DOF):
     """
     Sample the chi-squared distribution.
 
-    This function returns a vector of samples from the chi-square distribution 
-    given the number of samples desired and the degrees of freedom for the 
-    distribution.
+    This function simply samples from the chi-square distribution and is used
+    by other functions for generating reduced resonance width samples.
 
     Parameters
     ----------
@@ -30,20 +29,64 @@ def sample_chisquare(N_samples, DOF):
 
     Returns
     -------
-    array
+    numpy.ndarray
         Array of i.i.d. samples from $\chi^2$ distribution.
 
     See Also
     --------
-    chisquare_PDF : $\chi^2$ probability density function.
+    chisquare_PDF : Calculate probability density function for chi-squared distribution.
 
+    Notes
+    -----
+    A more robust/recomended way to set seed for examples would be to create a
+    random number generator and pass it to the function. The example included
+    in this documentation sets a global random number seed. See this article
+    for more information on why this could be improved:
+    https://towardsdatascience.com/stop-using-numpy-random-seed-581a9972805f.
+    
     Examples
     --------
+    >>> from smpl_resparm import sample_widths
+    >>> np.random.seed(7)
+    >>> sample_widths.sample_chisquare(2,10)
+    array([18.7081546 ,  7.46151704])
     """
     samples = np.random.chisquare(DOF, size=N_samples)
     return samples
     
 def chisquare_PDF(x, DOF, avg_reduced_width_square):
+    """
+    Calculate probability density function for chi-squared distribution.
+
+    This function simply houses the probaility density function for the 
+    chi-squared distribution and allows for a rescaling factor to be applied.
+    The rescaling factor represents the average resonance width value s.t.
+    this PDF will represent the distribution of widths for a specific isotope.
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        Values at which to evaluation the PDF.
+    DOF : float or int
+        Degrees of freedom for the chi-squared distribution.
+    avg_reduced_width_square : float or int
+        Re-scaling factor for isotope specific distribution.
+
+    Returns
+    -------
+    numpy.ndarray
+        Pointwise function evaluated at x, given DOF and rescaling factor.
+
+    See Also
+    --------
+    sample_chisquare : Sample the chi-squared distribution.
+    
+    Examples
+    --------
+    >>> from smpl_resparm import sample_widths
+    >>> sample_widths.chisquare_PDF(np.array([1.0, 2.5, 3.0]), 2, 1)
+    array([0.30326533, 0.1432524 , 0.11156508])
+    """
     x = x/avg_reduced_width_square
     y = stats.chi2.pdf(x, DOF)
     y_norm = y/avg_reduced_width_square
