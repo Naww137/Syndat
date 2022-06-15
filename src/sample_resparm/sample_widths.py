@@ -30,7 +30,7 @@ def sample_chisquare(N_samples, DOF):
     Returns
     -------
     numpy.ndarray
-        Array of i.i.d. samples from $\chi^2$ distribution.
+        Array of i.i.d. samples from chi-squared distribution.
 
     See Also
     --------
@@ -46,7 +46,7 @@ def sample_chisquare(N_samples, DOF):
     
     Examples
     --------
-    >>> from smpl_resparm import sample_widths
+    >>> from sample_resparm import sample_widths
     >>> np.random.seed(7)
     >>> sample_widths.sample_chisquare(2,10)
     array([18.7081546 ,  7.46151704])
@@ -83,7 +83,8 @@ def chisquare_PDF(x, DOF, avg_reduced_width_square):
     
     Examples
     --------
-    >>> from smpl_resparm import sample_widths
+    >>> from sample_resparm import sample_widths
+    >>> import scipy.stats as stats
     >>> sample_widths.chisquare_PDF(np.array([1.0, 2.5, 3.0]), 2, 1)
     array([0.30326533, 0.1432524 , 0.11156508])
     """
@@ -101,15 +102,47 @@ def sample_resonance_widths(DOF, N_levels, avg_reduced_width_square):
 
 
 def compare_pdf_to_samples(reduced_widths_square_vector, avg_reduced_width_square, dof):
+    """
+    Compare samples to pdf (re-scaled).
+
+    This function plots a histogram of the parameter samples with an
+    overlaid probability density function of the distribution from which the 
+    samples were drawn. In the limit that sample size approaches infinity, the
+    PDF and histogram should line up exactly, acting as visual verification 
+    for the sampling methods.
+
+    Parameters
+    ----------
+    reduced_widths_square_vector : numpy.ndarray
+        Array of reduced widths/decay amplitudes squared (little gamma squared).
+    avg_reduced_width_square : float or int
+        Isotope/spin group specific average reduced width/decay amplitude squared.
+    dof : float or int
+        Degrees of freedom for the chi-squared distribution.
+
+    Returns
+    -------
     
+    Notes
+    -----
+    Showing the example with a plot included is not working for this docstring.
+    
+    Examples
+    --------
+    
+    .. plot::
+       :format: doctest
+       :align: center
+       :scale: 100
+
+        >>> import matplotlib.pyplot as plt
+        >>> from sample_resparm import sample_widths
+        >>> myfig = sample_widths.compare_pdf_to_samples(sample_widths.sample_resonance_widths(5,10000, 1)[0], 1, 5)
+    """
     fig = plt.figure(num=1,frameon=True); ax = fig.gca()
     
     x = np.linspace(0,max(reduced_widths_square_vector),10000)
     plt.plot(x, chisquare_PDF(x,dof,avg_reduced_width_square), color='r', label='$\chi^2$ PDF', zorder=10)
-    
-    if avg_reduced_width_square != 1:
-        print(); print('WARNING: ')
-        print('pdf has not been transformed for <D> other than 1 - will not match samples'); print()
         
     plt.hist(reduced_widths_square_vector, bins=75, density=True, ec='k', linewidth=0.75,color='cornflowerblue', zorder=2, label='samples')
     
@@ -118,4 +151,4 @@ def compare_pdf_to_samples(reduced_widths_square_vector, avg_reduced_width_squar
     plt.legend()
     plt.show(); plt.close()
     
-    return
+    return fig
