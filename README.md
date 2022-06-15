@@ -52,9 +52,10 @@ This project uses sphinx with autodoc to read documentation embeded with pandas 
 Sphinx can be installed with `pip install -U sphinx`
 
 The next step is to build with `sphinx-quickstart` or `sphinx-build -b html sourcedir builddir`
+HTML files, with the style and other settings in conf.py, can be generated with `make html`.
 
 
-
+ 
 ## Other Resources
 The basis for the python package structure used in this project can be found [here](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
 
