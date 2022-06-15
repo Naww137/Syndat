@@ -41,7 +41,7 @@ The following command will clone and install the nuc_syndat package to whatever 
 pip install git+https://github.com/Naww137/nuc_syndat
 ```
 
-To install editable version of the package use `-e` s.t. you do not have to re-build to reflect updates. This creates a link to the source code and allows for on-the-fly development and testing.
+To install using "develoment mode" use the `-e` option with pip install. This will install an editable version of the packages with links to the source code s.t. you do not have to re-build to reflect updates made to the source.
 ```
 pip install -e git+https://github.com/Naww137/nuc_syndat#egg=nuc_syndat
 ```
