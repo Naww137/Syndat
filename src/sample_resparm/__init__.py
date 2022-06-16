@@ -1,1 +1,1 @@
-__all__ = ["generate_GOE", "sample_levels", "sample_widths"]
+__all__ = ["generate_GOE", "sample_levels", "sample_widths", "PS_functions"]
