@@ -17,9 +17,12 @@ These are potential areas of improvement or next steps in the development of the
 ## Software
 These are potential areas of improvement or next steps in the development of this project as a software package. 
 
+#### Packgaing and User installation
+  - Look into putting dependencis into setup.cfg file rather than the current method of (pip installing all dependencies in requirements. file). This may be more robust.
+
+
 #### Sphinx
   - Inlcude sphinx/latex extension that allows for mathematical expressions in documentation
   - Get example to render plot in html
 
-#### Other aspect of software package development
-  - Stuff
+
