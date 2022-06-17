@@ -20,9 +20,10 @@ These are potential areas of improvement or next steps in the development of thi
 #### Packgaing and User installation
   - Look into putting dependencis into setup.cfg file rather than the current method of (pip installing all dependencies in requirements. file). This may be more robust.
 
-
 #### Sphinx
   - Inlcude sphinx/latex extension that allows for mathematical expressions in documentation
   - Get example to render plot in html
+  - In the examples for stochastic functions, use an independent RNG to set the seed rather than the depreciated global np.random.seed()
+  
 
 
