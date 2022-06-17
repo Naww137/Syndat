@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import scipy.stats as stats
+from sample_resparm import PS_functions
 
 
 def sample_chisquare(N_samples, DOF):
@@ -29,7 +30,7 @@ def sample_chisquare(N_samples, DOF):
 
     Returns
     -------
-    numpy.ndarray
+    numpy.ndarray or float
         Array of i.i.d. samples from chi-squared distribution.
 
     See Also
@@ -52,6 +53,8 @@ def sample_chisquare(N_samples, DOF):
     array([18.7081546 ,  7.46151704])
     """
     samples = np.random.chisquare(DOF, size=N_samples)
+    if N_samples == 1:
+        samples = np.asscalar(samples)
     return samples
     
 def chisquare_PDF(x, DOF, avg_reduced_width_square):
@@ -97,6 +100,17 @@ def sample_resonance_widths(DOF, N_levels, avg_reduced_width_square):
     
     reduced_widths_square = avg_reduced_width_square*sample_chisquare(N_levels, DOF)
     partial_widths = 0  # add function with penetrability =2*P(E)*red_wid_sqr
+    
+    return reduced_widths_square, partial_widths
+
+
+
+
+def sample_RRR_widths(level_vector, avg_reduced_width_square, DOF, orbital_angular_momentum):
+    
+    reduced_widths_square = avg_reduced_width_square*sample_chisquare(len(level_vector), DOF)
+    S,P = PS_functions.PS_explicit(np.array(level_vector), orbital_angular_momentum)
+    partial_widths = 2*P*reduced_widths_square 
     
     return reduced_widths_square, partial_widths
 
@@ -151,4 +165,4 @@ def compare_pdf_to_samples(reduced_widths_square_vector, avg_reduced_width_squar
     plt.legend()
     plt.show(); plt.close()
     
-    return fig
+    return

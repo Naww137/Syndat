@@ -24,27 +24,124 @@ m_eV = 939.565420e6 # eV/c^2
 
 
 def k_wavenumber(E):
+    """
+    Calculate the wavenumber of the compound state nucleus.
+
+    This function calculates the wavenumber of the compound state nucleus
+    created by an incident neutron and a Cu-63 atom. Some nucelar parameters 
+    are housed within this function, this could be updated for other nuclei.
+
+    Parameters
+    ----------
+    E : float or numpy.ndarray
+        Energy of the incident neutron.
+
+    Returns
+    -------
+    float or numpy.ndarray
+        Returns either the scalar k or vector of k at different energies.
+    
+    Examples
+    --------
+    >>> from sample_resparm import PS_functions
+    >>> PS_functions.k_wavenumber(10.4)
+    697379673687.8605
+    >>> PS_functions.k_wavenumber(np.array([1,10,100,1000]))
+    array([2.16248257e+11, 6.83837032e+11, 2.16248257e+12, 6.83837032e+12])
+    """
     k = 1/hbar * M/(m+M) * np.sqrt(2*m_eV*E) * 1/c
     return k
 
 def PS_recursive(E, ac, orbital_angular_momentum):
+    """
+    Calculates penetrability and shift functions using recursion.
+
+    This function calculates the centifugal barrier penetrability as well as
+    the shift factor for a neutron incident on Cu-63. The recursive implementation
+    will allow for high l values. Some nucelar parameters are housed within 
+    this function, this could be updated for other nuclei.
+
+    Parameters
+    ----------
+    E : numpy.ndarray
+        Energy of the incident neutron.
+    ac : float 
+        The channel radius in meters.
+    orbital_angular_momentum : int
+        Orbital angular momentum of the pair, describes waveform (l).
+
+    Returns
+    -------
+    S_array : numpy.ndarray
+        Array shift factors, each row is an l value, columns traverse energy vector given.
+    P_array : numpy.ndarray
+        Array penetrability, each row is an l value, columns traverse energy vector given.
+
+    See Also
+    --------
+    PS_explicit : Calculates penetrability and shift functions using explicit definitions.
     
+    Examples
+    --------
+    >>> from sample_resparm import PS_functions
+    >>> PS_functions.PS_recursive(np.array([10.4]), 6.7e-15, 2)
+    [array([[ 0.        ],
+            [-0.99997817],
+            [-1.99999272]]),
+     array([[4.67244381e-03],
+            [1.02005310e-07],
+            [2.47442770e-13]])]
+    """
     rho = k_wavenumber(E)*ac
-    
-    S_vector = np.zeros([orbital_angular_momentum+1,len(E)])
-    P_vector = np.ones([orbital_angular_momentum+1,len(E)])
-    P_vector[0,:] *= rho
+
+    S_array = np.zeros([orbital_angular_momentum+1,len(E)])
+    P_array = np.ones([orbital_angular_momentum+1,len(E)])
+    P_array[0,:] *= rho
     
     for l in range(1,orbital_angular_momentum+1):
-        S = (rho**2*(l-S_vector[l-1]) / ((l-S_vector[l-1])**2 + P_vector[l-1]**2)) - l
-        P = rho**2*P_vector[l-1] / ((l-S_vector[l-1])**2 + P_vector[l-1]**2)
+        S = (rho**2*(l-S_array[l-1]) / ((l-S_array[l-1])**2 + P_array[l-1]**2)) - l
+        P = rho**2*P_array[l-1] / ((l-S_array[l-1])**2 + P_array[l-1]**2)
         
-        S_vector[l,:]=S; P_vector[l,:]=P
+        S_array[l,:]=S; P_array[l,:]=P
         
-    return [S_vector, P_vector]
+    return S_array, P_array
 
 
-def PS_explicit(E,ac,orbital_angular_momentum):
+def PS_explicit(E, orbital_angular_momentum):
+    """
+    Calculates penetrability and shift functions using explicit definitions.
+
+    This function calculates the centifugal barrier penetrability as well as
+    the shift factor for a neutron incident on Cu-63. The explicit implementation
+    only allows for l-values up to 3. Some nucelar parameters are housed within 
+    this function, this could be updated for other nuclei.
+
+    Parameters
+    ----------
+    E : float or numpy.ndarray
+        Energy of the incident neutron.
+    ac : float 
+        The channel radius in meters.
+    orbital_angular_momentum : int
+        Orbital angular momentum of the pair, describes waveform (l).
+
+    Returns
+    -------
+    S_array : array-like
+        shift factor(s) at given energy.
+    P_array : array-like
+        Penetrability at given energy.
+
+    See Also
+    --------
+    recursive : Calculates penetrability and shift functions using recursion.
+    
+    Examples
+    --------
+    >>> from sample_resparm import PS_functions
+    >>> PS_functions.PS_explicit(np.array([10.4, 10.5]), 6.7e-15, 2)
+    [array([-1.99999272, -1.99999265]), array([2.4744277e-13, 2.5343386e-13])]
+    """
     rho = k_wavenumber(E)*ac
     if orbital_angular_momentum == 0:
         P = rho
@@ -59,7 +156,7 @@ def PS_explicit(E,ac,orbital_angular_momentum):
         P = rho**7/(255+45*rho**2+6*rho**4+rho**6)
         S = -(675+90*rho**2+6*rho**4)/(225+45*rho**2+6*rho**4+rho**6)
         
-    return [S, P]
+    return S, P
         
         
         
