@@ -17,6 +17,7 @@ This option uses pip to read and install the nuc-syndat package and other depend
                   - Using this package in it's own venv as it will install the listed version of each dependent package
 
 The necessary packages and dependencies to use nuc_syndat are listed below:
+** need to add pandas package to this
 
 ```
 cycler==0.11.0
