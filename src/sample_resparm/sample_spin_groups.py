@@ -291,13 +291,4 @@ def sample_each_Jpi(I, i, l_wave_max,
         Jp_df.to_csv(os.path.join(sammy_run_folder,'Jp_all.csv'))
         
     return Jn_df, Jp_df
-
-
-     
-
-        
-        
-        
-        
-        
-        
+  
