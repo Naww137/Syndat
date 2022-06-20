@@ -10,32 +10,35 @@ Insert desciption of this project.
 
 ### Clone and install this repository 
 
-#### Option 1 - 
+#### Step 1 - Dependencies 
+
+If you have created a clean, virtual environment, you may use requirements to install all dependencies necessary to run nuc_syndat. If you have not created a virtual environment, this is not recommended as it may change the version of some python modules in your root environment while nuc-syndat will likely run on the most updated versions of these dependent packages. If you want to run nuc_syndat in your root environment, skip this step and go to step 2 but be aware that you may need to install some dependent packages (i.e. scipy, pandas).
 
 This option uses pip to read and install the nuc-syndat package and other dependent packages at once. This is a bare-bones set of packages and does not include a text editor or ide such as spyder. This option is recomended for the follow use-cases:
                   - Users only as the install of nuc_syndat is not a development installation
                   - Using this package in it's own venv as it will install the listed version of each dependent package
 
-The necessary packages and dependencies to use nuc_syndat are listed below:
-** need to add pandas package to this
+The necessary dependencies to use nuc_syndat are listed below:
 
 ```
 cycler==0.11.0
 fonttools==4.33.3
 kiwisolver==1.4.3
 matplotlib==3.5.2
-nuc-syndat @ git+https://github.com/Naww137/nuc_syndat@188ee1aa959c84746833c0022c68b4f92546b13a
 numpy==1.22.4
 packaging==21.3
+pandas==1.4.2
 Pillow==9.1.1
 pyparsing==3.0.9
 python-dateutil==2.8.2
+pytz==2022.1
+scipy==1.8.1
 six==1.16.0
 ```
 
 Copy this text to a file named `requirements.txt`. Ensure that this file is in the root directory of the environment that you want to work in. the run `pip install -r requirements.txt` from that directory. 
 
-#### Option 2 -
+#### Step 2 - nuc_syndat
 
 The following command will clone and install the nuc_syndat package to whatever environment you are working in. You will be required to rebuild/reinstall in order to reflect updates.
 ```
