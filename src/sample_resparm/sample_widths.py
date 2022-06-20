@@ -105,7 +105,30 @@ def sample_resonance_widths(DOF, N_levels, avg_reduced_width_square):
 
 
 def sample_RRR_widths(level_vector, avg_reduced_width_square, DOF, orbital_angular_momentum):
-    
+    """
+    Samples resonance widths corresponding to a vector of resonance energies.
+
+    This function uses the porter thomas distribution to sample a vector of
+    resonance widths corresponding to a vector of resonance level energies.
+
+    Parameters
+    ----------
+    level_vector : numpy.ndarray
+        Ladder of resonance energy levels.
+    avg_reduced_width_square : float or int
+        Average value for the reduced width for rescale of the PT distribution.
+    DOF : float or int
+        Degrees of freedom applied to the PT distiribution (chi-square).
+    orbital_angular_momentum : int
+        Orbital angular momentum of the pair, describes waveform (l).
+
+    Returns
+    -------
+    reduced_widths_square : numpy.ndarray
+        Array of reduced widths squared, this is what is sampled directly.
+    partial_widths : numpy.ndarray
+        Array partial widths, derived from red. widths using penetrability factor.
+    """
     reduced_widths_square = avg_reduced_width_square*sample_chisquare(len(level_vector), DOF)
     S,P = PS_functions.PS_explicit(np.array(level_vector), orbital_angular_momentum)
     partial_widths = 2*P*reduced_widths_square 

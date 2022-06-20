@@ -86,12 +86,12 @@ def sample_RRR_levels(E_range, avg_level_spacing):
     Sample the resonance energy levels.
 
     This function samples the wigner distribution using invCDF method in order 
-    to get a ladder of resonance energy levels.
+    to get a ladder of resonance energy levels within a specified range.
 
     Parameters
     ----------
     E_range : array-like
-        Array of all energies or just min/max.
+        Array energies in RRR, only need min/max.
     avg_level_spacing : float
         Average level spacing value to scale wigner distribution.
 
