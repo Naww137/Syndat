@@ -104,8 +104,6 @@ def sample_resonance_widths(DOF, N_levels, avg_reduced_width_square):
     return reduced_widths_square, partial_widths
 
 
-
-
 def sample_RRR_widths(level_vector, avg_reduced_width_square, DOF, orbital_angular_momentum):
     
     reduced_widths_square = avg_reduced_width_square*sample_chisquare(len(level_vector), DOF)
