@@ -40,7 +40,7 @@ six==1.16.0
 
 Copy this text to a file named `requirements.txt`. Ensure that this file is in the root directory of the environment that you want to work in. the run `pip install -r requirements.txt` from that directory. 
 
-## Installing the nuc-syndat package for use
+## Installing the nuc-syndat package
 
 #### Option - 1
 Clone this repository in the location of your choice, this will be refered to as the toplevel directory. From the toplevel directory run the following command:
