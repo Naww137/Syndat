@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import scipy.stats as stats
-from sample_resparm import PS_functions
+from syndat import PS_functions
 
 
 def sample_chisquare(N_samples, DOF):

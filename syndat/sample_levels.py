@@ -81,6 +81,8 @@ def sample_resonance_levels(E0, N_levels, avg_level_spacing, method):
             
     return levels, level_spacing
 
+
+
 def sample_RRR_levels(E_range, avg_level_spacing):
     """
     Sample the resonance energy levels.

@@ -8,8 +8,8 @@ Created on Mon Jun 20 07:48:31 2022
 
 import os
 import numpy as np
-from sample_resparm import sample_widths
-from sample_resparm import sample_levels
+from syndat import sample_widths
+from syndat import sample_levels
 import pandas as pd
 
 #%%
@@ -142,10 +142,10 @@ def map_quantum_numbers(I,i,l_wave_max, print_out):
     if print_out:
         print()
         print('The following arrays describe all possible spin groups for a each parity.\n\
-        The data is given as a tuple where the first value is the integer \n\
-        or half integer total quantum spin J and the second value is the \n\
-        number of entrance channels for that spin group. \n\
-        * See the dictionary "possible_Jpi" for a nested packing structure.')
+The data is given as a tuple where the first value is the integer \n\
+or half integer total quantum spin J and the second value is the \n\
+number of entrance channels for that spin group. \n\
+* See the dictionary "possible_Jpi" for a nested packing structure.')
         print()
         print('Spin group data for negative parity\n(J-, #Chs, l-waves)')
         for each in Jn:
@@ -160,12 +160,11 @@ def map_quantum_numbers(I,i,l_wave_max, print_out):
 
 
 
-def sample_each_Jpi(I, i, l_wave_max,  
+def sample_all_Jpi(I, i, l_wave_max,  
                     Erange, 
-                    Davg, Gavg, 
-                    Gavg_swave, 
+                    Davg, Ggavg, Gnavg, 
                     print_out = True,
-                    save_csv = True, 
+                    save_csv = False, 
                     sammy_run_folder = os.getcwd()):
     """
     Samples a full resonance parameter ladder for each possible spin group.
@@ -218,30 +217,27 @@ def sample_each_Jpi(I, i, l_wave_max,
 # =============================================================================
 #     negative parity Js
 # =============================================================================
-    Jn_df = pd.DataFrame()
+    Jn_ = [];
     for ij, j in enumerate(Jn):
         
         [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[0][ij])
         
-        Gnx = []; gnx = []
-        for ichannel, lwave in enumerate(j[2]):
-            [red_nwidth_2, nwidth] = sample_widths.sample_RRR_widths(levels, Gavg[0][ij], 1, lwave)
+        [red_gwidth_2, gwidth] = sample_widths.sample_RRR_widths(levels, Ggavg[0][ij], 100, 0)
+        
+        Gnx=[]; gnx=[]
+        for ichannel, lwave in enumerate(j[2]):      
+            [red_nwidth_2, nwidth] = sample_widths.sample_RRR_widths(levels, Gnavg[0][ij], 1, lwave)
             Gnx.append(nwidth); gnx.append(red_nwidth_2)
-              
-        # what is the orbital angular momentum of the gamma width?
-        [gg, Gg] = sample_widths.sample_RRR_widths(levels, Gavg_swave, 100, 0)
-        
         Gn = pd.DataFrame(Gnx)
-        E_Gg = pd.DataFrame([levels, Gg], index=['E','Gg'])
         
-        parm_df = pd.concat([E_Gg,Gn], axis=0)
-        parm_dfv = parm_df.transpose()
+        E_Gg = pd.DataFrame([levels, gwidth], index=['E','Gg'])
+        E_Gg_Gnx = pd.concat([E_Gg,Gn], axis=0)
+        E_Gg_Gnx_vert = E_Gg_Gnx.transpose()
         
-        Jn_df[f'{j}'] = ""
-        Jn_df = pd.concat([Jn_df,parm_dfv], axis=1)
+        Jn_.append(E_Gg_Gnx_vert)
         
         if save_csv:
-            parm_dfv.to_csv(os.path.join(sammy_run_folder, f'J_neg_{j[0]}.csv'))
+            E_Gg_Gnx_vert.to_csv(os.path.join(sammy_run_folder, f'Jn_{j[0]}.csv'))
         
 # =============================================================================
 #         if print_out:
@@ -252,30 +248,27 @@ def sample_each_Jpi(I, i, l_wave_max,
 # =============================================================================
 #       positive parity Js
 # =============================================================================
-    Jp_df = pd.DataFrame()
+    Jp_ = []
     for ij, j in enumerate(Jp):
         
         [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[1][ij])
         
+        [red_gwidth_2, gwidth] = sample_widths.sample_RRR_widths(levels, Ggavg[1][ij], 100, 0)
+        
         Gnx = []; gnx = []
         for ichannel, lwave in enumerate(j[2]):
-            [red_nwidth_2, nwidth] = sample_widths.sample_RRR_widths(levels, Gavg[1][ij], 1, lwave)
+            [red_nwidth_2, nwidth] = sample_widths.sample_RRR_widths(levels, Gnavg[1][ij], 1, lwave)
             Gnx.append(nwidth); gnx.append(red_nwidth_2)
-              
-        # what is the orbital angular momentum of the gamma width?
-        [gg, Gg] = sample_widths.sample_RRR_widths(levels, Gavg_swave, 100, 0)
-        
         Gn = pd.DataFrame(Gnx)
-        E_Gg = pd.DataFrame([levels, Gg], index=['E','Gg'])
         
-        parm_df = pd.concat([E_Gg,Gn], axis=0)
-        parm_dfv = parm_df.transpose()
+        E_Gg = pd.DataFrame([levels, gwidth], index=['E','Gg'])
+        E_Gg_Gnx = pd.concat([E_Gg,Gn], axis=0)
+        E_Gg_Gnx_vert = E_Gg_Gnx.transpose()
         
-        Jp_df[f'{j}'] = ""
-        Jp_df = pd.concat([Jp_df,parm_dfv], axis=1)
+        Jp_.append(E_Gg_Gnx_vert)
         
         if save_csv:
-            parm_dfv.to_csv(os.path.join(sammy_run_folder, f'J_pos_{j[0]}.csv'))
+            E_Gg_Gnx_vert.to_csv(os.path.join(sammy_run_folder, f'Jp_{j[0]}.csv'))
         
 # =============================================================================
 #         if print_out:
@@ -286,9 +279,11 @@ def sample_each_Jpi(I, i, l_wave_max,
 # =============================================================================
 #    save both
 # =============================================================================
-    if save_csv:
-        Jn_df.to_csv(os.path.join(sammy_run_folder,'Jn_all.csv'))
-        Jp_df.to_csv(os.path.join(sammy_run_folder,'Jp_all.csv'))
+# =============================================================================
+#     if save_csv:
+#         Jn_df.to_csv(os.path.join(sammy_run_folder,'Jn_all.csv'))
+#         Jp_df.to_csv(os.path.join(sammy_run_folder,'Jp_all.csv'))
+# =============================================================================
         
-    return Jn_df, Jp_df
+    return Jn_, Jp_
   
