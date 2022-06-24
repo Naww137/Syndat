@@ -17,6 +17,9 @@ These are potential areas of improvement or next steps in the development of the
 ## Software
 These are potential areas of improvement or next steps in the development of this project as a software package. 
 
+#### Modules
+The syndat.sammy_interface.samtools_fmtpar() module runs into a strange issue maintaining the 11 character width
+
 #### Packgaing and User installation
   - Look into putting dependencis into setup.cfg file rather than the current method of (pip installing all dependencies in requirements. file). This may be more robust.
 
