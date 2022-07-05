@@ -7,7 +7,8 @@ This is a good place to make note of things that need to be addressed by the cre
 These are potential areas of improvement or next steps in the development of the underlying methodology.
 
 #### Sampling resonance parameters to create theoretical cross section
-  - Spin group sampling
+  - Spin group average parameter value sampling vs pulling from endf
+    - currently pulling from endf, but need to correct PT distribution for very skinny resonances not being reported in endf
   - Feeding to sammy
 
 #### Creating experimental data points from theoretical cross section
