@@ -91,9 +91,9 @@ def plot2(energy,theo,exp):
 
 #%%
 
-def gaus_noise(vector, std):
+def gaus_noise(vector, std_vec):
     # scale (std) = sqrt(mean) resembles almost identically the poisson distribution with a number of counts>20
-    noise = np.random.default_rng().normal(loc=0.0, scale=std, size=len(vector)) #np.mean(vector)*level
+    noise = np.random.default_rng().normal(loc=0.0, scale=std_vec, size=len(vector)) #np.mean(vector)*level
     return vector + noise
 
 def pois_noise(vector):
@@ -116,27 +116,45 @@ xs_theoretical = np.array(sammy_lst['theo_xs'])
 
 n = .12
 time = 10
-flux_mag = 1e3
+flux_mag = 1e2
+detector_efficiency = 1
+
+C = np.ones((len(energy)))*flux_mag
+seC = np.sqrt(C) # poisson counting statistics
+
+c = C*np.exp(-xs_theoretical*n) * detector_efficiency
+sec = np.sqrt(c) #poisson counting statistics
+
+T = c/C
+seT = np.sqrt((c/C**2) + (c**2/C**3))
+
+Texp = gaus_noise(T,seT)
+
+plot2(energy, T, Texp)
+
 
 # open flux spectra measurement
 # do we need an appropriate function for the incident neutron flux spectra
-flux0 = 1/energy * np.ones((len(energy)))*flux_mag
-se_0 = np.sqrt(flux0)
+# =============================================================================
+# flux0 = np.ones((len(energy)))*flux_mag
+# se_0 = np.sqrt(flux0)
+# 
+# # detector measurement with sample in
+# fluxdet = flux0*np.exp(-xs_theoretical*n)
+# trans = fluxdet # APPLY SENSITYIVITY Of the detector - cps/flux - assumed to be 1
+# se_trans = np.sqrt(trans)
+# 
+# 
+# #se_net = np.sqrt((trans/time) + (flux0/time))
+# trans_exp = gaus_noise(trans, se_trans)
+# 
+# #plot1(energy, flux0, trans, 'no sample', 'sample')
+# 
+# plot1(energy,trans,trans_exp, 'trans', 'exp')
+# 
+# plot2(energy, trans, trans_exp)
+# =============================================================================
 
-# detector measurement with sample in
-fluxdet = flux0*np.exp(-xs_theoretical*n)
-trans = fluxdet # APPLY SENSITYIVITY Of the detector - cps/flux - assumed to be 1
-se_trans = np.sqrt(trans)
-
-
-#se_net = np.sqrt((trans/time) + (flux0/time))
-trans_exp = gaus_noise(trans, se_trans)
-
-#plot1(energy, flux0, trans, 'no sample', 'sample')
-
-plot1(energy,trans,trans_exp, 'trans', 'exp')
-
-plot2(energy, trans, trans_exp)
 
 #%%
 # =============================================================================
