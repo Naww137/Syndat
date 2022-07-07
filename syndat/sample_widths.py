@@ -161,18 +161,6 @@ def compare_pdf_to_samples(reduced_widths_square_vector, avg_reduced_width_squar
     Notes
     -----
     Showing the example with a plot included is not working for this docstring.
-    
-    Examples
-    --------
-    
-    .. plot::
-       :format: doctest
-       :align: center
-       :scale: 100
-
-        >>> import matplotlib.pyplot as plt
-        >>> from sample_resparm import sample_widths
-        >>> myfig = sample_widths.compare_pdf_to_samples(sample_widths.sample_resonance_widths(5,10000, 1)[0], 1, 5)
     """
     fig = plt.figure(num=1,frameon=True); ax = fig.gca()
     
