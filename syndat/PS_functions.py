@@ -134,7 +134,7 @@ def PS_explicit(E, orbital_angular_momentum):
 
     See Also
     --------
-    recursive : Calculates penetrability and shift functions using recursion.
+    PS_recursive : Calculates penetrability and shift functions using recursion.
     
     Examples
     --------
