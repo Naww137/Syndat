@@ -81,8 +81,9 @@ def plot2(energy,theo,exp):
     #ax1.set_yscale('log'); 
     ax1.set_xscale('log')
     
-    ax2.scatter(energy, (exp-theo)/theo, s=2)
-    ax2.set_ylim([-1,1])
+    rel_se = (exp-theo)/theo
+    ax2.scatter(energy, rel_se, s=2)
+    ax2.set_ylim([-.1,.1])
     ax2.set_xlabel('Energy'); ax2.set_ylabel('L1 Norm (relative)')
     
     plt.tight_layout()
@@ -116,7 +117,7 @@ xs_theoretical = np.array(sammy_lst['theo_xs'])
 
 n = .12
 time = 10
-flux_mag = 1e2
+flux_mag = 1e5
 detector_efficiency = 1
 
 C = np.ones((len(energy)))*flux_mag
