@@ -114,11 +114,14 @@ energy = np.array(sammy_lst['E'])
 xs_theoretical = np.array(sammy_lst['theo_xs'])
 
 
-
+# =============================================================================
+#  simple uncertainty propagation from counts to transmission (no background)
+# =============================================================================
 n = .12
 time = 10
 flux_mag = 1e5
 detector_efficiency = 1
+
 
 C = np.ones((len(energy)))*flux_mag
 seC = np.sqrt(C) # poisson counting statistics
@@ -133,6 +136,71 @@ Texp = gaus_noise(T,seT)
 
 plot2(energy, T, Texp)
 
+
+#%%
+# =============================================================================
+# rather than propagating uncertainty to T, I'm going to build a covariance matrix
+# and sample from it s.t. the propagted uncertainties will be correlated with one another
+# also, this will be done for the cross section sigmat because the cov derivation is greatly simplified by the ln()
+#   - derivation is done for channel to channel, when in actuality each data point I am looking at is a sum over multiple channels
+#   - interesting how dc and dC don't show up, is this correct? see ALEX manual
+#       - this is because dc = sqrt(c) and dc only shows up as dc^2 -> c
+#   - in the ALEX manual, why is there not a subscript i bor the background spectra?
+# =============================================================================
+
+def var_sig_i(sigi, c, C, d, D, n,dn, m,dm, M,dM, g,dg, G,dG):
+    var = 1/n * ( (sigi*dn**2) + (dM/M)**2 + (dm/m)**2 \
+                 + (dg/(d*c-g))**2 + (dG/(D*C-G))**2 \
+                 + d**2*c/(d*c-g)**2 + D**2*C/(D*C-G)**2 )
+    return var
+    
+def cov_sig_ij(sigi, sigj, di,ci,Di,Ci, dj,cj,Dj,Cj, n,dn, M,dM, m,dm, g,dg, G,dG):
+    cov_ij = 1/n**2 * ( sigi*sigj*dn**2 + (dM/M)**2 + (dm/m)**2 \
+                       + dg**2/((di*ci-g)*(dj*cj-g)) \
+                       + dG**2/((Di*Ci-G)*(Dj*Cj-G)) )
+    return cov_ij
+        
+energy = np.linspace(1,100,10)
+dn=0
+m = 1; dm = 0
+M = 1; dM = 0 
+g = 1; dg = .4
+G = 1; dG = .4
+
+d = np.ones([len(energy)])
+D = np.ones([len(energy)])
+
+
+covmat = np.zeros([len(energy),len(energy)])
+for i in range(len(energy)):
+    for j in range(len(energy)):
+        
+        if i == j:
+            covmat[i,j] = var_sig_i(xs_theoretical[i],c[i],C[i],d[i],D[i], \
+                                    n,dn, m,dm, M,dM, g,dg, G,dG)
+        else:
+            covmat[i,j] = cov_sig_ij(xs_theoretical[i], xs_theoretical[j], \
+                                     d[i],c[i],D[i],C[i], \
+                                     d[j],c[j],D[j],C[j], \
+                                     n,dn, M,dM, m,dm, g,dg, G,dG)
+                
+                
+
+covL = np.tril(covmat)
+uncor_unitvar = np.random.default_rng().normal(loc=0.0, scale=1, size=len(energy))
+
+test = np.dot(uncor_unitvar, uncor_unitvar.T)
+
+
+
+
+
+
+
+
+
+
+#%%
 
 # open flux spectra measurement
 # do we need an appropriate function for the incident neutron flux spectra
