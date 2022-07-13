@@ -53,33 +53,14 @@ def get_covT(tof, Bi, dc,dC, sys_unc, a,b, k,K, c,C, b0,B0, alpha):
         Uncertainty in the count rate for sample-in.
     dC : array-like
         Uncertainty in the count rate for sample-out.
-    Davg : array-like
-        Nested list of average level spacing for each spin group number. First 
-        list is for negative parity (J-) second is for positive parity (J+).
-    Gavg : array-like
-        Nested list of average widths for each spin group number. First 
-        list is for negative parity (J-) second is for positive parity (J+).
-    Gavg_swave : float
-        Average width used to sample agregate capture widths. **Unsure of this value.
-    print_out : bool
-        User option to print out quantum spin (J) mapping to console.
-    save_csv : bool
-        User option to save resonance ladders to csv.
-    sammy_run_folder : str
-        Folder in which the csv(s) containing resparm ladders will be saved.
 
     Notes
     -----
-    Unsure of the average capture width for Gg sampling.
+    Notes here.
     
     Returns
     -------
-    Jn_df : DataFrame
-        Pandas DataFrame conatining a resonance parameter ladder for each 
-        quantum spin group with negative parity (all J-).
-    Jp_df : DataFrame
-        Pandas DataFrame conatining a resonance parameter ladder for each 
-        quantum spin group with positive parity (all J+).
+    Output covaraiance matrix for transmission.
     """
 
     # derivatives

@@ -128,7 +128,7 @@ xs_theoretical = np.array(sammy_lst['theo_xs'])
 # experimentally unique values
 # =============================================================================
 n = .12
-trig = 10# number of linac pulses
+trig = 1e3# number of linac pulses
 bw = 1e-3 # bin width
 flux_mag = 1e5 # what is a reasonable flux magnitude??
 detector_efficiency = 1
@@ -213,9 +213,29 @@ def generate_count_data(energy, xs_theo, flux_mag, bw, trig, n, Bi, k,K, b0,B0, 
 cts_o = stat.norm.pdf(energy, loc=50, scale=100)*flux_mag # gaussian in energy, std=range of energy
 d_cts_o = np.sqrt(cts_o)
 ncts_o = gaus_noise(cts_o,d_cts_o) # noisey open counts
-
+d_ncts_o = np.sqrt(ncts_o)
 
 ncrs_o = ncts_o/(bw*trig) # noisy open count rate
+
+def crs_unc_prop(d_cts, bw, trig):
+    partial = 1/(bw*trig) # assumes constant bin width
+    Cin = np.diag(d_cts**2)
+    J = np.diag(np.ones(len(d_cts))*partial)
+    Cout = J.T @ Cin @ J
+    d_ncrs = np.sqrt(np.diag(Cout))
+    alt = [np.sqrt((partial**2)*dc**2) for dc in d_cts]
+    
+    if sum(d_ncrs_o-alt) > 1e-10:
+        print('Warning: JxCxJ.T != nsqrt((d_dx*dx**2))')
+    
+    return d_ncrs, alt
+
+d_ncrs_o, alt = crs_unc_prop(d_ncts_o, bw, trig)
+
+
+
+#%%
+
 
 # generate noisey count rate for sample in
 ncts_i = generate_count_data(energy,xs_theoretical, flux_mag,bw,trig, n, Bi, k,K, b0,B0, alpha)
