@@ -211,9 +211,9 @@ def generate_count_data(energy, xs_theo, flux_mag, bw, trig, n, Bi, k,K, b0,B0, 
 
 # get noisey open count rate (sample out)
 cts_o = stat.norm.pdf(energy, loc=50, scale=100)*flux_mag # gaussian in energy, std=range of energy
-d_cts_o = np.sqrt(cts_o)
+d_cts_o = np.sqrt(cts_o) # uncertainty on the clean open counts
 ncts_o = gaus_noise(cts_o,d_cts_o) # noisey open counts
-d_ncts_o = np.sqrt(ncts_o)
+d_ncts_o = np.sqrt(ncts_o) # uncertainty on the noisey open counts
 
 ncrs_o = ncts_o/(bw*trig) # noisy open count rate
 
@@ -223,25 +223,22 @@ def crs_unc_prop(d_cts, bw, trig):
     J = np.diag(np.ones(len(d_cts))*partial)
     Cout = J.T @ Cin @ J
     d_ncrs = np.sqrt(np.diag(Cout))
-    alt = [np.sqrt((partial**2)*dc**2) for dc in d_cts]
     
+    alt = [np.sqrt((partial**2)*dc**2) for dc in d_cts]
     if sum(d_ncrs_o-alt) > 1e-10:
         print('Warning: JxCxJ.T != nsqrt((d_dx*dx**2))')
     
-    return d_ncrs, alt
+    return d_ncrs
 
-d_ncrs_o, alt = crs_unc_prop(d_ncts_o, bw, trig)
+d_ncrs_o = crs_unc_prop(d_ncts_o, bw, trig)
 
-
-
-#%%
-
-
-# generate noisey count rate for sample in
+# generate noisey counts for sample in
 ncts_i = generate_count_data(energy,xs_theoretical, flux_mag,bw,trig, n, Bi, k,K, b0,B0, alpha)
 d_ncts_i = np.sqrt(ncts_i)
 
+# propagate uncertainty to count rate
 
+# calculate transmission and propagate uncertainty
 
 
 def transmission(cr,Cr, Bi, k,K, b0,B0, alpha):
