@@ -34,29 +34,13 @@ sammy_directory = os.getcwd()
 sammy_lst = pd.read_csv(os.path.join(sammy_directory,'synthetic_data/SAMMY_jb.LST'), sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
 energy = sammy_lst['E']
 
-plt.plot(energy, sammy_lst['theo_trans'], zorder=2, color='royalblue')
-plt.xscale('log')
-plt.show(); plt.close()
-
-
-# next steps
-# take this transmission data, add statistical noise and consider backgroud correction/correlation
-
 # =============================================================================
-# noise = np.random.default_rng().normal(loc=0.0, scale=np.mean(xs_theoretical)*1e-4, size=len(xs_theoretical))
-# xs_experimental = xs_theoretical + noise
-# 
-# 
-# plt.rcParams['figure.dpi'] = 500
-# 
-# plt.plot(energy,xs_theoretical, lw=0.5, label='$\sigma_{exp}$')
-# plt.scatter(energy,xs_experimental, s=0.1, c='r', label='$\sigma_{exp}$')
-# 
-# plt.legend()
-# plt.xlabel('Energy'); plt.ylabel('$\sigma$')
-# plt.yscale('log'); plt.xscale('log')
+# plt.plot(energy, sammy_lst['theo_trans'], zorder=2, color='royalblue')
+# plt.xscale('log')
 # plt.show(); plt.close()
 # =============================================================================
+
+
 #%% saved plotting functions
 
 def plot1(energy,theo,exp,label1,label2):
@@ -95,23 +79,10 @@ def plot2(energy,theo,exp,exp_unc, title):
     plt.show(); plt.close()
 
 
+
 #%%
 
-def gaus_noise(vector, std_vec):
-    # scale (std) = sqrt(mean) resembles almost identically the poisson distribution with a number of counts>20
-    noise = np.random.default_rng().normal(loc=0.0, scale=std_vec, size=len(vector)) #np.mean(vector)*level
-    return vector + noise
-
-def pois_noise(vector):
-    
-    noise = []
-    for counts in vector:
-        noise.append(np.random.default_rng().poisson(lam=counts))
-        
-    return vector + noise
      
-    
-
 #path_to_lst = '/Users/noahwalton/Library/Mobile Documents/com~apple~CloudDocs/Research Projects/Resonance Fitting/summer_2022/SAMMY_jb.LST'
 #sammy_lst = pd.read_csv(path_to_lst, sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans','theo_trans_bayes'])           
 
@@ -119,10 +90,6 @@ energy = np.array(sammy_lst['E'])
 xs_theoretical = np.array(sammy_lst['theo_xs'])
 
 
-
-# =============================================================================
-#  simple uncertainty propagation from counts to transmission (no background)
-# =============================================================================
 
 # =============================================================================
 # experimentally unique values
@@ -145,11 +112,11 @@ a = 1; da = a*0.05
 b = 1; db = b*0.05
 
 # sample in
-k = 0.1; dk = k*0.05
-b0 = 1; db0 = b0*0.05
+k_i = 0.1; dk_i = k_i*0.05
+b0_i = 1; db0_i = b0_i*0.05
 # sample out
-K = 0.1; dK = K*0.05
-B0 = 1; dB0 = B0*0.05
+K_o = 0.1; dK_o = K_o*0.05
+B0_o = 1; dB0_o = B0_o*0.05
 
 tof = syndat.exp_effects.e_to_t(energy,tof_dist,True)
 
@@ -161,167 +128,60 @@ Bi = bkg_func(tof,a,b)
 
 
 
+# =============================================================================
+# # estimate true underlying, raw, open count data with a wide gaussian flux
+# =============================================================================
+cts_o_true = syndat.exp_effects.generate_open_counts(energy, flux_mag, 50, 100)
 
+# =============================================================================
+# # generate noisy, raw, sample in count data with statistical unc from a true underlying transmission
+# =============================================================================
 
-def generate_count_data(energy, xs_theo, flux_mag, bw, trig, n, Bi, k,K, b0,B0, alpha):
-    
-    [m1,m2,m3,m4] = alpha
-    
-    # =============================================================================
-    # open counts, sample out- do we want this to be noisey or clean here?
-    # =============================================================================
-    cts_o = stat.norm.pdf(energy, loc=50, scale=100)*flux_mag # gaussian in energy, std=range of energy
-    d_cts_o = np.sqrt(cts_o)
-    #ncts_o = gaus_noise(cts_o,d_cts_o) # noisey open counts
-    
-    # Plot open flux spectra
-    # =============================================================================
-    # fig, (ax1,ax2) = plt.subplots(2,1, gridspec_kw={'height_ratios': [1, 1]})
-    # ax1.plot(energy, C); ax1.set_xlabel('energy (eV)'); ax1.set_ylabel('C(E)')
-    # ax2.plot(tof,C); ax2.set_xlabel('tof (s)'); ax1.set_ylabel('C(t)')
-    # =============================================================================
-    
-    ctr_o = cts_o/(bw*trig)
-    #nctr_o = ncts_o/(bw*trig) # noisy, open count rate
-    
-    # =============================================================================
-    # find the number of counts given theoretical transmission
-    # =============================================================================
-    
-    trans_theo = np.exp(-n*xs_theo) # sammy can also just output this transmission value
-    
-    ctr_i = (trans_theo*(m3*ctr_o - m4*K*Bi - B0) + m2*k*Bi + b0)/m1
-    
-    cts_i = ctr_i*bw*trig 
-    d_cts_i = np.sqrt(cts_i)
-    ncts_i = gaus_noise(cts_i,d_cts_i)
+T_theo = np.exp(-n*xs_theoretical) # sammy can also just output this transmission value
 
-    return ncts_i
-
-
+noisy_cts_i, noisy_cts_i_se = syndat.exp_effects.generate_raw_count_data(energy, T_theo, cts_o_true, flux_mag, bw, trig, k_i,K_o, Bi, b0_i,B0_o, alpha)
 
 
 
 
 # =============================================================================
-# now reduce the raw count data - can use the same, or different functions for C_open and background
+# now reduce the raw count data - can use the same, or different reduction parameters, bkg/open counts
 # =============================================================================
 
+# take a noisey measurement of raw open count data with uncertainty
+cts_o = syndat.exp_effects.generate_open_counts(energy, flux_mag, 50, 100)
+cts_o_se = np.sqrt(cts_o) # statistical error from poisson counting stats
+noisy_cts_o = syndat.exp_effects.gaus_noise(cts_o, cts_o_se)
+noisy_cts_o_se = np.sqrt(noisy_cts_o)
 
+#systematic uncertainties
+sys_unc = np.append([da,db,dk_i,dK_o,db0_i,dB0_o], d_alpha)
 
-# get noisey open count rate (sample out)
-cts_o = stat.norm.pdf(energy, loc=50, scale=100)*flux_mag # gaussian in energy, std=range of energy
-d_cts_o = np.sqrt(cts_o) # uncertainty on the clean open counts
-ncts_o = gaus_noise(cts_o,d_cts_o) # noisey open counts
-d_ncts_o = np.sqrt(ncts_o) # uncertainty on the noisey open counts
-
-ncrs_o = ncts_o/(bw*trig) # noisy open count rate
-
-def crs_unc_prop(d_cts, bw, trig):
-    partial = 1/(bw*trig) # assumes constant bin width
-    Cin = np.diag(d_cts**2)
-    J = np.diag(np.ones(len(d_cts))*partial)
-    Cout = J.T @ Cin @ J
-    d_ncrs = np.sqrt(np.diag(Cout))
-    
-    alt = [np.sqrt((partial**2)*dc**2) for dc in d_cts]
-    if sum(d_ncrs_o-alt) > 1e-10:
-        print('Warning: JxCxJ.T != nsqrt((d_dx*dx**2))')
-    
-    return d_ncrs
-
-d_ncrs_o = crs_unc_prop(d_ncts_o, bw, trig)
-
-# generate noisey counts for sample in
-ncts_i = generate_count_data(energy,xs_theoretical, flux_mag,bw,trig, n, Bi, k,K, b0,B0, alpha)
-d_ncts_i = np.sqrt(ncts_i)
-
-# propagate uncertainty to count rate
-
-# calculate transmission and propagate uncertainty
-
-
-def transmission(cr,Cr, Bi, k,K, b0,B0, alpha):
-    [m1,m2,m3,m4] = alpha
-    return (m1*c - m2*k*Bi - b0) / (m3*C - m4*K*Bi - B0) 
-
-crn = cn/(bw*trig)
-
-T = transmission(crn,Crn, Bi, k,K, b0,B0, alpha)
+# reduce raw, noisy count data with statistical uncertainties to transmission data with propagated uncertainty
+Tn, dT, CovT = syndat.exp_effects.reduce_raw_count_data(tof, noisy_cts_i,noisy_cts_o, noisy_cts_i_se,noisy_cts_o_se, \
+                                                        bw, trig, a,b, k_i,K_o, Bi, b0_i,B0_o, alpha, sys_unc)
 
 
 
-
-# =============================================================================
-# sys_unc = np.append([da,db,dk,dK,db0,dB0], d_alpha)
-# 
-# CovT = syndat.exp_effects.get_covT(tof, Bi, dc,dC, sys_unc, a,b, k,K, c,C, b0,B0, alpha)
-# 
-# dT = np.diagonal(CovT)
-# 
-# plot2(energy,T,T_noise,dT, 'Fully Correlated Uncertainty')
-# =============================================================================
-
-
-
-
-#%%
-# flat flux for sample out
-C = np.ones((len(tof)))*flux_mag
-dC = np.sqrt(C) # poisson counting statistics
-C_noise = gaus_noise(C,dC)
-
-c = C*np.exp(-xs_theoretical*n) * detector_efficiency
-dc = np.sqrt(c) #poisson counting statistics
-c_noise = gaus_noise(c,dc)
-
-# need a proper function to convert to count rate and correct for deadtime
-# the function for transmission below assumes c/C are count rates
-# are these calculations included in the uncertainty propagation? technically the poisson unc is on the raw count #
-# Cr = C/bin_width
-# cr = c/bin_width
-
-
-# calculate noisey transmission points and background 
-def bkg_func(ti,a,b):
-    return a*ti**-b
-
-def transmission(alpha, c,C, k,K,  Bi, b0,B0):
-    return (alpha[0]*c - alpha[1]*k*Bi - b0) / (alpha[2]*C - alpha[3]*K*Bi - B0) 
- 
-Bi = bkg_func(tof,a,b)
-
-T = transmission(alpha, c,C, k,K, Bi, b0,B0)
-T_noise = transmission(alpha, c_noise,C_noise, k,K, Bi, b0,B0)
-
-
-# =============================================================================
-# uncertainty propagation from poisson uncertainty on count rates
-# =============================================================================
+plot2(energy,T_theo,Tn,dT, 'Fully Correlated Uncertainty')
 
 
 
 
 
-sys_unc = np.append([da,db,dk,dK,db0,dB0], dalpha)
-
-CovT = syndat.exp_effects.get_covT(tof, Bi, dc,dC, sys_unc, a,b, k,K, c,C, b0,B0, alpha)
-
-dT = np.diagonal(CovT)
-
-plot2(energy,T,T_noise,dT, 'Fully Correlated Uncertainty')
 
 
-inv_dT = np.linalg.inv(np.sqrt(np.diag(dT)))
-CorrT = inv_dT @ CovT @ inv_dT
-plt.matshow(CorrT)
-cb = plt.colorbar()
-#cb.ax.tick_params(labelsize=10)
-plt.title('Correlation of Transmission', fontsize=10);
-plt.show(); plt.close()
 
 
-#%%
+
+
+
+
+
+
+#%% Ignore below this: came from previous work, incorrect method
+
+
 # =============================================================================
 # Covariance matrix from ALEX manual
 #   - derivation is done for channel to channel, when in actuality each data point I am looking at is a sum over multiple channels
@@ -401,37 +261,6 @@ plt.show(); plt.close()
 # test = np.dot(uncor_unitvar, uncor_unitvar.T)
 # =============================================================================
 
-
-
-
-
-
-
-
-
-#%%
-
-# open flux spectra measurement
-# do we need an appropriate function for the incident neutron flux spectra
-# =============================================================================
-# flux0 = np.ones((len(energy)))*flux_mag
-# se_0 = np.sqrt(flux0)
-# 
-# # detector measurement with sample in
-# fluxdet = flux0*np.exp(-xs_theoretical*n)
-# trans = fluxdet # APPLY SENSITYIVITY Of the detector - cps/flux - assumed to be 1
-# se_trans = np.sqrt(trans)
-# 
-# 
-# #se_net = np.sqrt((trans/time) + (flux0/time))
-# trans_exp = gaus_noise(trans, se_trans)
-# 
-# #plot1(energy, flux0, trans, 'no sample', 'sample')
-# 
-# plot1(energy,trans,trans_exp, 'trans', 'exp')
-# 
-# plot2(energy, trans, trans_exp)
-# =============================================================================
 
 
 #%%
