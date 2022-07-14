@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import syndat
 import scipy.stats as stat
+import matplotlib as mpl
 
 
 
@@ -54,25 +55,29 @@ def plot1(energy,theo,exp,label1,label2):
     plt.show();plt.close()
     
 
-def plot2(energy,theo,exp,exp_unc, title):
+def plot2(x,theo,exp,exp_unc, title):
     
-    fig, (ax1,ax2) = plt.subplots(2,1, sharex=True, figsize=(6,4),gridspec_kw={'height_ratios': [2, 1]}) # , figsize=(12,5)
+    fig, (ax1,ax2,ax3) = plt.subplots(3,1, sharex=True, constrained_layout=True, gridspec_kw={'height_ratios': [2, 1, 1]}) # , figsize=(12,5)
     plt.rcParams['figure.dpi'] = 500
     
-    ax1.plot(energy,theo, lw=0.5, color='b', label='$T_{theo}$', zorder=2)
+    ax1.plot(x,theo, lw=0.5, color='b', label='$T_{theo}$', zorder=2)
     #ax1.scatter(energy,exp, s=0.1, c='r', label='$T_{exp}$')
-    ax1.errorbar(energy, exp, yerr=exp_unc, color='k',ecolor='k',elinewidth=1,capsize=2, fmt='.', ms=3, label='$T_{exp}$', zorder=0)
+    ax1.errorbar(x, exp, yerr=exp_unc, color='k',ecolor='k',elinewidth=1,capsize=2, fmt='.', ms=3, label='$T_{exp}$', zorder=0)
     
     ax1.legend()
     ax1.set_ylabel('T') #('$\sigma$')
     #ax1.set_yscale('log'); 
-    ax1.set_xscale('log')
+    #ax1.set_xscale('log')
     ax1.set_ylim([0,max(exp)+0.1])
     
-    rel_se = (exp-theo)/theo
-    ax2.scatter(energy, rel_se, s=2)
-    ax2.set_ylim([-.5,.5])
-    ax2.set_xlabel('ToF (s)'); ax2.set_ylabel('L1 Norm (relative)')
+    rel_se = np.sqrt((exp-theo)**2) #/theo
+    ax2.scatter(x, rel_se, s=2)
+    #ax2.set_ylim([-.5,.5])
+    ax2.set_ylabel('L2 Norm'); #ax2.set_ylabel('L1 Norm (relative)')
+    
+    ax3.scatter(x, exp_unc, lw=0.5, color='b', s=2, zorder=2)
+    ax3.set_ylabel('$\delta$T') #('$\sigma$')
+    ax3.set_xlabel('ToF (s)');
     
     plt.suptitle(title)
     plt.tight_layout()
@@ -128,10 +133,13 @@ Bi = bkg_func(tof,a,b)
 
 
 
+
 # =============================================================================
 # # estimate true underlying, raw, open count data with a wide gaussian flux
 # =============================================================================
+
 cts_o_true = syndat.exp_effects.generate_open_counts(energy, flux_mag, 50, 100)
+
 
 # =============================================================================
 # # generate noisy, raw, sample in count data with statistical unc from a true underlying transmission
@@ -140,7 +148,6 @@ cts_o_true = syndat.exp_effects.generate_open_counts(energy, flux_mag, 50, 100)
 T_theo = np.exp(-n*xs_theoretical) # sammy can also just output this transmission value
 
 noisy_cts_i, noisy_cts_i_se = syndat.exp_effects.generate_raw_count_data(energy, T_theo, cts_o_true, flux_mag, bw, trig, k_i,K_o, Bi, b0_i,B0_o, alpha)
-
 
 
 
@@ -161,12 +168,51 @@ sys_unc = np.append([da,db,dk_i,dK_o,db0_i,dB0_o], d_alpha)
 Tn, dT, CovT = syndat.exp_effects.reduce_raw_count_data(tof, noisy_cts_i,noisy_cts_o, noisy_cts_i_se,noisy_cts_o_se, \
                                                         bw, trig, a,b, k_i,K_o, Bi, b0_i,B0_o, alpha, sys_unc)
 
+    
+    
+    
+#%%
 
 
-plot2(energy,T_theo,Tn,dT, 'Fully Correlated Uncertainty')
+fig, (ax1,ax2) = plt.subplots(2,1,sharex=True, constrained_layout=True)
+ax1.plot(tof, Bi); plt.xlabel('tof'); ax1.set_ylabel('Bi(t)')
+ax2.plot(tof,cts_o_true); plt.xlabel('tof');ax2.set_ylabel('open counts')
+
+plt.show(); plt.close()
+
+
+plot2(tof,T_theo,Tn,dT, 'Fully Correlated Uncertainty')
 
 
 
+#%%
+
+
+
+
+# =============================================================================
+# fig, ax = plt.subplots(2,2, gridspec_kw={'height_ratios': [1, 1], 'width_ratios':[2,1]}) # , figsize=(12,5)
+# plt.rcParams['figure.dpi'] = 500
+# ax1 = ax[0,0]; ax2=ax[1,0]; ax3=ax[0,1]; ax4=ax[1,1]
+# 
+# ax1.scatter(tof, dT, lw=0.5, color='b', s=2, zorder=2)
+# ax1.legend()
+# ax1.set_ylabel('$\delta$T') #('$\sigma$')
+# 
+# rel_se = (Tn-T_theo)/T_theo
+# ax2.scatter(tof, (Tn-T_theo), s=2)
+# ax2.set_xlabel('ToF (s)'); ax2.set_ylabel('Noise')
+# 
+# # =============================================================================
+# # ax3.matshow(CovT)
+# # ax4.matshow(np.corrcoef(CovT))
+# # =============================================================================
+# 
+# plt.suptitle('Uncertainty and Noise on Transmission')
+# plt.tight_layout()
+# plt.show(); plt.close()
+# 
+# =============================================================================
 
 
 
