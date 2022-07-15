@@ -336,7 +336,7 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trig, a,b, k,K, Bi, b0,B0, alpha,
     Tn = transmission(cr,Cr, Bi, k,K, b0,B0, alpha)
     # propagate uncertainty to transmission
     CovT = get_covT(tof, cr,Cr, dcr,dCr, a,b, k,K, Bi, b0,B0, alpha, sys_unc)
-    dT = np.diagonal(CovT)
+    dT = np.sqrt(np.diagonal(CovT))
     
     return Tn, dT, CovT
 

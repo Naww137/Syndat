@@ -24,6 +24,14 @@ print(test)
 print(round(test))
 
 
-s = 1e4
+s = int(1e4)
 
-for i in s
+g = []; p= []
+for i in range(1000):
+    g.append(round(sample_gaussian(m)))
+    p.append(sample_poisson(m))
+    
+
+plt.hist(g)
+plt.hist(p)
+

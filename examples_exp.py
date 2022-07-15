@@ -99,7 +99,7 @@ xs_theoretical = np.array(sammy_lst['theo_xs'])
 # =============================================================================
 # experimentally unique values
 # =============================================================================
-n = .12
+n = .12 # need to pull this from the endf evaluation
 trig = 1e3# number of linac pulses
 bw = 1e-3 # bin width
 flux_mag = 1e5 # what is a reasonable flux magnitude??
@@ -124,6 +124,7 @@ K_o = 0.1; dK_o = K_o*0.05
 B0_o = 1; dB0_o = B0_o*0.05
 
 tof = syndat.exp_effects.e_to_t(energy,tof_dist,True)
+
 
 # background function
 def bkg_func(ti,a,b):
@@ -168,7 +169,9 @@ sys_unc = np.append([da,db,dk_i,dK_o,db0_i,dB0_o], d_alpha)
 Tn, dT, CovT = syndat.exp_effects.reduce_raw_count_data(tof, noisy_cts_i,noisy_cts_o, noisy_cts_i_se,noisy_cts_o_se, \
                                                         bw, trig, a,b, k_i,K_o, Bi, b0_i,B0_o, alpha, sys_unc)
 
-    
+#%%
+plt.plot(tof,cts_o_true*np.exp(-n*xs_theoretical))
+
     
     
 #%%
@@ -186,6 +189,13 @@ plot2(tof,T_theo,Tn,dT, 'Fully Correlated Uncertainty')
 
 
 #%%
+
+
+plt.errorbar(tof,noisy_cts_o,yerr=noisy_cts_o_se, label='open', color='k',ecolor='k',elinewidth=1,capsize=2, fmt='.', ms=3)
+plt.errorbar(tof,noisy_cts_i,yerr=noisy_cts_i_se, label='in', color='b',ecolor='b',elinewidth=1,capsize=2, fmt='.', ms=3)
+
+plt.legend()
+plt.xlabel('tof'); plt.ylabel('counts')
 
 
 
