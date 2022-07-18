@@ -24,14 +24,15 @@ print(test)
 print(round(test))
 
 
-s = int(1e4)
+s = int(1e8)
 
 g = []; p= []
-for i in range(1000):
+for i in range(s):
     g.append(round(sample_gaussian(m)))
     p.append(sample_poisson(m))
     
+#%%
 
-plt.hist(g)
-plt.hist(p)
+plt.hist(g, bins=75,density=True, ec='k', linewidth=0.75,color='cornflowerblue', label='gauss')
+plt.hist(p, bins=75,density=True, ec='k', linewidth=0.75,color='pink', label='poisson')
 
