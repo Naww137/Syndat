@@ -21,13 +21,13 @@ jev = 1.6022e-19 # J/eV
 mn = 1.674927498e-27 #kg
 
 # min and max RRR energies for Cu-63 - in actuality we will want to go above and below these values a bit
-RRR_speeds = np.array([np.sqrt(600*jev*2/mn), np.sqrt(300000*jev*2/mn)])
+RRR_speeds = np.array([np.sqrt(1*jev*2/mn), np.sqrt(333*jev*2/mn)])
 
 # 400 m flightpath at GELINA
 distance = np.array([400, 400]) 
 
 RRR_ToF = distance/RRR_speeds
-dt = 1e-7 # linear time between neutron pts... this should also be better informed
+dt = 6.4e-7 # linear time between neutron pts... this should also be better informed - typically 1ns
 time_points = np.arange(min(RRR_ToF),max(RRR_ToF),dt)
 
 e_pts = syndat.exp_effects.t_to_e(time_points,400, True)
@@ -37,6 +37,9 @@ plt.plot(Estruct,np.flipud(time_points))
 plt.title('ToF vs Energy')
 plt.xlabel('Energy (eV)'); plt.ylabel('ToF (s)')
 plt.show(); plt.close()
+
+
+syndat.sammy_interface.write_estruct_file(Estruct, "./synthetic_data/estruct")
 
 
 
