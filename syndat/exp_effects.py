@@ -95,7 +95,7 @@ def cts_to_ctr(cts, d_cts, bw, trig):
     
     return ctr, d_nctr
 
-
+    
 
 def generate_raw_count_data(energy, T_theo, C, flux_mag, bw, trig, k,K, Bi, b0,B0, alpha):
     """

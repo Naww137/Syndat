@@ -12,6 +12,13 @@ from pathlib import Path
 import syndat
 import pandas as pd
 
+# =============================================================================
+# 
+# =============================================================================
+def readlst(filepath):
+    df = pd.read_csv(filepath, sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
+    return df
+
 
 # =============================================================================
 # 
@@ -99,6 +106,9 @@ def create_sammyinp(filename='sammy.inp', \
         
     return
     
+# =============================================================================
+# 
+# =============================================================================
 def read_SAMNDF_PAR(filename):
 
     energies = []; spin_group = []; nwidth = []; gwidth = []

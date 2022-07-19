@@ -16,26 +16,27 @@ import matplotlib as mpl
 #import syndat.plot as myplt
 
 
-#%%
+#%% need to pull estructure from the open count rate file
 
 plt.rcParams['figure.dpi'] = 500
 
 sammy_directory =  os.path.realpath('./synthetic_data/Ta181')
 
-sam = pd.read_csv(os.path.join(sammy_directory,'SAMMY.LST'), sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
-#samndf = pd.read_csv(os.path.join(sammy_directory,'SAMMY_endf.LST'), sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
-energy = sam['E']
-
-
-plt.rcParams['figure.dpi'] = 500
-plt.plot(energy,sam['theo_trans'], lw=1, label='$\sigma_{exp}$')
-#plt.plot(energy,samndf['theo_trans'], lw=0.5, c='r', label='$\sigma_{endf}$')
-
-plt.legend()
-plt.xlabel('Energy'); plt.ylabel('$\sigma$')
-plt.yscale('log'); plt.xscale('log')
-plt.show(); plt.close()
-
+# =============================================================================
+# sam = pd.read_csv(os.path.join(sammy_directory,'SAMMY.LST'), sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
+# #samndf = pd.read_csv(os.path.join(sammy_directory,'SAMMY_endf.LST'), sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
+# energy = np.array(sam['E'])
+# xs_theoretical = np.array(sam['theo_xs'])
+# trans_theo = sam['theo_trans']
+# 
+# plt.rcParams['figure.dpi'] = 500
+# plt.plot(energy,sam['theo_trans'], lw=1, label='$\sigma_{exp}$')
+# #plt.plot(energy,samndf['theo_trans'], lw=0.5, c='r', label='$\sigma_{endf}$')
+# plt.legend()
+# plt.xlabel('Energy'); plt.ylabel('$\sigma$')
+# plt.yscale('log'); plt.xscale('log')
+# plt.show(); plt.close()
+# =============================================================================
 
 
 
@@ -45,20 +46,17 @@ plt.show(); plt.close()
 #path_to_lst = '/Users/noahwalton/Library/Mobile Documents/com~apple~CloudDocs/Research Projects/Resonance Fitting/summer_2022/SAMMY_jb.LST'
 #sammy_lst = pd.read_csv(path_to_lst, sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans','theo_trans_bayes'])           
 
-energy = np.array(sam['E'])
-xs_theoretical = np.array(sam['theo_xs'])
-trans_theo = sam['theo_trans']
+
 
 
 # =============================================================================
 # experimentally unique values
 # =============================================================================
 n = .12 # need to pull this from the endf evaluation
-trig = 1e3# number of linac pulses
-bw = 1e-3 # bin width
+trig = 1e5# number of linac pulses
 flux_mag = 1e5 # what is a reasonable flux magnitude??
 detector_efficiency = 1
-tof_dist = 100 # m
+tof_dist = 50 # m   !!! not the proper tof_distance, but I need the erange to match up
 
 # assuming 1% uncertainty of these values
 m1 = 1; dm1 = m1*0.01
@@ -77,44 +75,89 @@ b0_i = 1; db0_i = b0_i*0.05
 K_o = 0.1; dK_o = K_o*0.05
 B0_o = 1; dB0_o = B0_o*0.05
 
-tof = syndat.exp_effects.e_to_t(energy,tof_dist,True)
 
+
+
+
+
+#%% import Open Count rate
+
+# # estimate true underlying, raw, open count data with a wide gaussian flux
+# cts_o_true = syndat.exp_effects.generate_open_counts(energy, flux_mag, 50, 100)
+
+# or: import open count rate from RPI Ta-181 experiment:
+C_o = pd.read_csv(os.path.join(sammy_directory,'ta181opencountrate.dat'), sep=',')
+# =============================================================================
+# C_o_tof = np.array(C_o['tof'])*1e-6 # microseconds to s
+# C_o_Epts = syndat.exp_effects.t_to_e(C_o_tof, tof_dist, True) 
+# =============================================================================
+
+C_o['E'] = syndat.exp_effects.t_to_e(C_o['tof']*1e-6, tof_dist, True) 
+
+ctr_o_true = C_o.loc[C_o['E'] < 330, 'co']
+
+plt.plot(C_o['tof'], C_o['co'])
+plt.xlabel('tof'); plt.ylabel('countrate')
+plt.yscale('log'); plt.xscale('log')
+plt.show(); plt.close()
+# plt.plot(np.diff(C_o['tof']))
+
+
+# syndat.sammy_interface.write_estruct_file(C_o_Epts, "./synthetic_data/Ta181/estruct")
+
+
+
+
+#%% read sammy lst
+
+sam = syndat.sammy_interface.readlst(os.path.join(sammy_directory,'SAMMY.LST'))
+energy = sam['E']
+
+#tof = syndat.exp_effects.e_to_t(energy,tof_dist,True)
+tof = np.flipud(syndat.exp_effects.e_to_t(energy, tof_dist, True))
+#tof = syndat.exp_effects.e_to_t(energy, tof_dist, True)
+bw = np.diff(tof)
+bw = np.insert(bw,0,bw[0]) # assumes given leading tof edge
 
 # background function
 def bkg_func(ti,a,b):
     return a*ti**-b
 Bi = bkg_func(tof,a,b)
 
+# get open counts - no need to propagate uncertainty bc we are un-reducing
+# but, does uncertainty propagate backwards and some out the same?
+
+cts_o_true = ctr_o_true*bw*trig
+
+plt.plot(tof*1e6,cts_o_true); plt.yscale('log'); plt.xscale('log')
 
 
+#%% compare resolution broading on transmission vs cross section - sammy output of transmission vs cross section
+# these might actually be the same thing, I bet that sammy still resolution broadens transmission, but then converts back to xs
+# there is a flag in the sammy input to resolution broaden the xs rather than trans
 
-#%% 
-
+T_theo = sam['theo_trans']
 # =============================================================================
-# # estimate true underlying, raw, open count data with a wide gaussian flux
+# T_theo_wrong = np.exp(-n*sam['theo_xs']); T_theo_wrong[np.where(T_theo_wrong <= 1e-10)[0]] = 0 # set very small values to zero
+# 
+# plt.plot(energy, T_theo, label='samcalc')
+# plt.scatter(energy, T_theo_wrong, label='wrong', s=2, color='r')
+# 
+# plt.xscale('log'); plt.yscale('log')
+# plt.legend()
+# plt.show(); plt.close()
+# 
+# print(); print('The difference in resolution broadening transmission vs xs is:')
+# print(sum(T_theo-T_theo_wrong))
 # =============================================================================
-cts_o_true = syndat.exp_effects.generate_open_counts(energy, flux_mag, 50, 100)
-#
-# or: import open count rate:
-
-C_o = pd.read_csv(os.path.join(sammy_directory,'ta181opencountrate.dat'), sep=',')
 
 
-plt.plot(C_o['tof'], C_o['co'])
-plt.xlabel('Energy'); plt.ylabel('$\sigma$')
-plt.yscale('log'); plt.xscale('log')
-plt.show(); plt.close()
-
-
-# plt.plot(np.diff(C_o['tof']))
 
 #%%
 
 # =============================================================================
 # # generate noisy, raw, sample in count data with statistical unc from a true underlying transmission
 # =============================================================================
-
-T_theo = np.exp(-n*xs_theoretical) # sammy can also just output this transmission value
 
 noisy_cts_i, noisy_cts_i_se = syndat.exp_effects.generate_raw_count_data(energy, T_theo, cts_o_true, flux_mag, bw, trig, k_i,K_o, Bi, b0_i,B0_o, alpha)
 
