@@ -13,75 +13,29 @@ import numpy as np
 import syndat
 import scipy.stats as stat
 import matplotlib as mpl
-
+#import syndat.plot as myplt
 
 
 #%%
 
 plt.rcParams['figure.dpi'] = 500
 
-sammy_directory = os.getcwd()
+sammy_directory =  os.path.realpath('./synthetic_data/Ta181')
 
-# =============================================================================
-# # jesse's work
-# trans = pd.read_csv(os.path.join(sammy_directory,'walton-trans.twenty'), sep='\s+', header=None)
-# plt.errorbar(trans[0], trans[1], yerr=trans[2], ecolor='k', color='k', capsize=4, elinewidth=1.5, ms=2, fmt=".", zorder=0)
-# #plt.close()
-# 
-# #theoretical from sammy
-# dat = pd.read_csv(os.path.join(sammy_directory,'r-mat-test.dat'), sep='\s+', header=None)
-# =============================================================================
-
-sammy_lst = pd.read_csv(os.path.join(sammy_directory,'synthetic_data/SAMMY_jb.LST'), sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
-energy = sammy_lst['E']
-
-# =============================================================================
-# plt.plot(energy, sammy_lst['theo_trans'], zorder=2, color='royalblue')
-# plt.xscale('log')
-# plt.show(); plt.close()
-# =============================================================================
+sam = pd.read_csv(os.path.join(sammy_directory,'SAMMY.LST'), sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
+#samndf = pd.read_csv(os.path.join(sammy_directory,'SAMMY_endf.LST'), sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
+energy = sam['E']
 
 
-#%% saved plotting functions
+plt.rcParams['figure.dpi'] = 500
+plt.plot(energy,sam['theo_trans'], lw=1, label='$\sigma_{exp}$')
+#plt.plot(energy,samndf['theo_trans'], lw=0.5, c='r', label='$\sigma_{endf}$')
 
-def plot1(energy,theo,exp,label1,label2):
-    
-    plt.plot(energy, theo, label=label1, zorder=2)
-    plt.scatter(energy,exp, label=label2, s=1, c='k', zorder=1)
-    
-    plt.legend()
-    #plt.yscale('log'); 
-    plt.xscale('log')
-    plt.show();plt.close()
-    
+plt.legend()
+plt.xlabel('Energy'); plt.ylabel('$\sigma$')
+plt.yscale('log'); plt.xscale('log')
+plt.show(); plt.close()
 
-def plot2(x,theo,exp,exp_unc, title):
-    
-    fig, (ax1,ax2,ax3) = plt.subplots(3,1, sharex=True, constrained_layout=True, gridspec_kw={'height_ratios': [2, 1, 1]}) # , figsize=(12,5)
-    plt.rcParams['figure.dpi'] = 500
-    
-    ax1.plot(x,theo, lw=0.5, color='b', label='$T_{theo}$', zorder=2)
-    #ax1.scatter(energy,exp, s=0.1, c='r', label='$T_{exp}$')
-    ax1.errorbar(x, exp, yerr=exp_unc, color='k',ecolor='k',elinewidth=1,capsize=2, fmt='.', ms=3, label='$T_{exp}$', zorder=0)
-    
-    ax1.legend()
-    ax1.set_ylabel('T') #('$\sigma$')
-    #ax1.set_yscale('log'); 
-    #ax1.set_xscale('log')
-    ax1.set_ylim([0,max(exp)+0.1])
-    
-    rel_se = np.sqrt((exp-theo)**2) #/theo
-    ax2.scatter(x, rel_se, s=2)
-    #ax2.set_ylim([-.5,.5])
-    ax2.set_ylabel('L2 Norm'); #ax2.set_ylabel('L1 Norm (relative)')
-    
-    ax3.scatter(x, exp_unc, lw=0.5, color='b', s=2, zorder=2)
-    ax3.set_ylabel('$\delta$T') #('$\sigma$')
-    ax3.set_xlabel('ToF (s)');
-    
-    plt.suptitle(title)
-    plt.tight_layout()
-    plt.show(); plt.close()
 
 
 
@@ -91,9 +45,9 @@ def plot2(x,theo,exp,exp_unc, title):
 #path_to_lst = '/Users/noahwalton/Library/Mobile Documents/com~apple~CloudDocs/Research Projects/Resonance Fitting/summer_2022/SAMMY_jb.LST'
 #sammy_lst = pd.read_csv(path_to_lst, sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans','theo_trans_bayes'])           
 
-energy = np.array(sammy_lst['E'])
-xs_theoretical = np.array(sammy_lst['theo_xs'])
-
+energy = np.array(sam['E'])
+xs_theoretical = np.array(sam['theo_xs'])
+trans_theo = sam['theo_trans']
 
 
 # =============================================================================
@@ -134,13 +88,27 @@ Bi = bkg_func(tof,a,b)
 
 
 
+#%% 
 
 # =============================================================================
 # # estimate true underlying, raw, open count data with a wide gaussian flux
 # =============================================================================
-
 cts_o_true = syndat.exp_effects.generate_open_counts(energy, flux_mag, 50, 100)
+#
+# or: import open count rate:
 
+C_o = pd.read_csv(os.path.join(sammy_directory,'ta181opencountrate.dat'), sep=',')
+
+
+plt.plot(C_o['tof'], C_o['co'])
+plt.xlabel('Energy'); plt.ylabel('$\sigma$')
+plt.yscale('log'); plt.xscale('log')
+plt.show(); plt.close()
+
+
+# plt.plot(np.diff(C_o['tof']))
+
+#%%
 
 # =============================================================================
 # # generate noisy, raw, sample in count data with statistical unc from a true underlying transmission
