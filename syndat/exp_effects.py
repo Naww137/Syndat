@@ -81,23 +81,53 @@ def generate_open_counts(energy, flux_mag, mean, std):
     return cts_o
 
 def cts_to_ctr(cts, d_cts, bw, trig):
+    """
+    Converts counts to count rate and propagates uncertainty.
+
+    Parameters
+    ----------
+    cts : array-like
+        Array of count data corresponting to each tof bin.
+    d_cts : array-like
+        Array of uncertainty on each count data point corresponting to each tof bin.
+    bw : array-like
+        Array of tof bin widths.
+    trig : float or int
+        Number of linac pulses.
+        
+    Notes
+    _____
+    Uncertainty propagation with sandwich rule (JxCxJ.T) is over 1000x slower. 
+    A more simple error propagtion is used because there is no covariance 
+    between the statistical variables.
+    
+    Returns
+    -------
+    ctr : array-like
+        Array of count rates corresponding to each tof bin.
+    d_nctr : array-like
+        Array of propagated uncertainty on each count rate point.
+    """
     ctr = cts/(bw*trig)
-    
-    partial = 1/(bw*trig) # assumes constant bin width
-    Cin = np.diag(d_cts**2)
-    J = np.diag(np.ones(len(d_cts))*partial)
-    Cout = J.T @ Cin @ J
-    d_nctr = np.sqrt(np.diag(Cout))
-    
-    alt = [np.sqrt((partial**2)*dc**2) for dc in d_cts]
-    if sum(d_nctr-alt) > 1e-10:
-        print('Warning: JxCxJ.T != nsqrt((d_dx*dx**2))')
+    partial = 1/(bw*trig) 
+# Matrix multiplication takes for ever here! no covariance, so take advantage of that!
+# =============================================================================
+#     Cin = np.diag(d_cts**2)
+#     J = np.diag(np.ones(len(d_cts))*partial)
+#     Cout = J.T @ Cin @ J
+#     alt_d_nctr = np.sqrt(np.diag(Cout))
+# =============================================================================
+    d_nctr = [np.sqrt((partial[i]**2)*dc**2) for i,dc in enumerate(d_cts)]
+# =============================================================================
+#     if sum(d_nctr-alt_d_nctr) > 1e-10:
+#         print('Warning: JxCxJ.T != nsqrt((d_dx*dx**2))')
+# =============================================================================
     
     return ctr, d_nctr
 
     
 
-def generate_raw_count_data(energy, T_theo, C, flux_mag, bw, trig, k,K, Bi, b0,B0, alpha):
+def generate_raw_count_data(energy, T_theo, C, bw, trig, k,K, Bi, b0,B0, alpha):
     """
     Generates raw count data for sample-in given a theoretical tranmission. 
     
@@ -113,8 +143,6 @@ def generate_raw_count_data(energy, T_theo, C, flux_mag, bw, trig, k,K, Bi, b0,B
         Vector of theoretical transmission values that the detector will see, (must be experimentally corrected).
     C : array-like
         Open count data - sample out counts.
-    flux_mag : float
-        Magnitude scaling factor applied to flux shape, how many counts!
     bw : float
         Width in time a given channel is open, bin width.
     trig : int
@@ -149,10 +177,11 @@ def generate_raw_count_data(energy, T_theo, C, flux_mag, bw, trig, k,K, Bi, b0,B
     # calculate sample in counts, noise, and uncertainty
     c = cr*bw*trig 
     dc = np.sqrt(c)
-    nc = gaus_noise(c,dc)
+    nc = gaus_noise(c,dc) # will create some negative counts, force to zero
+    nc = np.where(nc<0, 0, nc) # replace negative counts with 0
     dnc = np.sqrt(nc)
 
-    return nc, dnc
+    return nc, dnc, c, dc
 
 
 
@@ -206,14 +235,23 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
     Output covaraiance matrix for transmission.
     """
 
+# =============================================================================
+# make inputs the proper type
+# =============================================================================
+    
+    dc = np.array(dc)
+    dC = np.array(dC)
+
     # derivatives
     D = alpha[2]*C - alpha[3]*K*Bi - B0
     N = alpha[0]*c - alpha[1]*k*Bi - b0
     
-    def dTi_dci(i):
-        return alpha[0]/D[i]
-    def dTi_dCi(i):
-        return N[i]*alpha[2]/D[i]
+# =============================================================================
+#     def dTi_dci(i):
+#         return alpha[0]/D[i]
+#     def dTi_dCi(i):
+#         return N[i]*alpha[2]/D[i]
+# =============================================================================
     def dT_dsys(i):
         dTi_da = -(k*alpha[1]*D[i]+K*alpha[3]*N[i])*np.exp(-b*tof[i]) / (D[i]**2)
         dTi_db = (k*alpha[1]*D[i])*Bi[i]*tof[i] / (D[i]**2)
@@ -224,42 +262,53 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
         dTi_dalpha = [ c[i]/D[i], -k*Bi[i]/D[i], -C[i]*N[i]/D[i]**2, K*Bi[i]*N[i]/D[i]**2 ]
         return np.append([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0], dTi_dalpha)
     
-    # construct statistical covariance and jacobian
-    Cov_stat = np.zeros([len(tof*2),len(tof*2)])
-    #samplein = True; sampleout = False
-    for i in range(len(tof)):
-        for j in range(len(tof)):
-            if i == j:
-                Cov_stat[i,j] = dc[i] 
-    for i in range(len(tof),len(tof*2)):
-        for j in range(len(tof),len(tof*2)):
-            if i == j:
-                Cov_stat[i,j] = dC[i]
     
-    Jac_stat = np.zeros([len(tof*2),len(tof*2)])
-    for i in range(len(tof)):
-        for j in range(len(tof)):
-            if i == j:
-                Jac_stat[i,j] = dTi_dci(i)
-    for i in range(len(tof),len(tof*2)):
-        for j in range(len(tof),len(tof*2)):
-            if i == j:
-                Jac_stat[i,j] = dTi_dCi(i)
+    # construct statistical covariance and jacobian
+    dc_dC = np.append(dc,dC)
+    Cov_stat = np.diag(dc_dC**2)
+# =============================================================================
+#     Cov_stat = np.zeros([len(tof*2),len(tof*2)])
+#     #samplein = True; sampleout = False
+#     for i in range(len(tof)):
+#         for j in range(len(tof)):
+#             if i == j:
+#                 Cov_stat[i,j] = dc[i] 
+#     for i in range(len(tof),len(tof*2)):
+#         for j in range(len(tof),len(tof*2)):
+#             if i == j:
+#                 Cov_stat[i,j] = dC[i]
+# =============================================================================
+    dTi_dci = alpha[0]/D; dTi_dci = np.diag(dTi_dci**2)
+    dTi_dCi = N*alpha[2]/D**2; dTi_dCi = np.diag(dTi_dCi**2)
+    Jac_stat = np.vstack((dTi_dci,dTi_dCi))
+# =============================================================================
+#     Jac_stat = np.zeros([len(tof)*2,len(tof)])
+#     for i in range(len(tof)):
+#         for j in range(len(tof)):
+#             if i == j:
+#                 Jac_stat[i,j] = dTi_dci(i)
+#     for i in range(len(tof),len(tof*2)):
+#         for j in range(len(tof)):
+#             if i == j:
+#                 Jac_stat[i,j] = dTi_dCi(i)
+# =============================================================================
     
     # construct systematic covariance and jacobian
-
-    Cov_sys = np.zeros([len(sys_unc),len(sys_unc)])
-    for i in range(len(sys_unc)):
-        for j in range(len(sys_unc)):
-            if i == j:
-                Cov_sys[i,j] = sys_unc[i]
+    Cov_sys = np.diag(sys_unc**2)
+# =============================================================================
+#     Cov_sys = np.zeros([len(sys_unc),len(sys_unc)])
+#     for i in range(len(sys_unc)):
+#         for j in range(len(sys_unc)):
+#             if i == j:
+#                 Cov_sys[i,j] = sys_unc[i]
+# =============================================================================
+    print("WARNING: Need to update getCov function to take a/b covariances, currently it says cov = var*var")
     Cov_sys[0,1] = sys_unc[0]*sys_unc[1]  
     Cov_sys[1,0] = sys_unc[1]*sys_unc[0]        
     
     Jac_sys = np.zeros([len(sys_unc),len(tof)])
-    for i in range(len(sys_unc)):
-        for j in range(len(tof)):
-            Jac_sys[i,j] = dT_dsys(j)[i]
+    for j in range(len(tof)):
+        Jac_sys[:,j] = dT_dsys(j)
                 
     # calculate covariance of output
     CovT_stat = Jac_stat.T @ Cov_stat @ Jac_stat
