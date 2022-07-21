@@ -159,8 +159,8 @@ plt.show(); plt.close()
 
 #%%
 
-syndat.plot.exp_theo(tof, Tn, dT, T_theo)
-syndat.plot.unc_noise(tof, dT, T_theo, Tn, ctr_o)
+#syndat.plot.exp_theo(tof, Tn, dT, T_theo)
+syndat.plot.unc_noise(tof, dT, T_theo, Tn, ctr_o, ctr_i)
 
 
 

@@ -60,37 +60,44 @@ def exp_theo(tof, Tn, dT, T_theo):
     #plt.ylim([1e-5,1e1])
     #plt.xlim([1e2,1e3])
     plt.xscale('log')
-    plt.yscale('log')
+    #plt.yscale('log')
     
 
-def unc_noise(tof, dT, T_theo, Tn, cr_o):
+def unc_noise(tof, dT, T_theo, Tn, cr_o, cr_i):
     #fig, ax = plt.subplots(2,2, gridspec_kw={'height_ratios': [1, 1], 'width_ratios':[2,1]}) # , figsize=(12,5)
     fig, (ax1, ax2, ax3) = plt.subplots(3, gridspec_kw={'height_ratios': [1, 1, 1]}, sharex=True) # , figsize=(12,5)
-    plt.rcParams['figure.dpi'] = 500
+    # plt.rcParams['figure.dpi'] = 500
     # ax1 = ax[0,0]; ax2=ax[1,0]; ax3=ax[0,1]; ax4=ax[1,1]
     
-    ax1.scatter(tof, dT, lw=0.5, color='b', s=1, zorder=2)
+    ax1.scatter(tof, dT/Tn*100, lw=0.5, color='b', s=0.5, zorder=2)
     #ax1.set_ylim([0,2])
-    ax1.set_yscale('log')
+    #ax1.set_yscale('log')
     ax1.set_ylabel('$\delta$T'); #('$\sigma$')
     
-    ax2.plot(tof,T_theo, lw= 0.5, c='g')
-    ax2.set_ylabel(r'$T_{theo}$')
-    ax2.set_yscale('log')
-    ax25 = plt.twinx(ax2)
-    ax25.plot(tof,cr_o, lw= 0.5, c='orange')
-    ax25.set_yscale('log')
-    ax25.set_ylabel(r'$ctr_o$')
+    ax2.plot(tof,cr_o, lw= 0.5, c='orange', label=r'$ctr_{out}$')
+    ax2.plot(tof,cr_i, lw= 0.5, c='cornflowerblue', label=r'$ctr_{in}$')
+    #ax2.set_yscale('log')
+    
+    ax2.set_ylabel(r'$ctr_o$')
+    ax2.legend()
+# =============================================================================
+#     ax25 = plt.twinx(ax2)
+#     ax25.plot(tof,T_theo, lw= 0.5, c='g', label=r'$T_{theo}$')
+#     ax25.set_ylabel(r'$T_{theo}$')
+#     ax25.set_yscale('log')
+#     ax25.set_ylim([1e-3,1e1])
+# =============================================================================
     
     rel_se = (Tn-T_theo)/T_theo
-    ax3.scatter(tof, rel_se, s=1)
+    ax3.scatter(tof, rel_se, s=0.5, c='b')
     #ax3.set_ylim()
     ax3.set_ylabel('Noise')
     ax3.set_yscale('log')
     
     #plt.xlim([1e2,2e3])
+
     plt.xscale('log')
     plt.xlabel('ToF (s)');
     plt.suptitle('Uncertainty and Noise on Transmission')
     plt.tight_layout()
-    plt.show(); plt.close()
+    #plt.show(); plt.close()

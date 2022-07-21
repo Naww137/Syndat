@@ -256,7 +256,7 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
         dTi_da = -(k*alpha[1]*D[i]+K*alpha[3]*N[i])*np.exp(-b*tof[i]) / (D[i]**2)
         dTi_db = (k*alpha[1]*D[i])*Bi[i]*tof[i] / (D[i]**2)
         dTi_dk = -alpha[1]*Bi[i]/D[i]**2
-        dTi_dK = -N[i]*alpha[3]*Bi[i]/D[i]**2
+        dTi_dK = N[i]*alpha[3]*Bi[i]/D[i]**2
         dTi_db0 = -1/D[i]
         dTi_dB0 = N[i]/D[i]**2
         dTi_dalpha = [ c[i]/D[i], -k*Bi[i]/D[i], -C[i]*N[i]/D[i]**2, K*Bi[i]*N[i]/D[i]**2 ]

@@ -95,7 +95,7 @@ plt.show(); plt.close()
 # experimentally unique values
 # =============================================================================
 n = .12 # need to pull this from the endf evaluation
-trig = 9760770# number of linac pulses
+trig = 9760770 # number of linac pulses
 # flux_mag = 1e5 # what is a reasonable flux magnitude??
 detector_efficiency = 1
 tof_dist = 35 # m   !!! not the proper tof_distance, but I need the erange to match up
@@ -140,11 +140,11 @@ C_o = pd.read_csv(os.path.join(sammy_directory,'ta181opencountrate.dat'), sep=',
 C_o['E'] = pd.read_csv(os.path.join(sammy_directory,'ta-181-12mm.twenty'), sep='\s+', names=['E','1','2'])['E']
 
 ctr_o_true = C_o['co'][0:-5] # C_o.loc[C_o['E'] < 330, 'co']
-tof_ = C_o['tof'][0:-5]*1e-6 # C_o.loc[C_o['E'] < 330, 'tof'] *1e-6
+tof = C_o['tof'][0:-5]#*1e-6 # C_o.loc[C_o['E'] < 330, 'tof'] *1e-6
 energy = C_o['E'][0:-5]
 
 #plt.plot(C_o['tof'], C_o['co'])
-plt.plot(tof_, ctr_o_true)
+plt.plot(tof, ctr_o_true)
 plt.xlabel('tof'); plt.ylabel('countrate')
 plt.yscale('log'); plt.xscale('log')
 plt.show(); plt.close()
@@ -165,12 +165,14 @@ bw = np.insert(bw,0,bw[0]) # assumes given leading tof edge
 # background function
 def bkg_func(ti,a,b):
     return a*np.exp(ti*-b)
-Bi = bkg_func(tof,a,b)*1e-2#*bw*trig*1e-2
+Bi = bkg_func(tof,a,b) #*bw*trig*1e-2
 
 
-plt.plot(tof,Bi)
+plt.plot(tof,Bi*K_o+[B0_o]*len(tof))
+#plt.plot(tof,Bi*k_i+b0_i)
 plt.xlabel('tof')
 plt.title('Background Function')
+plt.xscale('log'); plt.yscale('log')
 plt.show(); plt.close()
 
 #%%
@@ -193,7 +195,7 @@ Cr, dCr = syndat.exp_effects.cts_to_ctr(cts_o_true, np.sqrt(cts_o_true), bw, tri
 [m1,m2,m3,m4] = alpha
 cr = (T_theo*(m3*Cr - m4*K_o*Bi - B0_o) + m2*k_i*Bi + b0_i)/m1
 
-print(sum(T_theo - ( (m1*cr-m2*k_i*Bi-b0_i)/(m3*Cr-m4*K_o*Bi-B0_o))))
+#print(sum(T_theo - ( (m1*cr-m2*k_i*Bi-b0_i)/(m3*Cr-m4*K_o*Bi-B0_o))))
 
 # calculate sample in counts, noise, and uncertainty
 c = cr*bw*trig 
@@ -203,7 +205,7 @@ dc = np.sqrt(c)
 # nc = np.where(nc<0, 0, nc) # replace negative counts with 0
 # dnc = np.sqrt(nc)
 # =============================================================================
-print(np.array([cr<0]).any())
+#print(np.array([cr<0]).any())
 
 
 
@@ -212,12 +214,12 @@ print(np.array([cr<0]).any())
 plt.scatter(tof, cr, s=1, label='c_s')
 plt.scatter(tof, Cr, s=1, label='c_o')
 #plt.plot(tof, T_theo, label='trans', c='k')
-plt.plot(tof, Bi*K_o-B0_o, c='k', label='Bi*K_o-B0_o')
-plt.plot(tof, Bi*k_i-b0_i, c='r', alpha=0.5, label='Bi*K_s-B0_s')
+plt.plot(tof, Bi*K_o+B0_o, c='k', label='Bi*K_o-B0_o')
+plt.plot(tof, Bi*k_i+b0_i, c='r', alpha=0.5, label='Bi*K_s-B0_s')
 
 plt.legend()
 #plt.xlim([1e-4,1e-3]);
-plt.ylim([1e1,1e5])
+#plt.ylim([1e1,1e5])
 plt.xscale('log'); plt.yscale('log')
 
 #plt.title('Count comparison with overlayed theoretical transmission')
@@ -243,40 +245,42 @@ plt.show(); plt.close()
 
 #%%
 
-dc = noisy_cts_i_se
-dC = noisy_cts_o_se 
-
-
 # =============================================================================
-# dc = dc.flatten()
-# dC = dC.flatten()
-# =============================================================================
-
-
-
-import time
-start = time.time()
-
-dcC = np.append(dc,dC)
-Cov_stat1 = np.diag(dcC)
-
-# =============================================================================
-# Cov_stat = np.zeros([len(tof)*2,len(tof)*2])
-# #samplein = True; sampleout = False
-# for i in range(len(tof)):
-#     for j in range(len(tof)):
-#         if i == j:
-#             Cov_stat[i,j] = dc[i] 
-# for i in range(len(tof),len(tof)*2):
-#     for j in range(len(tof),len(tof*2)):
-#         if i == j:
-#             Cov_stat[i,j] = dC[i]
+# dc = noisy_cts_i_se
+# dC = noisy_cts_o_se 
+# 
+# 
+# # =============================================================================
+# # dc = dc.flatten()
+# # dC = dC.flatten()
+# # =============================================================================
+# 
+# 
+# 
+# import time
+# start = time.time()
+# 
+# dcC = np.append(dc,dC)
+# Cov_stat1 = np.diag(dcC)
+# 
+# # =============================================================================
+# # Cov_stat = np.zeros([len(tof)*2,len(tof)*2])
+# # #samplein = True; sampleout = False
+# # for i in range(len(tof)):
+# #     for j in range(len(tof)):
+# #         if i == j:
+# #             Cov_stat[i,j] = dc[i] 
+# # for i in range(len(tof),len(tof)*2):
+# #     for j in range(len(tof),len(tof*2)):
+# #         if i == j:
+# #             Cov_stat[i,j] = dC[i]
+# # 
+# # =============================================================================
+# 
+# end = time.time()
+# print(end - start)
 # 
 # =============================================================================
-
-end = time.time()
-print(end - start)
-
 
 # =============================================================================
 # Jac_stat = np.zeros([len(tof*2),len(tof*2)])
