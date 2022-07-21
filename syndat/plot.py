@@ -59,10 +59,11 @@ def exp_theo(tof, Tn, dT, T_theo):
     plt.legend()
     #plt.ylim([1e-5,1e1])
     #plt.xlim([1e2,1e3])
-    plt.xscale('log');plt.yscale('log')
+    plt.xscale('log')
+    plt.yscale('log')
     
 
-def unc_noise(tof, dT, T_theo, Tn):
+def unc_noise(tof, dT, T_theo, Tn, cr_o):
     #fig, ax = plt.subplots(2,2, gridspec_kw={'height_ratios': [1, 1], 'width_ratios':[2,1]}) # , figsize=(12,5)
     fig, (ax1, ax2, ax3) = plt.subplots(3, gridspec_kw={'height_ratios': [1, 1, 1]}, sharex=True) # , figsize=(12,5)
     plt.rcParams['figure.dpi'] = 500
@@ -76,7 +77,10 @@ def unc_noise(tof, dT, T_theo, Tn):
     ax2.plot(tof,T_theo, lw= 0.5, c='g')
     ax2.set_ylabel(r'$T_{theo}$')
     ax2.set_yscale('log')
-    #ax2.set_ylim([1e-10,1e1])
+    ax25 = plt.twinx(ax2)
+    ax25.plot(tof,cr_o, lw= 0.5, c='orange')
+    ax25.set_yscale('log')
+    ax25.set_ylabel(r'$ctr_o$')
     
     rel_se = (Tn-T_theo)/T_theo
     ax3.scatter(tof, rel_se, s=1)

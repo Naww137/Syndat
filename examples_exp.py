@@ -273,8 +273,8 @@ plt.scatter(tof, ctr_o, s=1, label='cr_o')
 plt.plot(tof, T_theo, label='Theoretical T', c='k', alpha=0.5)
 
 plt.legend()
-plt.ylim([1e-2,1e5])
-plt.xlim([2e2, 2.5e2])
+#plt.ylim([1e-2,1e5])
+#plt.xlim([2e2, 2.5e2])
 # =============================================================================
 # plt.xlim([1.5e-4,2.1e-4]);
 # plt.ylim([4e2,1e3])
@@ -343,9 +343,9 @@ CorT = np.corrcoef(CovT)
 
 
 
-syndat.plot.exp_theo(tof, Tn, dT, T_theo)
+# syndat.plot.exp_theo(tof, Tn, dT, T_theo)
     
-syndat.plot.unc_noise(tof, dT, T_theo, Tn)
+syndat.plot.unc_noise(tof, dT, ctr_i, Tn, ctr_o)
 
 #%%
 

@@ -302,9 +302,9 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
 #             if i == j:
 #                 Cov_sys[i,j] = sys_unc[i]
 # =============================================================================
-    print("WARNING: Need to update getCov function to take a/b covariances, currently it says cov = var*var")
-    Cov_sys[0,1] = sys_unc[0]*sys_unc[1]  
-    Cov_sys[1,0] = sys_unc[1]*sys_unc[0]        
+    # print("WARNING: Need to update getCov function to take a/b covariances, currently it says cov = var*var")
+    Cov_sys[0,1] = 1.42405866e-01 # sys_unc[0]*sys_unc[1]  
+    Cov_sys[1,0] = 1.42405866e-01 #sys_unc[1]*sys_unc[0]        
     
     Jac_sys = np.zeros([len(sys_unc),len(tof)])
     for j in range(len(tof)):
