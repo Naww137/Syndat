@@ -108,26 +108,17 @@ def cts_to_ctr(cts, d_cts, bw, trig):
     d_nctr : array-like
         Array of propagated uncertainty on each count rate point.
     """
-    ctr = cts/(bw*trig)
-    partial = 1/(bw*trig) 
-# Matrix multiplication takes for ever here! no covariance, so take advantage of that!
-# =============================================================================
-#     Cin = np.diag(d_cts**2)
-#     J = np.diag(np.ones(len(d_cts))*partial)
-#     Cout = J.T @ Cin @ J
-#     alt_d_nctr = np.sqrt(np.diag(Cout))
-# =============================================================================
+    
+    
+    ctr = np.array(cts/(bw*trig))
+    partial = np.array(1/(bw*trig))
     d_nctr = [np.sqrt((partial[i]**2)*dc**2) for i,dc in enumerate(d_cts)]
-# =============================================================================
-#     if sum(d_nctr-alt_d_nctr) > 1e-10:
-#         print('Warning: JxCxJ.T != nsqrt((d_dx*dx**2))')
-# =============================================================================
     
     return ctr, d_nctr
 
     
 
-def generate_raw_count_data(energy, T_theo, C, bw, trig, k,K, Bi, b0,B0, alpha):
+def generate_raw_count_data(sample_df, open_df, trig, k,K, Bi, b0,B0, alpha):
     """
     Generates raw count data for sample-in given a theoretical tranmission. 
     
@@ -137,12 +128,10 @@ def generate_raw_count_data(energy, T_theo, C, bw, trig, k,K, Bi, b0,B0, alpha):
 
     Parameters
     ----------
-    energy : array-like
-        Vector of energy values for each data point - corresponds to tof.
-    T_theo : array-like
-        Vector of theoretical transmission values that the detector will see, (must be experimentally corrected).
-    C : array-like
-        Open count data - sample out counts.
+    sample_df : pandas.DataFrame
+        Sample in dataframe with a column for theoretical tranmission ['theo_trans'] and energy ['E'].
+    open_df : pandas.DataFrame
+        Open dataframe, columns ['E'], ['bw'
     bw : float
         Width in time a given channel is open, bin width.
     trig : int
@@ -168,20 +157,22 @@ def generate_raw_count_data(energy, T_theo, C, bw, trig, k,K, Bi, b0,B0, alpha):
         Uncertainty (standard error) associated with nc from Poisson.
     """
     #calculate open count rates
-    Cr, dCr = cts_to_ctr(C, np.sqrt(C), bw, trig) # cts_o/(bw*trig)
+    Cr, dCr = cts_to_ctr(open_df.counts, open_df.dcounts, open_df.bw, trig) # cts_o/(bw*trig)
+    open_df['cps'] = Cr; open_df['dcps'] = dCr
     
     # calculate sample in count rate from theoretical transmission, bkg, m,k, and open count rate
     [m1,m2,m3,m4] = alpha
-    cr = (T_theo*(m3*Cr - m4*K*Bi - B0) + m2*k*Bi + b0)/m1
+    cr = (sample_df.theo_trans*(m3*Cr - m4*K*Bi - B0) + m2*k*Bi + b0)/m1
     
     # calculate sample in counts, noise, and uncertainty
-    c = cr*bw*trig 
-    dc = np.sqrt(c)
-    nc = gaus_noise(c,dc) # will create some negative counts, force to zero
-    nc = np.where(nc<0, 0, nc) # replace negative counts with 0
-    dnc = np.sqrt(nc)
+    c = cr*open_df.bw*trig 
+    sample_df['c'] = c #np.where(c<0, 10, c)
+    sample_df['dc'] = np.sqrt(sample_df.c)
+    nc = gaus_noise(sample_df.c,sample_df.dc) # will create some negative counts, force to zero
+    sample_df['nc'] = np.where(nc<0, 10, nc) # replace negative counts with 0
+    sample_df['dnc'] = np.sqrt(nc)
 
-    return nc, dnc, c, dc
+    return sample_df, open_df
 
 
 
@@ -234,10 +225,6 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
     -------
     Output covaraiance matrix for transmission.
     """
-
-# =============================================================================
-# make inputs the proper type
-# =============================================================================
     
     c = np.array(c); dc = np.array(dc)
     C = np.array(C); dC = np.array(dC)
@@ -247,20 +234,6 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
     # derivatives
     D = alpha[2]*C - alpha[3]*K*Bi - B0
     N = alpha[0]*c - alpha[1]*k*Bi - b0
-    
-
-# =============================================================================
-#     def dT_dsys(i):
-#         dTi_da = -(k*alpha[1]*D[i]+K*alpha[3]*N[i])*np.exp(-b*tof[i]) / (D[i]**2)
-#         dTi_db = (k*alpha[1]*D[i])*Bi[i]*tof[i] / (D[i]**2)
-#         dTi_dk = -alpha[1]*Bi[i]/D[i]**2
-#         dTi_dK = N[i]*alpha[3]*Bi[i]/D[i]**2
-#         dTi_db0 = -1/D[i]
-#         dTi_dB0 = N[i]/D[i]**2
-#         dTi_dalpha = [ c[i]/D[i], -k*Bi[i]/D[i], -C[i]*N[i]/D[i]**2, K*Bi[i]*N[i]/D[i]**2 ]
-#         return np.append([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0], dTi_dalpha)
-# =============================================================================
-    
     
     # construct statistical covariance and jacobian
     dTi_dci = alpha[0]/D
@@ -282,22 +255,16 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
     dTi_db0 = -1/D
     dTi_dB0 = N/D**2
     dTi_dalpha = [ c/D, -k*Bi/D, -C*N/D**2, K*Bi*N/D**2 ]
-    # dT_dsys = np.append([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0], dTi_dalpha)
     
     Jac_sys = np.array([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0, dTi_dalpha[0], dTi_dalpha[1],dTi_dalpha[2],dTi_dalpha[3]])
     
-# =============================================================================
-#     Jac_sys = np.zeros([len(sys_unc),len(tof)])
-#     for j in range(len(tof)):
-#         Jac_sys[:,j] = dT_dsys(j)
-# =============================================================================
                 
     # calculate covariance of output
     CovT_sys = Jac_sys.T @ Cov_sys @ Jac_sys
     
     CovT = CovT_stat + CovT_sys
     
-    return CovT
+    return CovT, CovT_stat, CovT_sys
 
 
 
@@ -365,7 +332,7 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trig, a,b, k,K, Bi, b0,B0, alpha,
     # calculate transmission
     Tn = transmission(cr,Cr, Bi, k,K, b0,B0, alpha)
     # propagate uncertainty to transmission
-    CovT = get_covT(tof, cr,Cr, dcr,dCr, a,b, k,K, Bi, b0,B0, alpha, sys_unc)
+    CovT, CovT_stat, CovT_sys = get_covT(tof, cr,Cr, dcr,dCr, a,b, k,K, Bi, b0,B0, alpha, sys_unc)
     dT = np.sqrt(np.diagonal(CovT))
     
     return Tn, dT, CovT
