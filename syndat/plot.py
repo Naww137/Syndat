@@ -52,12 +52,13 @@ def plot2(x,theo,exp,exp_unc, title):
     
     
 def exp_theo(tof, Tn, dT, T_theo):
+    plt.figure()
     plt.errorbar(tof,Tn, yerr=dT,color='r',ecolor='k',elinewidth=1,capsize=2, fmt='.', ms=3)
     #plt.scatter(tof, Tn, label='Experimental', s=1, c='k')
     plt.plot(tof, T_theo, label='Theoretical', c='g', lw=0.25)
     
     plt.legend()
-    #plt.ylim([1e-5,1e1])
+    plt.ylim([-1,5])
     #plt.xlim([1e2,1e3])
     plt.xscale('log')
     #plt.yscale('log')

@@ -59,17 +59,20 @@ B0_o = 13.4; dB0_o = B0_o*0.01
 # cts_o_true = syndat.exp_effects.generate_open_counts(energy, flux_mag, 50, 100)
 
 # or: import open count rate from RPI Ta-181 experiment:
-C_o = pd.read_csv(os.path.join(sammy_directory,'ta181opencountrate.dat'), sep=',')
-C_o['E'] = syndat.exp_effects.t_to_e(C_o['tof']*1e-6, tof_dist, True) 
+C_o = pd.read_csv(os.path.join(sammy_directory,'rpi-open-ta181.csv'), sep=',')
+C_o['E'] = syndat.exp_effects.t_to_e((C_o.tof+3)*1e-6, tof_dist, True) 
 # C_o['E'] = pd.read_csv(os.path.join(sammy_directory,'ta-181-12mm.twenty'), sep='\s+', names=['E','1','2'])['E']
 
-ctr_o_true = C_o['co'][0:-5] # C_o.loc[C_o['E'] < 330, 'co']
-tof = C_o['tof'][0:-5] # C_o.loc[C_o['E'] < 330, 'tof'] *1e-6  #!!! tof must be in microseconds to have the proper magnitude that Jesse normed to
-energy = C_o['E'][0:-5]
+cts_o_true = C_o.counts# C_o.loc[C_o['E'] < 330, 'co']
+tof = C_o['tof'] # C_o.loc[C_o['E'] < 330, 'tof'] *1e-6  #!!! tof must be in microseconds to have the proper magnitude that Jesse normed to
+energy = C_o['E']
 
 # get ben width vector from tof
-bw = np.flipud(np.diff(np.flipud(tof)))
-bw = np.insert(bw,0,bw[0]) # assumes given leading tof edge
+# =============================================================================
+# bw = np.flipud(np.diff(np.flipud(tof)))
+# bw = np.insert(bw,0,bw[0]) # assumes given leading tof edge
+# =============================================================================
+bw = C_o.bin_width[0:-5] 
 
 # background function - Jesse has normalized alread, tof mus be micro-seconds
 def bkg_func(ti,a,b):
@@ -88,7 +91,7 @@ Bi = bkg_func(tof,a,b)
 
 
 # get open counts - no need to propagate uncertainty bc we are un-reducing - taking these input values as truth
-cts_o_true = ctr_o_true*bw*trig
+#cts_o_true = ctr_o_true*bw*trig
 
 
 #%% read sammy lst for experimentally corrected theoretical cross section
@@ -126,6 +129,7 @@ Tn = syndat.exp_effects.transmission(ctr_i,ctr_o, Bi, k_i,K_o, b0_i,B0_o, alpha)
 plt.plot(tof, ctr_i, lw=1, label='cr_s')
 plt.plot(tof, ctr_o, lw=1, label='cr_o')
 plt.plot(tof, T_theo, label='Theoretical T', c='k', alpha=0.5)
+plt.plot(tof, Bi*k_i+b0_i)
 
 plt.legend()
 plt.ylim([1e-3,1e5])

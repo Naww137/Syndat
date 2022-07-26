@@ -12,6 +12,26 @@ import matplotlib as mpl
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #%% need to pull estructure from the open count rate file
 # =============================================================================
 # 

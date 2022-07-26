@@ -16,6 +16,7 @@ import matplotlib as mpl
 #import syndat.plot as myplt
 import sys
 
+%matplotlib
 
 #%% need to pull estructure from the open count rate file
 

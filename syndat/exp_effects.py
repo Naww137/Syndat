@@ -239,79 +239,60 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
 # make inputs the proper type
 # =============================================================================
     
-    dc = np.array(dc)
-    dC = np.array(dC)
+    c = np.array(c); dc = np.array(dc)
+    C = np.array(C); dC = np.array(dC)
+    tof = np.array(tof)
+    Bi = np.array(Bi)
 
     # derivatives
     D = alpha[2]*C - alpha[3]*K*Bi - B0
     N = alpha[0]*c - alpha[1]*k*Bi - b0
     
+
 # =============================================================================
-#     def dTi_dci(i):
-#         return alpha[0]/D[i]
-#     def dTi_dCi(i):
-#         return N[i]*alpha[2]/D[i]
+#     def dT_dsys(i):
+#         dTi_da = -(k*alpha[1]*D[i]+K*alpha[3]*N[i])*np.exp(-b*tof[i]) / (D[i]**2)
+#         dTi_db = (k*alpha[1]*D[i])*Bi[i]*tof[i] / (D[i]**2)
+#         dTi_dk = -alpha[1]*Bi[i]/D[i]**2
+#         dTi_dK = N[i]*alpha[3]*Bi[i]/D[i]**2
+#         dTi_db0 = -1/D[i]
+#         dTi_dB0 = N[i]/D[i]**2
+#         dTi_dalpha = [ c[i]/D[i], -k*Bi[i]/D[i], -C[i]*N[i]/D[i]**2, K*Bi[i]*N[i]/D[i]**2 ]
+#         return np.append([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0], dTi_dalpha)
 # =============================================================================
-    def dT_dsys(i):
-        dTi_da = -(k*alpha[1]*D[i]+K*alpha[3]*N[i])*np.exp(-b*tof[i]) / (D[i]**2)
-        dTi_db = (k*alpha[1]*D[i])*Bi[i]*tof[i] / (D[i]**2)
-        dTi_dk = -alpha[1]*Bi[i]/D[i]**2
-        dTi_dK = N[i]*alpha[3]*Bi[i]/D[i]**2
-        dTi_db0 = -1/D[i]
-        dTi_dB0 = N[i]/D[i]**2
-        dTi_dalpha = [ c[i]/D[i], -k*Bi[i]/D[i], -C[i]*N[i]/D[i]**2, K*Bi[i]*N[i]/D[i]**2 ]
-        return np.append([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0], dTi_dalpha)
     
     
     # construct statistical covariance and jacobian
-    dc_dC = np.append(dc,dC)
-    Cov_stat = np.diag(dc_dC**2)
-# =============================================================================
-#     Cov_stat = np.zeros([len(tof*2),len(tof*2)])
-#     #samplein = True; sampleout = False
-#     for i in range(len(tof)):
-#         for j in range(len(tof)):
-#             if i == j:
-#                 Cov_stat[i,j] = dc[i] 
-#     for i in range(len(tof),len(tof*2)):
-#         for j in range(len(tof),len(tof*2)):
-#             if i == j:
-#                 Cov_stat[i,j] = dC[i]
-# =============================================================================
-    dTi_dci = alpha[0]/D; dTi_dci = np.diag(dTi_dci**2)
-    dTi_dCi = N*alpha[2]/D**2; dTi_dCi = np.diag(dTi_dCi**2)
-    Jac_stat = np.vstack((dTi_dci,dTi_dCi))
-# =============================================================================
-#     Jac_stat = np.zeros([len(tof)*2,len(tof)])
-#     for i in range(len(tof)):
-#         for j in range(len(tof)):
-#             if i == j:
-#                 Jac_stat[i,j] = dTi_dci(i)
-#     for i in range(len(tof),len(tof*2)):
-#         for j in range(len(tof)):
-#             if i == j:
-#                 Jac_stat[i,j] = dTi_dCi(i)
-# =============================================================================
-    
+    dTi_dci = alpha[0]/D
+    dTi_dCi = N*alpha[2]/D**2
+    diag = (dc**2)*(dTi_dci**2) + (dC**2)*(dTi_dCi**2)
+    CovT_stat = np.diag(diag)
+
     # construct systematic covariance and jacobian
     Cov_sys = np.diag(sys_unc**2)
-# =============================================================================
-#     Cov_sys = np.zeros([len(sys_unc),len(sys_unc)])
-#     for i in range(len(sys_unc)):
-#         for j in range(len(sys_unc)):
-#             if i == j:
-#                 Cov_sys[i,j] = sys_unc[i]
-# =============================================================================
     # print("WARNING: Need to update getCov function to take a/b covariances, currently it says cov = var*var")
     Cov_sys[0,1] = 1.42405866e-01 # sys_unc[0]*sys_unc[1]  
     Cov_sys[1,0] = 1.42405866e-01 #sys_unc[1]*sys_unc[0]        
     
-    Jac_sys = np.zeros([len(sys_unc),len(tof)])
-    for j in range(len(tof)):
-        Jac_sys[:,j] = dT_dsys(j)
+    # systematic derivatives
+    dTi_da = -(k*alpha[1]*D+K*alpha[3]*N)*np.exp(-b*tof) / (D**2)
+    dTi_db = (k*alpha[1]*D)*Bi*tof / (D**2)
+    dTi_dk = -alpha[1]*Bi/D**2
+    dTi_dK = N*alpha[3]*Bi/D**2
+    dTi_db0 = -1/D
+    dTi_dB0 = N/D**2
+    dTi_dalpha = [ c/D, -k*Bi/D, -C*N/D**2, K*Bi*N/D**2 ]
+    # dT_dsys = np.append([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0], dTi_dalpha)
+    
+    Jac_sys = np.array([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0, dTi_dalpha[0], dTi_dalpha[1],dTi_dalpha[2],dTi_dalpha[3]])
+    
+# =============================================================================
+#     Jac_sys = np.zeros([len(sys_unc),len(tof)])
+#     for j in range(len(tof)):
+#         Jac_sys[:,j] = dT_dsys(j)
+# =============================================================================
                 
     # calculate covariance of output
-    CovT_stat = Jac_stat.T @ Cov_stat @ Jac_stat
     CovT_sys = Jac_sys.T @ Cov_sys @ Jac_sys
     
     CovT = CovT_stat + CovT_sys
