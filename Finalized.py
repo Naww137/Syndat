@@ -170,6 +170,28 @@ Tn, dT, CovT = syndat.exp_effects.reduce_raw_count_data(tof, sdat.nc, odat.count
 # # calculate the correlation matrix
 CorT = np.corrcoef(CovT)
 
+#%% reduce clean raw count data to see if I can reconstruct theoretical transmission
+
+# compile systematic uncertainties #[dks,dko,db0s,db0o,dalpha1,dalpha2,dalpha3,dalpha4]
+sys_unc = np.append([da,db,dk_i,dK_o,db0_i,dB0_o], d_alpha)
+# %time
+# #%%timeit
+# # reduce raw, noisy count data with statistical uncertainties to transmission data with propagated uncertainty
+T_clean, dT_clean, CovT_clean = syndat.exp_effects.reduce_raw_count_data(tof, sdat.c, odat.counts, sdat.dc, np.sqrt(odat.counts), \
+                                                        odat.bw, trig_o, a,b, k_i,K_o, Bi, b0_i,B0_o, alpha, sys_unc)
+
+    #%%
+    
+figure()
+plot(tof,T_clean, label='Reconstructed')
+plot(tof,sdat.theo_trans, label='theo')
+legend()
+xscale('log')
+xlim([1e2,1e3])
+ylim([-0.05,0.6])
+axhline(y=0.0, ls='--')
+#yscale('log')
+show(); close()
 
 
 #%%
