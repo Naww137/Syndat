@@ -157,7 +157,7 @@ def generate_raw_count_data(sample_df, open_df, trig, k,K, Bi, b0,B0, alpha):
         Uncertainty (standard error) associated with nc from Poisson.
     """
     #calculate open count rates
-    Cr, dCr = cts_to_ctr(open_df.counts, open_df.dcounts, open_df.bw, trig) # cts_o/(bw*trig)
+    Cr, dCr = cts_to_ctr(open_df.c, open_df.dc, open_df.bw, trig) # cts_o/(bw*trig)
     open_df['cps'] = Cr; open_df['dcps'] = dCr
     
     # calculate sample in count rate from theoretical transmission, bkg, m,k, and open count rate

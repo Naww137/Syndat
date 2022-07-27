@@ -19,7 +19,9 @@ import sys
 from matplotlib.pyplot import *
 
 
-sammy_directory =  '/Users/nwx/Documents/GitHub/nuc_syndat/synthetic_data/Ta181'
+sammy_directory =  os.path.realpath('../synthetic_data/Ta181')
+
+#'/Users/nwx/Documents/GitHub/nuc_syndat/synthetic_data/Ta181'
 
 #"/Users/noahwalton/Documents/GitHub/nuc_syndat/synthetic_data/Ta181"
 # #os.path.realpath('./synthetic_data/Ta181')
@@ -104,10 +106,14 @@ sam = syndat.sammy_interface.readlst(os.path.join(sammy_directory,'SAMMY.LST'))
 
 T_theo = np.flipud(sam.theo_trans)
 sdat = pd.DataFrame()
-sdat['theo_trans'] = T_theo
+sdat['theo_trans'] = sam.theo_trans #T_theo
+sdat['E'] = sam.E
+sdat['tof'] = syndat.exp_effects.e_to_t(sdat.E, tof_dist, True)*1e6+t0
+sdat.sort_values('tof', axis=0, ascending=True, inplace=True)
+sdat.reset_index(drop=True, inplace=True)
 
 plt.figure()
-plt.plot(tof,T_theo)
+plt.plot(sdat.tof,sdat.theo_trans)
 plt.xscale('log'); plt.yscale('log')
 
 # could test that energy structure lines up the same
