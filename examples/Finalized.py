@@ -20,6 +20,7 @@ from matplotlib.pyplot import *
 
 
 sammy_directory =  '/Users/nwx/Documents/GitHub/nuc_syndat/synthetic_data/Ta181'
+
 #"/Users/noahwalton/Documents/GitHub/nuc_syndat/synthetic_data/Ta181"
 # #os.path.realpath('./synthetic_data/Ta181')
 
