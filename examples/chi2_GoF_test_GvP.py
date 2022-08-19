@@ -42,13 +42,13 @@ def test_dist(test_dist, m, s, disp_bool):
             index_bin = [index]
             
     lumped_exp_freq = []; lumped_obs_freq = []
-    lumped_count_bins = []; bin_edges = [min(possible_counts)]
+    lumped_count_bins = []; # bin_edges = [min(possible_counts)]
     mid_bin = []
     for index in index_bins:
         lumped_exp_freq.append(sum(expected_frequencies[index]))
         lumped_obs_freq.append(sum(obs_freq[index]))
         lumped_count_bins.append(possible_counts[index])
-        bin_edges.append(max(possible_counts[index])+1)
+        # bin_edges.append(max(possible_counts[index])+1)
         mid_bin.append(np.median(possible_counts[index]))
      
         
@@ -66,6 +66,7 @@ def test_dist(test_dist, m, s, disp_bool):
     chi2_stat = np.sum((lumped_obs_freq-lumped_exp_freq)**2/lumped_exp_freq)
     crit_val = stats.chi2.ppf(1-0.05, df=len(lumped_exp_freq)-1)
     
+    reject = np.NaN
     if chi2_stat < crit_val:
         reject = 0
     elif chi2_stat > crit_val:
@@ -102,18 +103,49 @@ def test_rounded_gaus(mean_num_counts, sample_size, disp_bool):
 
 
 
+
+
+rep = 1
+
+
 mean_num_counts=1
-sample_size = int(1e4)
+sample_size = [int(1e2), int(1e3), int(1e4), int(1e5), int(1e6)]
+#sample_size = int(1e5)
+mean_counts = [10, 1e2, 1e3, 1e4, 1e5]
 
-mean_counts = [10, 1e2, 1e3, 1e4]
+all_gaus = []
+all_pois = []
 
-rejects = []
-for each in mean_counts:
-    rejects.append(test_rounded_gaus(each, sample_size, True))
+for i in range(rep):
+    
+    data_gaus = np.empty([len(sample_size),len(mean_counts)]); data_gaus[:] = np.NaN
+    data_pois = np.empty([len(sample_size),len(mean_counts)]); data_pois[:] = np.NaN
+    
+    for iss, ss in enumerate(sample_size):
+        for imc, mc in enumerate(mean_counts):
+            reject_gaus, reject_pois = test_rounded_gaus(mc, ss, False)
+            data_gaus[iss,imc] = reject_gaus
+            data_pois[iss,imc] = reject_pois
+
+    all_gaus.append(data_gaus)
+    all_pois.append(data_pois)
+    #np.savetxt(f"s{i}_gaus.csv", data_gaus, delimiter=",")
+    #np.savetxt(f"s{i}_pois.csv", data_pois, delimiter=",")
 
 
+#%%
 
+#gaus = []; pois = []
+for i in range(int(1e8)):
+    gaus.append(round(sample_gaussian(1e3)))
+    #gaus.append(sample_gaussian(m))
+    pois.append(sample_poisson(1e3))
+    
+#%%
 
-
-
-
+plt.hist(gaus, density=True, ec='k',color='cornflowerblue', bins=75,zorder=2, label=r'$N(m,\sqrt{m})$')
+plt.hist(pois, density=True, ec='k', color='r', alpha=0.35, bins=75,zorder=2, label='P(m)')
+plt.xlabel('Expected Counts'); plt.ylabel('Normalized Frequency')
+plt.title('Comparison of Rounded Guassian and Poisson')
+plt.legend()
+plt.show(); plt.close()
