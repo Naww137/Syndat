@@ -118,20 +118,22 @@ def cts_to_ctr(cts, d_cts, bw, trig):
 
     
 
-def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0, alpha):
+def generate_raw_count_data(sample_df, open_df, trig, k,K, Bi, b0,B0, alpha):
     """
     Generates raw count data for sample-in given a theoretical tranmission. 
     
     This function performs the inverse of the reduction process, calculating raw count data
-    from a theoretical transmission. This process requires the assumption of known,
-    true underlying reduction parameters and open count data.
+    from a theoretical transmission. This process requires the assumption of know,
+    true underlying reduction parameters.
 
     Parameters
     ----------
     sample_df : pandas.DataFrame
         Sample in dataframe with a column for theoretical tranmission ['theo_trans'] and energy ['E'].
     open_df : pandas.DataFrame
-        Open dataframe, columns ['E'], ['bw']
+        Open dataframe, columns ['E'], ['bw'
+    bw : float
+        Width in time a given channel is open, bin width.
     trig : int
         Number of times the LINAC is fired, corresponding to the number of times each channel is openned for counts.
     k : float
@@ -149,10 +151,10 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0,
     
     Returns
     -------
-    sample_df : pandas.DataFrame
-        Dataframe containing data for sample in.
-    open_df : pandas.DataFrame
-        Dataframe containing data for sample out.
+    nc : array-like
+        Noisy raw count data for sample in - noise sampled from Poisson wrt true underlying counts.
+    dnc : array-like
+        Uncertainty (standard error) associated with nc from Poisson.
     """
     #calculate open count rates
     Cr, dCr = cts_to_ctr(open_df.c, open_df.dc, open_df.bw, trig) # cts_o/(bw*trig)
@@ -164,15 +166,11 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0,
     
     # calculate sample in counts, noise, and uncertainty
     c = cr*open_df.bw*trig 
-    # c = np.where(c<0, float(10), c) uneccessary, no negatives
-    dc = np.sqrt(c)
-    if add_noise:
-        c = gaus_noise(c,dc) # will create some negative counts, force to zero
-        c = np.where(c<0, float(10), c) # replace negative counts with 0
-        dc = np.sqrt(c)
-        
-    sample_df['c'] = c
-    sample_df['dc'] = dc
+    sample_df['c'] = np.where(c<0, 0, c)
+    sample_df['dc'] = np.sqrt(sample_df.c)
+    nc = gaus_noise(sample_df.c,sample_df.dc) # will create some negative counts, force to zero
+    sample_df['nc'] = np.where(nc<0, 0, nc) # replace negative counts with 0
+    sample_df['dnc'] = np.sqrt(nc)
 
     return sample_df, open_df
 
@@ -228,12 +226,10 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
     Output covaraiance matrix for transmission.
     """
     
-    # cast all into numpy arrays
     c = np.array(c); dc = np.array(dc)
     C = np.array(C); dC = np.array(dC)
     tof = np.array(tof)
     Bi = np.array(Bi)
-    sys_unc = np.array(sys_unc)
 
     # derivatives
     D = alpha[2]*C - alpha[3]*K*Bi - B0

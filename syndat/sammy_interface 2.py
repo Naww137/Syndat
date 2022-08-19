@@ -23,11 +23,7 @@ def readlst(filepath):
 # =============================================================================
 # 
 # =============================================================================
-def samtools_fmtpar(a, filename, \
-                    template = os.path.realpath("../templates/sammy_template_RM_only.par") 
-                    ):
-    
-    print("WARNING: check parameter file created - formatting in sammy_interface.samtools_fmtpar could be more robust")
+def samtools_fmtpar(a, template, filename):
     
     with open(template, 'r') as f:
         template_lines = f.readlines()
@@ -39,7 +35,7 @@ def samtools_fmtpar(a, filename, \
             if line.startswith('%%%ResParms%%%'):
                 for row in a:
                     # for some reason, the first format string has had problems with the width definition,
-                    #if using a different sized energy range (digits before decimal) this may become an issue
+                    # if using a different sized energy range (digits before decimal) this may become an issue
                     f.write(f'{row[0]:0<11.4f} {row[1]:0<10f} {row[2]:0<10f} {row[3]:0<10f} {row[4]:0<10f} ')
                     f.write(f'{row[5]:1g} {row[6]:1g} {row[7]:1g} {row[8]:1g} {row[9]:1g} {row[10]:1g}\n')
 # =============================================================================
@@ -71,26 +67,27 @@ def write_estruct_file(Energies, filename):
 # 
 # =============================================================================
 def write_expdat_file(transmission_data, filename):
-    print("WARNING: if 'twenty' is not specified in sammy.inp, the data file format will change.\nSee 'sammy_interface.write_estruct_file'")
     iterable = transmission_data.sort_values('E', axis=0, ascending=True).to_numpy(copy=True)
     cols = transmission_data.columns
     if 'E' not in cols:
         raise ValueError("transmission data passed to 'write_expdat_file' does not have the column 'E'")
-    if 'expT' not in cols:
+    if 'exp' not in cols:
         raise ValueError("transmission data passed to 'write_expdat_file' does not have the column 'exp'")
     if 'dT' not in cols:
         raise ValueError("transmission data passed to 'write_expdat_file' does not have the column 'dT'")
-    iE = cols.get_loc('E'); iexp = cols.get_loc('expT'); idT = cols.get_loc('dT')
+    iE = cols.get_loc('E'); iexp = cols.get_loc('exp'); idT = cols.get_loc('dT')
     with open(filename,'w') as f:
         for each in iterable:
-            f.write(f'{each[iE]:0<19f} {each[iexp]:0<19f} {each[idT]:0<19f}\n')
+            f.write(f'{each[iE]:0<19f} {each[iexp]:<19} {each[idT]:0<7}\n')
         f.close()
 
 
 # =============================================================================
 #         
 # =============================================================================
-def create_samtools_array_from_J(Jn_ladders, Jp_ladders):
+def create_sammypar(Jn_ladders, Jp_ladders, \
+                    filename='sammy.par', \
+                    par_template=os.path.join(Path(os.path.dirname(__file__)).parents[0],'templates/sammy_template.par') ):
     
     J = Jn_ladders + Jp_ladders
     samtools_array = np.empty((0,11))
@@ -106,26 +103,9 @@ def create_samtools_array_from_J(Jn_ladders, Jp_ladders):
         
         samtools_array  = np.concatenate([samtools_array, j_inp_array], axis=0)
     
+    samtools_fmtpar(samtools_array, par_template, filename)
     
-    return samtools_array
-
-
-def create_samtools_array_from_DF(df, vary_parm):
-    
-    par_array = np.array(df)
-    zero_neutron_widths = 5-(len(par_array[0])-1)
-    zero_neutron_array = np.zeros([len(par_array),zero_neutron_widths])
-    par_array = np.insert(par_array, [5-zero_neutron_widths], zero_neutron_array, axis=1)
-    
-    vary_parm = True
-    if vary_parm:
-        binary_array = np.hstack((np.ones([len(par_array),5-zero_neutron_widths]), np.zeros([len(par_array),zero_neutron_widths])))
-    else:
-        binary_array = np.zeros([len(par_array),5])
-        
-    samtools_array = np.insert(par_array, [5], binary_array, axis=1)
-    
-    return samtools_array
+    return
 
 
 # =============================================================================
@@ -166,7 +146,7 @@ def read_SAMNDF_PAR(filename):
                     gwidth.append(float(splitline[1]))
                     nwidth.append(float(splitline[2]))
                     spin_group.append(float(splitline[-1]))
-            if line.startswith('RESONANCE'):
+            if line.startswith('RESONANCE PARAMETERS'):
                 in_res_dat = True
                 
                 
@@ -184,7 +164,7 @@ def read_SAMNDF_PAR(filename):
         avg_df['Gg'][ij+1]=jdf['Gg'].mean()
         avg_df['Gn'][ij+1]=jdf['Gn'].mean()
 
-    return avg_df, df
+    return avg_df
     
      
 

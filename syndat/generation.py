@@ -14,7 +14,7 @@ import syndat
 
 class generation:
     
-    def __init__(self, default_exp, opendat_filename, sammydat_filename):
+    def __init__(self, perform_methods, default_exp, add_noise, opendat_filename, sammydat_filename):
         
         if default_exp:
             pardict = {
@@ -37,17 +37,23 @@ class generation:
             print("Please define a reduction parameter dictionary specific to your experiment")
             pardict = {}
             
-        self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
-        self.get_odat(opendat_filename)
-        self.get_bkg()
-        self.get_sdat(sammydat_filename)
-        self.generate_raw_data()
-        
+        if perform_methods:
+            # workflow
+            self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
+            # import open data from jesse's experiment
+            self.get_odat(opendat_filename)
+            # vectorize the background function from jesse's experiment
+            self.get_bkg()
+            # get sample in data 
+            self.get_sdat(sammydat_filename)
+            self.generate_raw_data(add_noise)
+            
         
     def get_odat(self,filename):
         
         odat = pd.read_csv(filename, sep=',') 
         odat = odat[odat.tof >= self.redpar.val.t0]
+        odat.sort_values('tof', axis=0, ascending=True, inplace=True)
         odat.reset_index(drop=True, inplace=True)
         odat['E'] = syndat.exp_effects.t_to_e((odat.tof+self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
         odat['bw'] = odat.bin_width*1e-6 
@@ -74,12 +80,16 @@ class generation:
     
     def sample_turp(self):
         print("Update this function")
+        
         # sample/wiggle each true underlying value based on the associated uncertainty 
+        
+        # if wiggling these values, I will need to re calculate the covariance on a/b background functions
         # if statement to possibly sample open count data based on dcounts
         # if statement to smooth open count data
         
-    def generate_raw_data(self):
-        self.sdat, self.odat = syndat.exp_effects.generate_raw_count_data(self.sdat, self.odat, 
+        
+    def generate_raw_data(self, add_noise):
+        self.sdat, self.odat = syndat.exp_effects.generate_raw_count_data(self.sdat, self.odat, add_noise,
                                                                           self.redpar.val.trig, self.redpar.val.ks,self.redpar.val.ko, 
                                                                           self.Bi, self.redpar.val.b0s, self.redpar.val.b0o, 
                                                                           self.redpar.val.m)
