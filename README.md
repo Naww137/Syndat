@@ -75,5 +75,10 @@ HTML files, with the style and other settings in conf.py, can be generated with 
 The basis for the python package structure used in this project can be found [here](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
 
 The basis for the sphinx documentation used in this project can be found [here](https://betterprogramming.pub/auto-documenting-a-python-project-using-sphinx-8878f9ddc6e9)
+
+
   
+## Examples
+
+For examples on how to use this package, see the examples folder from the main directory. Within that folder, the "exec" ipython notebook steps through the generation and visualization of a sythetic experimental dataset. 
 
