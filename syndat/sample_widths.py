@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import scipy.stats as stats
-from syndat import PS_functions
+from syndat import scattering_theory
 
 
 def sample_chisquare(N_samples, DOF):
@@ -130,10 +130,11 @@ def sample_RRR_widths(level_vector, avg_reduced_width_square, DOF, orbital_angul
         Array partial widths, derived from red. widths using penetrability factor.
     """
     reduced_widths_square = avg_reduced_width_square*sample_chisquare(len(level_vector), DOF)
-    S,P = PS_functions.PS_explicit(np.array(level_vector), orbital_angular_momentum)
-    partial_widths = 2*P*reduced_widths_square 
     
-    return reduced_widths_square, partial_widths
+    # S,P = scattering_theory.PS_explicit(np.array(level_vector), orbital_angular_momentum)
+    # partial_widths = 2*P*reduced_widths_square 
+    
+    return reduced_widths_square # partial_widths
 
 
 def compare_pdf_to_samples(reduced_widths_square_vector, avg_reduced_width_square, dof):
