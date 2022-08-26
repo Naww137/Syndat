@@ -6,8 +6,13 @@ Created on Thu Jun 16 12:18:04 2022
 @author: nwx
 """
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
+from syndat import sample_widths
+from syndat import sample_levels
+from syndat import scattering_theory
+import pandas as pd
 
 
 class particle_pair:
@@ -53,7 +58,7 @@ class particle_pair:
         self.m_eV = 939.565420e6 # eV/c^2
 
 
-    def quant_vec_sum(a,b):
+    def quant_vec_sum(self, a,b):
         """
         Calculates a quantum vector sum.
 
@@ -77,7 +82,7 @@ class particle_pair:
         return vec
 
 
-    def map_quantum_numbers(particle_pair, print_out):
+    def map_quantum_numbers(self, print_out):
         """
         Maps the possible quantum numbers for pair.
 
@@ -113,14 +118,14 @@ class particle_pair:
         (3.0, 1, [1.0])])
         """
         
-        # pull out values from particle pair object
-        I = particle_pair.I
-        i = particle_pair.i
-        l_wave_max = particle_pair.l_max
+        # define object atributes
+        I = self.I
+        i = self.i
+        l_wave_max = self.l_max
 
         # now perform calculations
         Jn = []; Jp = []
-        S = quant_vec_sum(I,i)
+        S = self.quant_vec_sum(I,i)
         L = range(l_wave_max+1)
 
         i_parity = (-1 if i<0 else 1)
@@ -136,7 +141,7 @@ class particle_pair:
             J_parity = S_parity*l_parity
             
             for i_s, s in enumerate(S):
-                js = quant_vec_sum(s,l)
+                js = self.quant_vec_sum(s,l)
                 this_l[f's={s}'] = js
                 for j in js:
                     if J_parity == 1:
@@ -195,18 +200,17 @@ class particle_pair:
                 print(each)
 
         # define new attributes for particle_pair object
-        particle_pair.Jn = Jn
-        particle_pair.Jp = Jp
+        self.Jn = Jn
+        self.Jp = Jp
 
-        return particle_pair, Jn, Jp
-
-
+        return
 
 
-    def sample_all_Jpi(M, m, I, i, l_wave_max,  
+
+
+    def sample_all_Jpi(self,  
                         Erange, 
-                        Davg, Ggavg, Gnavg, 
-                        print_out = True,
+                        Davg, Ggavg, Gnavg,
                         save_csv = False, 
                         sammy_run_folder = os.getcwd()):
         """
@@ -218,12 +222,8 @@ class particle_pair:
 
         Parameters
         ----------
-        I : float or int
-            Intrinsic spin of the target particle.
-        i : float or int
-            Intrinsic spin of the incident paritcle.
-        l_wave_max : int
-            Maximum considered incident waveform (l-wave).
+        self : syndat object
+            Particle pair object.
         Erange : array-like
             Array of resolve resonance range energy, only requires min/max.
         Davg : array-like
@@ -255,24 +255,30 @@ class particle_pair:
             quantum spin group with positive parity (all J+).
         """
         
-        [Jn, Jp] = map_quantum_numbers(I,i,l_wave_max, print_out)
-        
+        # ensure enough average parameter values were given
+        Jn_avg_length = [len(Davg[0]), len(Ggavg[0]), len(Gnavg[0])]
+        Jp_avg_length = [len(Davg[1]), len(Ggavg[1]), len(Gnavg[1])]
+        if any(each != len(self.Jn) for each in Jn_avg_length):
+            raise ValueError("Not enough avarage parameters given for negative parity spin groups")
+        if any(each != len(self.Jp) for each in Jp_avg_length):
+            raise ValueError("Not enough avarage parameters given for positive parity spin groups")
+            
     # =============================================================================
     #     negative parity Js
     # =============================================================================
         Jn_ = []
         if len(Davg[0]) > 0:
-            for ij, j in enumerate(Jn):
+            for ij, j in enumerate(self.Jn):
                 
                 [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[0][ij])
                 
                 red_gwidth_2 = sample_widths.sample_RRR_widths(levels, Ggavg[0][ij], 100, 0)  # why is the l-wave hard-coded to zero here??
-                gwidth = scattering_theory.reduced_width_square_2_partial_width(M,m, levels, red_gwidth_2, 0)
+                gwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_gwidth_2, 0) # (M, m, levels, red_gwidth_2, 0)
                 
                 Gnx=[]; gnx=[]
                 for ichannel, lwave in enumerate(j[2]):      
                     red_nwidth_2 = sample_widths.sample_RRR_widths(levels, Gnavg[0][ij], 1, lwave)
-                    nwidth = scattering_theory.reduced_width_square_2_partial_width(particle_pair, levels, red_nwidth_2, lwave)
+                    nwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_gwidth_2, lwave)
                     Gnx.append(nwidth); gnx.append(red_nwidth_2)
                 Gn = pd.DataFrame(Gnx)
                 
@@ -286,29 +292,23 @@ class particle_pair:
                     E_Gg_Gnx_vert.to_csv(os.path.join(sammy_run_folder, f'Jn_{j[0]}.csv'))
         else:
             print("No average level spacing given for negative parity spin groups")
-            
-    # =============================================================================
-    #         if print_out:
-    #             print(); print(j)
-    #             print(parm_dfv); print()
-    # =============================================================================
                 
     # =============================================================================
     #       positive parity Js
     # =============================================================================
         Jp_ = []
         if len(Davg[1]) > 0:
-            for ij, j in enumerate(Jp):
+            for ij, j in enumerate(self.Jp):
                 
                 [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[1][ij])
                 
                 red_gwidth_2 = sample_widths.sample_RRR_widths(levels, Ggavg[1][ij], 100, 0)
-                gwidth = scattering_theory.reduced_width_square_2_partial_width(particle_pair,levels, red_gwidth_2, 0)
+                gwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_gwidth_2, 0)
                 
                 Gnx = []; gnx = []
                 for ichannel, lwave in enumerate(j[2]):
                     red_nwidth_2 = sample_widths.sample_RRR_widths(levels, Gnavg[1][ij], 1, lwave)
-                    nwidth = scattering_theory.reduced_width_square_2_partial_width(particle_pair,levels, red_nwidth_2, lwave)
+                    nwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_nwidth_2, lwave)
                     Gnx.append(nwidth); gnx.append(red_nwidth_2)
                 Gn = pd.DataFrame(Gnx)
                 
@@ -323,23 +323,12 @@ class particle_pair:
         else:
             print("No average level spacing given for positive parity spin groups")
                 
-            
-    # =============================================================================
-    #         if print_out:
-    #             print(); print(j)
-    #             print(parm_dfv); print()
-    # =============================================================================
-                
-    # =============================================================================
-    #    save both
-    # =============================================================================
-    # =============================================================================
-    #     if save_csv:
-    #         Jn_df.to_csv(os.path.join(sammy_run_folder,'Jn_all.csv'))
-    #         Jp_df.to_csv(os.path.join(sammy_run_folder,'Jp_all.csv'))
-    # =============================================================================
-            
-        return Jn_, Jp_
+        
+        # =============================================================================
+        #       redefine object attributes
+        # ============================================================================= 
+        self.Jn_resonances = Jn_
+        self.Jp_resonances = Jp_
 
     
 

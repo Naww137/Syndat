@@ -6,13 +6,33 @@ import os
 import scipy.stats as stats
 
 
-def g(J):
+def g(J, I, i):
+    """
+    Calculates the spin statistical factor for a given $J_{\pi,\alpha}$.
+
+    The spin statistical factor (g) is a weigting factor describing the probability of the different total angular momenta, give by:
+    </br> $ g_{J\alpha} = \frac{2J+1}{(2i+1)(2I+1)} $ </br>
+
+    Parameters
+    ----------
+    J : Float or int
+        Total angular momentum of the channel.
+    I : float or int
+        Spin and parity of the target particle.
+    i : float or int
+        Spin and parity of the incident particle.
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
     return (2*J+1/((2*i+1)*(2*I+1)))
 
 
 def k_wavenumber(E, M, m):
     """
-    Calculate the wavenumber of the compound state nucleus at a given incident energy.
+    Calculates the angular wavenumber of the compound state nucleus at a given incident energy.
 
     This function calculates the wavenumber of the compound state nucleus
     created by an incident neutron and a Cu-63 atom. Some nucelar parameters 
@@ -164,11 +184,45 @@ def PS_explicit(E, ac, M, m, orbital_angular_momentum):
     return S, P
 
 
-def reduced_width_square_2_partial_width(level_vector, ac, M, m, reduced_widths_square, orbital_angular_momentum):
-    S,P = PS_explicit(np.array(level_vector), ac, M, m, orbital_angular_momentum)
+def reduced_width_square_2_partial_width(E, ac, M, m, reduced_widths_square, orbital_angular_momentum):
+    S,P = PS_explicit(np.array(E), ac, M, m, orbital_angular_momentum)
     partial_widths = 2*P*reduced_widths_square 
     return partial_widths
 
 
-# def SLBW_capture
+def SLBW_capture(g, k, E, resonance_ladder):
+    """
+    Calculates a multi-level capture cross section using SLBW formalism.
+
+    _extended_summary_
+
+    Parameters
+    ----------
+    g : float
+        Spin statistical factor $g_{J,\alpha}$.
+    k : float or array-like
+        Angular wavenumber or array of angular wavenumber values corresponding to the energy vector.
+    E : float or array-like
+        KE of incident particle or array of KE's.
+    resonance_ladder : _type_
+        _description_
+
+    Returns
+    -------
+    xs
+        SLBW capture cross section.
+    """
+
+    if len(k) != len(E):
+        raise ValueError("Vector of angular wavenumbers, k(E), does not match the length of vector E")
+
+    xs = 0
+    constant = (np.pi*g/(k**2))
+    for index, row in resonance_ladder.iterrows():
+        Gn = sum([row[ign] for ign in range(len(row)-2)]) * 1e-3
+        Gg = row.Gg * 1e-3
+        E_lambda = row.E
+        xs += (Gg*Gn) / ( (E-E_lambda)**2 + ((Gg+Gn)/2)**2 )
+    xs = constant*xs
+    return xs
     
