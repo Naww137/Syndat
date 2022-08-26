@@ -87,6 +87,31 @@ def write_expdat_file(transmission_data, filename):
         f.close()
 
 
+def write_samdat(df,filename):
+    """
+    Writes sammy.dat file.
+    This function takes a DataFrame with columns corresponding to the columns in the sammy.dat file:
+    1) energy points
+    2) experimental data points
+    3) uncertainty on the experimental data point
+    The uncertainty on the experimental data point must be absolute for this formatting as it corresponds to the \
+    sammy format with "use twenty significant digits" or "twenty" in the input file. If this flag is not in the \
+    input file, the uncertainty should be absolute and the formatting (space between variables) changes.
+    Parameters
+    ----------
+    df : DataFrame
+        DataFrame with first thee columns corresponding to sammy.dat format.
+    filename : string
+        Full path and filename where the sammy.dat file will be written.
+    """
+    a = np.array(df)
+    with open(filename,'w') as f:
+        for row in a:
+            # print(row[0])
+            f.write(f'{row[0]:0<19f} {row[1]:0<19f} {row[2]:0<7f}\n')
+        f.close()
+
+
 # =============================================================================
 #         
 # =============================================================================
