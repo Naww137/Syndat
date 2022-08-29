@@ -14,7 +14,25 @@ import syndat
 
 class generation:
     
-    def __init__(self, perform_methods, default_exp, add_noise, opendat_filename, sammydat_filename):
+    def __init__(self, perform_methods, default_exp, add_noise, opendat_filename, theoretical_data):
+        """
+        Initializes generation object
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        perform_methods : _type_
+            _description_
+        default_exp : _type_
+            _description_
+        add_noise : _type_
+            _description_
+        opendat_filename : _type_
+            _description_
+        theoretical_data : str or pd.DataFrame
+            Either full path to sammy.lst file or pd.DataFrame, both containing the theoretical values to be put through the syndat methodology 
+        """
         
         if default_exp:
             pardict = {
@@ -45,7 +63,7 @@ class generation:
             # vectorize the background function from jesse's experiment
             self.get_bkg()
             # get sample in data 
-            self.get_sdat(sammydat_filename)
+            self.get_sdat(theoretical_data)
             self.generate_raw_data(add_noise)
             
         
@@ -66,12 +84,25 @@ class generation:
             return a*np.exp(ti*-b)
         self.Bi = f(self.odat.tof,self.redpar.val.a,self.redpar.val.b)
 
-    def get_sdat(self, filename):
-        sam = syndat.sammy_interface.readlst(filename)
-        T_theo = np.flipud(sam.theo_trans)
+    def get_sdat(self, theoretical_data):
+
+        # check types
+        if isinstance(theoretical_data, pd.DataFrame):
+            theo_df = theoretical_data
+            if 'E' not in theo_df.columns:
+                raise ValueError("Column name 'E' not in theoretical DataFrame passed to generation class.")
+            if 'theo_trans' not in theo_df.columns:
+                raise ValueError("Column name 'E' not in theoretical DataFrame passed to generation class.")
+        elif isinstance(theoretical_data, str):
+            theo_df = syndat.sammy_interface.readlst(theoretical_data)
+        else:
+            raise ValueError("Theoretical data passed to generation class is neither a DataFrame or path name (string).")
+            
+
+        T_theo = np.flipud(theo_df.theo_trans)
         sdat = pd.DataFrame()
-        sdat['theo_trans'] = sam.theo_trans #
-        sdat['E'] = sam.E
+        sdat['theo_trans'] = theo_df.theo_trans #
+        sdat['E'] = theo_df.E
         sdat['tof'] = syndat.exp_effects.e_to_t(sdat.E, self.redpar.val.tof_dist, True)*1e6+self.redpar.val.t0
         sdat.sort_values('tof', axis=0, ascending=True, inplace=True)
         sdat.reset_index(drop=True, inplace=True)
