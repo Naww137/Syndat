@@ -16,7 +16,22 @@ import pandas as pd
 # 
 # =============================================================================
 def readlst(filepath):
-    df = pd.read_csv(filepath, sep='\s+', names=['E','exp_xs','exp_xs_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
+    """
+    Reads a sammy .lst or .dat file.
+
+    _extended_summary_
+
+    Parameters
+    ----------
+    filepath : str
+        Full path to the .lst or .dat file.
+
+    Returns
+    -------
+    DataFrame
+        DataFrame with headers.
+    """
+    df = pd.read_csv(filepath, sep='\s+', names=['E','exp','exp_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
     return df
 
 
@@ -173,13 +188,19 @@ def create_sammyinp(filename='sammy.inp', \
 # =============================================================================
 # 
 # =============================================================================
-def read_SAMNDF_PAR(filename):
+def read_sammy_par(filename):
 
     energies = []; spin_group = []; nwidth = []; gwidth = []
     with open(filename,'r') as f:   
         readlines = f.readlines()
-        in_res_dat = False
+        in_res_dat = True
         for line in readlines:   
+
+            try:
+                float(line.split()[0]) # if first line starts with a float, parameter file starts directly with resonance data
+            except:
+                in_res_dat = False # if that is not the case, parameter file has some keyword input before line "RESONANCES" then resonance parameters
+
             if line.startswith(' '):
                 in_res_dat = False  
             if in_res_dat:
@@ -193,6 +214,7 @@ def read_SAMNDF_PAR(filename):
                     spin_group.append(float(splitline[-1]))
             if line.startswith('RESONANCE'):
                 in_res_dat = True
+
                 
                 
     Gg = np.array(gwidth); Gn = np.array(nwidth); E = np.array(energies); jspin = np.array(spin_group)
