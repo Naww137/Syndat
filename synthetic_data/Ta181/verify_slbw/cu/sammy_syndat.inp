@@ -1,0 +1,25 @@
+Cu63
+      Cu63 62.929599 1500.0000 4000.0000       -20                     
+key-word particle-pair definitions
+SLBW
+generate plot file a
+twenty
+ev
+normalize as cross sections rather than yeild
+do not solve bayes equation
+ignore input binary covariance file
+broadening is not wanted
+# do not include self-shielding of multiple-scattering corrections
+
+Name=Inc Chan Particle a=neutron Particle b=other
+Pent=1        Shift=0
+Za=0          Zb=0  
+Sa=0.5        Sb=-1.5 
+Ma=1.00866492 Mb=62.929599
+                  
+ 6.7000000 0.008804                       0.00000        
+elastic
+  1      1    0 -1.0 0.9987500
+    1  Inc Chan    0      -1.0
+  2      1    0 -2.0 0.9987500
+    1  Inc Chan    0      -2.0

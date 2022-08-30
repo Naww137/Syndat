@@ -1,0 +1,35 @@
+Ta181
+Ta181     180.948030  1.00000 6.0E7     0    0 0  0 0  0         0
+#
+# _____________________________________
+#     Card Set 3 - end with blank
+# _____________________________________
+#
+# === FROM SAMNDF.INP ===
+print all input parameters
+do not solve bayes equations
+# debug
+use twenty significant digits
+ev
+put quantum numbers into parameter file
+# ==== FORMALISM ====
+# reich-moore formalism is wanted
+SLBW
+# ==== EXPERIMENTAL CORRECTIONS ====
+#
+# broadening is wanted
+broadening is not wanted
+#
+do not include self-shielding of multiple-scattering corrections
+# ==== NON-DEFAULT OPTIONS ====
+generate plot file a
+# ==== SPECIAL OPTIONS ====
+# generate spin group cross sections
+       
+  8.127100  0.120000                       0.00000        
+TRANSMISSION                                                               
+  1      1    0  3.0       1.0  3.5
+    1    1    0    0       3.0
+  2      1    0  4.0       1.0  3.5
+    1    1    0    0       4.0
+    

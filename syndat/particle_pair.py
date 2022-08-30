@@ -46,7 +46,7 @@ class particle_pair:
             print("WARNING: scattering radius seems to be given in fm rather than m")
 
         self.ac = ac # 6.7e-15 # m or 6.7 femtometers
-        self.M = M # 63 amu
+        self.M = M # amu
         self.m = m # 1
         self.I = I
         self.i = i
@@ -273,6 +273,7 @@ class particle_pair:
                 [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[0][ij])
                 
                 red_gwidth_2 = sample_widths.sample_RRR_widths(levels, Ggavg[0][ij], 100, 0)  # why is the l-wave hard-coded to zero here??
+                print('Warning: l-wave is ahrd coded to zero for gamma widths because PT does not hold well for higher order waveforms')
                 gwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_gwidth_2, 0) # (M, m, levels, red_gwidth_2, 0)
                 
                 Gnx=[]; gnx=[]
@@ -303,6 +304,7 @@ class particle_pair:
                 [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[1][ij])
                 
                 red_gwidth_2 = sample_widths.sample_RRR_widths(levels, Ggavg[1][ij], 100, 0)
+                print('Warning: l-wave is ahrd coded to zero for gamma widths because PT does not hold well for higher order waveforms')
                 gwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_gwidth_2, 0)
                 
                 Gnx = []; gnx = []

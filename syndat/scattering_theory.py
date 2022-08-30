@@ -27,7 +27,7 @@ def g(J, I, i):
     _type_
         _description_
     """
-    return (2*J+1/((2*i+1)*(2*I+1)))
+    return (2*J+1)/((2*i+1)*(2*I+1))
 
 
 def k_wavenumber(E, M, m):
@@ -47,22 +47,17 @@ def k_wavenumber(E, M, m):
     -------
     float or numpy.ndarray
         Returns either the scalar k or vector of k at different energies.
-    
-    Examples
-    --------
-    >>> from sample_resparm import PS_functions
-    >>> PS_functions.k_wavenumber(10.4)
-    697379673687.8605
-    >>> PS_functions.k_wavenumber(np.array([1,10,100,1000]))
-    array([2.16248257e+11, 6.83837032e+11, 2.16248257e+12, 6.83837032e+12])
+
     """
 
     # constants
+    Constant = 0.002197 #sqrt(2Mn)/hbar
     hbar = 6.582119569e-16 # eV-s
     c = 2.99792458e8 # m/s
     m_eV = 939.565420e6 # eV/c^2
 
-    k = 1/hbar * M/(m+M) * np.sqrt(2*m_eV*E) * 1/c
+    # k = 1/hbar * M/(m+M) * np.sqrt(2*m_eV*E) * 1/c
+    k = Constant*(M/(M+m))*np.sqrt(E)
     return k
     
 
@@ -125,7 +120,7 @@ def PS_recursive(E, ac, M, m, orbital_angular_momentum):
         return S_array, P_array
 
 
-def PS_explicit(E, ac, M, m, orbital_angular_momentum):
+def P_S_psi_explicit(E, ac, M, m, orbital_angular_momentum):
     """
     Calculates penetrability and shift functions using explicit definitions.
 
@@ -150,9 +145,11 @@ def PS_explicit(E, ac, M, m, orbital_angular_momentum):
     Returns
     -------
     S_array : array-like
-        shift factor(s) at given energy.
+        Shift factor(s) at given energy.
     P_array : array-like
         Penetrability at given energy.
+    psi : array-like
+        Potential scattering phase shift.
 
     See Also
     --------
@@ -164,7 +161,12 @@ def PS_explicit(E, ac, M, m, orbital_angular_momentum):
     >>> PS_functions.PS_explicit(np.array([10.4, 10.5]), 6.7e-15, 2)
     [array([-1.99999272, -1.99999265]), array([2.4744277e-13, 2.5343386e-13])]
     """
+    
+    assert(orbital_angular_momentum == 0, "Phase shift function in syndat.scattering theory needs to be updated for higher-order waveforms")
+
     rho = k_wavenumber(E, M, m)*ac
+    psi = rho
+    
     if orbital_angular_momentum == 0:
         P = rho
         S = np.zeros(len(E))
@@ -181,11 +183,13 @@ def PS_explicit(E, ac, M, m, orbital_angular_momentum):
     if orbital_angular_momentum > 3:
         raise ValueError("PS_explicit cannot handle orbital_angular_momenta > 3, use PS_recursive")
         
-    return S, P
+    return S, P, psi
+
+
 
 
 def reduced_width_square_2_partial_width(E, ac, M, m, reduced_widths_square, orbital_angular_momentum):
-    S,P = PS_explicit(np.array(E), ac, M, m, orbital_angular_momentum)
+    S,P,psi = P_S_psi_explicit(np.array(E), ac, M, m, orbital_angular_momentum)
     partial_widths = 2*P*reduced_widths_square 
     return partial_widths
 
@@ -219,10 +223,11 @@ def SLBW_capture(g, k, E, resonance_ladder):
     xs = 0
     constant = (np.pi*g/(k**2))
     for index, row in resonance_ladder.iterrows():
-        Gn = sum([row[ign] for ign in range(len(row)-2)]) * 1e-3
+        Gn = sum([row[ign] for ign in range(2,len(row))]) * 1e-3
         Gg = row.Gg * 1e-3
         E_lambda = row.E
-        xs += (Gg*Gn) / ( (E-E_lambda)**2 + ((Gg+Gn)/2)**2 )
+        d = (E-E_lambda)**2 + ((Gg+Gn)/2)**2 
+        xs += (Gg*Gn) / ( d )
     xs = constant*xs
     return xs
     

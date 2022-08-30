@@ -6,26 +6,26 @@ Created on Tue Jul 19 13:16:02 2022
 @author: nwx
 """
 
-import matplotlib.pyplot as plt
+from matplotlib.pyplot import *
 import numpy as np
 
 
 
 def plot1(energy,theo,exp,label1,label2):
     
-    plt.plot(energy, theo, label=label1, zorder=2)
-    plt.scatter(energy,exp, label=label2, s=1, c='k', zorder=1)
+    plot(energy, theo, label=label1, zorder=2)
+    scatter(energy,exp, label=label2, s=1, c='k', zorder=1)
     
-    plt.legend()
+    legend()
     #plt.yscale('log'); 
-    plt.xscale('log')
-    plt.show();plt.close()
+    xscale('log')
+    show();close()
     
 
 def plot2(x,theo,exp,exp_unc, title):
     
     fig, (ax1,ax2,ax3) = plt.subplots(3,1, sharex=True, constrained_layout=True, gridspec_kw={'height_ratios': [2, 1, 1]}) # , figsize=(12,5)
-    plt.rcParams['figure.dpi'] = 500
+    rcParams['figure.dpi'] = 500
     
     ax1.plot(x,theo, lw=0.5, color='b', label='$T_{theo}$', zorder=2)
     #ax1.scatter(energy,exp, s=0.1, c='r', label='$T_{exp}$')
@@ -46,59 +46,72 @@ def plot2(x,theo,exp,exp_unc, title):
     ax3.set_ylabel('$\delta$T') #('$\sigma$')
     ax3.set_xlabel('ToF (s)');
     
-    plt.suptitle(title)
-    plt.tight_layout()
-    plt.show(); plt.close()
+    suptitle(title)
+    tight_layout()
+    show(); close()
     
     
 def exp_theo(tof, Tn, dT, T_theo):
-    plt.figure()
-    plt.errorbar(tof,Tn, yerr=dT,color='r',ecolor='k',elinewidth=1,capsize=2, fmt='.', ms=3)
-    #plt.scatter(tof, Tn, label='Experimental', s=1, c='k')
-    plt.plot(tof, T_theo, label='Theoretical', c='g', lw=0.25)
+    figure()
+    errorbar(tof,Tn, yerr=dT,color='r',ecolor='k',elinewidth=1,capsize=2, fmt='.', ms=3)
+    #scatter(tof, Tn, label='Experimental', s=1, c='k')
+    plot(tof, T_theo, label='Theoretical', c='g', lw=0.25)
     
-    plt.legend()
-    plt.ylim([-1,5])
-    #plt.xlim([1e2,1e3])
-    plt.xscale('log')
-    #plt.yscale('log')
+    legend()
+    ylim([-1,5])
+    #xlim([1e2,1e3])
+    xscale('log')
+    #yscale('log')
     
 
-def unc_noise(tof, dT, T_theo, Tn, cr_o, cr_i):
-    #fig, ax = plt.subplots(2,2, gridspec_kw={'height_ratios': [1, 1], 'width_ratios':[2,1]}) # , figsize=(12,5)
-    fig, (ax1, ax2, ax3) = plt.subplots(3, gridspec_kw={'height_ratios': [1, 1, 1]}, sharex=True) # , figsize=(12,5)
-    # plt.rcParams['figure.dpi'] = 500
-    # ax1 = ax[0,0]; ax2=ax[1,0]; ax3=ax[0,1]; ax4=ax[1,1]
-    
-    ax1.scatter(tof, dT/Tn*100, lw=0.5, color='b', s=0.5, zorder=2)
-    #ax1.set_ylim([0,2])
-    #ax1.set_yscale('log')
-    ax1.set_ylabel('$\delta$T'); #('$\sigma$')
-    
-    ax2.plot(tof,cr_o, lw= 0.5, c='orange', label=r'$ctr_{out}$')
-    ax2.plot(tof,cr_i, lw= 0.5, c='cornflowerblue', label=r'$ctr_{in}$')
-    #ax2.set_yscale('log')
-    
-    ax2.set_ylabel(r'$ctr_o$')
-    ax2.legend()
-# =============================================================================
-#     ax25 = plt.twinx(ax2)
-#     ax25.plot(tof,T_theo, lw= 0.5, c='g', label=r'$T_{theo}$')
-#     ax25.set_ylabel(r'$T_{theo}$')
-#     ax25.set_yscale('log')
-#     ax25.set_ylim([1e-3,1e1])
-# =============================================================================
-    
-    rel_se = (Tn-T_theo)/T_theo
-    ax3.scatter(tof, rel_se, s=0.5, c='b')
-    #ax3.set_ylim()
-    ax3.set_ylabel('Noise')
-    ax3.set_yscale('log')
-    
-    #plt.xlim([1e2,2e3])
+def unc_noise_theo(tof, theo, exp, unc):
 
-    plt.xscale('log')
-    plt.xlabel('ToF (s)');
-    plt.suptitle('Uncertainty and Noise on Transmission')
-    plt.tight_layout()
+    fig, (ax1, ax2, ax3) = subplots(3,2, gridspec_kw={'height_ratios': [1, 1, 1]}, sharex=True, figsize=(15,6)) # , figsize=(12,5)
+
+    ax1[0].scatter(tof, unc/exp*100, lw=0.5, color='b', s=0.5, zorder=2)
+    # ax1[0].set_ylim([0,100]);
+    ax1[0].set_xlim([1e2,2e3])
+    ax1[0].set_yscale('log')
+    ax1[0].set_ylabel('$\delta$T/T'); #('$\sigma$')
+
+    ax2[0].plot(tof, theo, lw= 0.5, c='orange')
+    #ax2[0].set_yscale('log')
+    ax2[0].set_xlim([1e2,2e3])
+    ax2[0].set_ylabel('Trans')
+    ax2[0].legend()
+
+    rel_se = (exp-theo)/theo
+    ax3[0].scatter(tof, rel_se, s=0.5, c='b')
+    ax3[0].set_ylim([0.001,100])
+    ax3[0].set_ylabel('Rel Noise')
+    ax3[0].set_yscale('log')
+
+
+    # cross section
+    title('Cross Section')
+    ax1[1].scatter(tof, unc/exp*100, lw=0.5, color='b', s=0.5, zorder=2)
+    # ax1[1].set_ylim([3,100]);
+    ax1[1].set_xlim([1e2,2e3])
+    ax1[1].set_yscale('log')
+    ax1[1].set_ylabel('$\delta\sigma/\sigma$'); #('$\sigma$')
+
+    ax2[1].plot(tof, theo, lw= 0.5, c='orange')
+    ax2[1].set_yscale('log')
+    ax2[1].set_xlim([1e2,2e3])
+    ax2[1].set_ylabel(r'$\sigma_{t}$')
+    ax2[1].legend()
+
+    rel_se = (exp.trans.exp_xs-exp.trans.theo_xs)/exp.trans.theo_xs
+    ax3[1].scatter(tof, rel_se, s=0.5, c='b')
+    # ax3[1].set_ylim([0.001,1000])
+    ax3[1].set_ylabel('Rel Noise')
+    ax3[1].set_yscale('log')
+
+
+    xscale('log')
+    xlabel('ToF (s)');
+    suptitle('Uncertainty and Noise on Transmission')
+    tight_layout()
     #plt.show(); plt.close()
+
+    
