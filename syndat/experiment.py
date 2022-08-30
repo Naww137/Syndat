@@ -79,7 +79,7 @@ class experiment:
         odat = odat[odat.tof >= self.redpar.val.t0]
         odat.sort_values('tof', axis=0, ascending=True, inplace=True)
         odat.reset_index(drop=True, inplace=True)
-        odat['E'] = syndat.exp_effects.t_to_e((odat.tof+self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
+        odat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
         odat['bw'] = odat.bin_width*1e-6 
         odat.rename(columns={"counts": "c", "dcounts": "dc"}, inplace=True)
         self.odat = odat
