@@ -51,11 +51,13 @@ def k_wavenumber(E, M, m):
     """
 
     # constants
+    Constant = 0.002197 #sqrt(2Mn)/hbar
     hbar = 6.582119569e-16 # eV-s
     c = 2.99792458e8 # m/s
     m_eV = 939.565420e6 # eV/c^2
 
-    k = 1/hbar * M/(m+M) * np.sqrt(2*m_eV*E) * 1/c
+    # k = 1/hbar * M/(m+M) * np.sqrt(2*m_eV*E) * 1/c
+    k = Constant*(M/(M+m))*np.sqrt(E)
     return k
     
 
@@ -221,7 +223,7 @@ def SLBW_capture(g, k, E, resonance_ladder):
     xs = 0
     constant = (np.pi*g/(k**2))
     for index, row in resonance_ladder.iterrows():
-        Gn = sum([row[ign] for ign in range(len(row)-2)]) * 1e-3
+        Gn = sum([row[ign] for ign in range(2,len(row))]) * 1e-3
         Gg = row.Gg * 1e-3
         E_lambda = row.E
         d = (E-E_lambda)**2 + ((Gg+Gn)/2)**2 

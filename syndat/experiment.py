@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -12,7 +14,7 @@ import syndat
     
 
 
-class generation:
+class experiment:
     
     def __init__(self, perform_methods, default_exp, add_noise, opendat_filename, theoretical_data):
         """
@@ -65,6 +67,8 @@ class generation:
             # get sample in data 
             self.get_sdat(theoretical_data)
             self.generate_raw_data(add_noise)
+            # reduce the experimental data
+            self.reduce_raw_data()
             
         
     def get_odat(self,filename):
@@ -124,6 +128,31 @@ class generation:
                                                                           self.redpar.val.trig, self.redpar.val.ks,self.redpar.val.ko, 
                                                                           self.Bi, self.redpar.val.b0s, self.redpar.val.b0o, 
                                                                           self.redpar.val.m)
+        
+    def reduce_raw_data(self):
+
+        # create transmission object
+        self.trans = pd.DataFrame()
+        self.trans['tof'] = self.sdat.tof
+        self.trans['E'] = self.sdat.E
+        self.trans['theo_trans'] = self.sdat.theo_trans
+
+        # rename noisey counts from generation as counts for reduction
+        sdat = self.sdat.filter(['E','tof','bw','c','dc'])
+        #sdat.rename(columns={"nc": "c", "dnc": "dc"}, inplace=True)
+        self.sdat = sdat
+
+        # get count rates for sample in data
+        self.sdat['cps'], self.sdat['dcps'] = syndat.exp_effects.cts_to_ctr(self.sdat.c, self.sdat.dc, self.odat.bw, self.redpar.val.trig)
+
+        # define systematic uncertainties
+        sys_unc = self.redpar.unc[['a','b','ks','ko','b0s','b0o','m1','m2','m3','m4']].astype(float)
+
+        self.trans['exp_trans'], self.trans['exp_trans_unc'], self.CovT = syndat.exp_effects.reduce_raw_count_data(self.sdat.tof, 
+                                                                self.sdat.c, self.odat.c, self.sdat.dc, self.odat.dc,
+                                                                self.odat.bw, self.redpar.val.trig, self.redpar.val.a,self.redpar.val.b, 
+                                                                self.redpar.val.ks, self.redpar.val.ko, self.Bi, self.redpar.val.b0s,
+                                                                self.redpar.val.b0o, self.redpar.val.m, sys_unc)
         
 
 
