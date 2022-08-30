@@ -46,7 +46,7 @@ class particle_pair:
             print("WARNING: scattering radius seems to be given in fm rather than m")
 
         self.ac = ac # 6.7e-15 # m or 6.7 femtometers
-        self.M = M # 63 amu
+        self.M = M # amu
         self.m = m # 1
         self.I = I
         self.i = i
