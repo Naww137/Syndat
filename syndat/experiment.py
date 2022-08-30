@@ -57,15 +57,17 @@ class experiment:
             print("Please define a reduction parameter dictionary specific to your experiment")
             pardict = {}
             
+        # workflow
+        self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
+
         if perform_methods:
-            # workflow
-            self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
             # import open data from jesse's experiment
             self.get_odat(opendat_filename)
             # vectorize the background function from jesse's experiment
             self.get_bkg()
             # get sample in data 
             self.get_sdat(theoretical_data)
+            # generate raw count data for sample in given theoretical transmission and assumed true reduction parameters/open count data
             self.generate_raw_data(add_noise)
             # reduce the experimental data
             self.reduce_raw_data()
@@ -124,6 +126,10 @@ class experiment:
         
         
     def generate_raw_data(self, add_noise):
+
+        if len(self.odat) != len(self.sdat):
+            raise ValueError("Experiment open data and sample data are not of the same length, check energy grid")
+
         self.sdat, self.odat = syndat.exp_effects.generate_raw_count_data(self.sdat, self.odat, add_noise,
                                                                           self.redpar.val.trig, self.redpar.val.ks,self.redpar.val.ko, 
                                                                           self.Bi, self.redpar.val.b0s, self.redpar.val.b0o, 
