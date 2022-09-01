@@ -31,7 +31,7 @@ def readlst(filepath):
     DataFrame
         DataFrame with headers.
     """
-    df = pd.read_csv(filepath, sep='\s+', names=['E','exp','exp_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
+    df = pd.read_csv(filepath, sep='\s+', names=['E','exp_dat','exp_dat_unc','theo_xs','theo_xs_bayes','exp_trans','exp_trans_unc','theo_trans', 'theo_trans_bayes'])
     return df
 
 
