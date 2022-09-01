@@ -27,7 +27,7 @@ class particle_pair:
         Parameters
         ----------
         ac : float
-            Scattering channel radius in meters.
+            Scattering channel radius in 1e-12 cm.
         M : float or int
             Mass of the target nucleus.
         m : float or int
@@ -42,7 +42,7 @@ class particle_pair:
 
         # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
 
-        if ac > 1e-10:
+        if ac < 1e-7:
             print("WARNING: scattering radius seems to be given in fm rather than m")
 
         self.ac = ac # 6.7e-15 # m or 6.7 femtometers
@@ -51,6 +51,9 @@ class particle_pair:
         self.I = I
         self.i = i
         self.l_max = l_max
+
+        # generalized
+        ac_expected = (1.23*M**(1/3))+0.8 # fermi or femtometers
 
         # constants
         self.hbar = 6.582119569e-16 # eV-s
