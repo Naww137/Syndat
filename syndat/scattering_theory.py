@@ -49,7 +49,6 @@ def k_wavenumber(E, M, m):
         Returns either the scalar k or vector of k at different energies.
 
     """
-
     # constants 
     hbar = 6.582119569e-16 # eV-s
     c = 2.99792458e8 # m/s
@@ -207,8 +206,8 @@ def SLBW_capture(g, k, E, resonance_ladder):
         Angular wavenumber or array of angular wavenumber values corresponding to the energy vector.
     E : float or array-like
         KE of incident particle or array of KE's.
-    resonance_ladder : _type_
-        _description_
+    resonance_ladder : DataFrame
+        DF with columns for 
 
     Returns
     -------
@@ -222,9 +221,9 @@ def SLBW_capture(g, k, E, resonance_ladder):
     xs = 0
     constant = (np.pi*g/(k**2))
     for index, row in resonance_ladder.iterrows():
-        Gn = sum([row[ign] for ign in range(2,len(row))]) * 1e-3
-        Gg = row.Gg * 1e-3
         E_lambda = row.E
+        Gn = sum([row[ign] for ign in range(2,len(row))]) * np.sqrt(E/E_lambda) * 1e-3
+        Gg = row.Gg * 1e-3
         d = (E-E_lambda)**2 + ((Gg+Gn)/2)**2 
         xs += (Gg*Gn) / ( d )
     xs = constant*xs
