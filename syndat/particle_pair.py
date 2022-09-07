@@ -16,18 +16,23 @@ import pandas as pd
 
 
 class particle_pair:
+    """
+    _summary_
+
+    _extended_summary_
+    """
 
     def __init__(self, ac, M, m, I, i, l_max):
         """
         Initialization of particle pair object for a given reaction.
 
-        The pair class houses information about the incident and target particle for a reaction of interest. 
+        The particle_pair class houses information about the incident and target particle for a reaction of interest. 
         The methods for this class include functions to calculate the open channels 
 
         Parameters
         ----------
         ac : float
-            Scattering channel radius in meters.
+            Scattering channel radius in 1e-12 cm.
         M : float or int
             Mass of the target nucleus.
         m : float or int
@@ -42,7 +47,7 @@ class particle_pair:
 
         # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
 
-        if ac > 1e-10:
+        if ac < 1e-7:
             print("WARNING: scattering radius seems to be given in fm rather than m")
 
         self.ac = ac # 6.7e-15 # m or 6.7 femtometers
@@ -51,6 +56,9 @@ class particle_pair:
         self.I = I
         self.i = i
         self.l_max = l_max
+
+        # generalized
+        ac_expected = (1.23*M**(1/3))+0.8 # fermi or femtometers
 
         # constants
         self.hbar = 6.582119569e-16 # eV-s
@@ -202,6 +210,7 @@ class particle_pair:
         # define new attributes for particle_pair object
         self.Jn = Jn
         self.Jp = Jp
+        self.J = Jn + Jp
 
         return
 
@@ -210,7 +219,7 @@ class particle_pair:
 
     def sample_all_Jpi(self,  
                         Erange, 
-                        Davg, Ggavg, Gnavg,
+                        Davg, Ggavg, gnavg,
                         save_csv = False, 
                         sammy_run_folder = os.getcwd()):
         """
@@ -218,7 +227,7 @@ class particle_pair:
 
         This function samples resonance parameters (Energy and widths) for each 
         possible spin group (Jpi) of a given particle pair. The results can be 
-        printed to the console and/or saved to a csv.
+        printed to the console and/or saved to a csv. 
 
         Parameters
         ----------
@@ -229,11 +238,12 @@ class particle_pair:
         Davg : array-like
             Nested list of average level spacing for each spin group number. First 
             list is for negative parity (J-) second is for positive parity (J+).
-        Gavg : array-like
+        Ggavg : array-like
             Nested list of average widths for each spin group number. First 
             list is for negative parity (J-) second is for positive parity (J+).
-        Gavg_swave : float
-            Average width used to sample agregate capture widths. **Unsure of this value.
+        gnavg : float
+            Nested list of average reduced amplitudes (gn_squared) for each spin group number. First 
+            list is for negative parity (J-) second is for positive parity (J+).
         print_out : bool
             User option to print out quantum spin (J) mapping to console.
         save_csv : bool
@@ -249,15 +259,19 @@ class particle_pair:
         -------
         Jn_df : DataFrame
             Pandas DataFrame conatining a resonance parameter ladder for each 
-            quantum spin group with negative parity (all J-).
+            quantum spin group with negative parity (all J-). The column E gives the energy of the level,
+            the column Gn gives the width of the agregate capture channel, and the following columns give
+            reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).
         Jp_df : DataFrame
             Pandas DataFrame conatining a resonance parameter ladder for each 
-            quantum spin group with positive parity (all J+).
+            quantum spin group with positive parity (all J+). The column E gives the energy of the level,
+            the column Gn gives the width of the agregate capture channel, and the following columns give
+            reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).
         """
         
         # ensure enough average parameter values were given
-        Jn_avg_length = [len(Davg[0]), len(Ggavg[0]), len(Gnavg[0])]
-        Jp_avg_length = [len(Davg[1]), len(Ggavg[1]), len(Gnavg[1])]
+        Jn_avg_length = [len(Davg[0]), len(Ggavg[0]), len(gnavg[0])]
+        Jp_avg_length = [len(Davg[1]), len(Ggavg[1]), len(gnavg[1])]
         if any(each != len(self.Jn) for each in Jn_avg_length):
             raise ValueError("Not enough avarage parameters given for negative parity spin groups")
         if any(each != len(self.Jp) for each in Jp_avg_length):
@@ -270,22 +284,25 @@ class particle_pair:
         if len(Davg[0]) > 0:
             for ij, j in enumerate(self.Jn):
                 
+                # sample resonance levels for each spin group with negative parity
                 [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[0][ij])
                 
-                red_gwidth_2 = sample_widths.sample_RRR_widths(levels, Ggavg[0][ij], 100, 0)  # why is the l-wave hard-coded to zero here??
-                print('Warning: l-wave is ahrd coded to zero for gamma widths because PT does not hold well for higher order waveforms')
-                gwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_gwidth_2, 0) # (M, m, levels, red_gwidth_2, 0)
+                # a single radiative capture width is sampled w/large DOF because of many 'partial' radiative transitions to ground state
+                red_gwidth = sample_widths.sample_RRR_widths(levels, Ggavg[0][ij], 100)
+                Gwidth = 2*red_gwidth # Gbar = 2*gbar b/c P~1 for gamma channels
                 
-                Gnx=[]; gnx=[]
+                # reduced width amplitudes are sampled as single channel (PT or chi with 1 DOF) for each contributing channel then summed
+                # while the sum will follow chi square with DOF=#channels, if you just sample the sum over all channels, you ignore
+                # differences in the average widths and differences in the penetrability function assosciated with each width
+                gnx=[]; gn_lwave = []
                 for ichannel, lwave in enumerate(j[2]):      
-                    red_nwidth_2 = sample_widths.sample_RRR_widths(levels, Gnavg[0][ij], 1, lwave)
-                    nwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_gwidth_2, lwave)
-                    Gnx.append(nwidth); gnx.append(red_nwidth_2)
-                Gn = pd.DataFrame(Gnx)
+                    red_nwidth = sample_widths.sample_RRR_widths(levels, gnavg[0][ij], 1)
+                    gnx.append(red_nwidth); gn_lwave.append(lwave)
+                gn = pd.DataFrame(gnx, index=gn_lwave)
                 
-                E_Gg = pd.DataFrame([levels, gwidth], index=['E','Gg'])
-                E_Gg_Gnx = pd.concat([E_Gg,Gn], axis=0)
-                E_Gg_Gnx_vert = E_Gg_Gnx.transpose()
+                E_Gg = pd.DataFrame([levels, Gwidth], index=['E','Gg'])
+                E_Gg_gnx = pd.concat([E_Gg,gn], axis=0)
+                E_Gg_Gnx_vert = E_Gg_gnx.transpose()
                 
                 Jn_.append(E_Gg_Gnx_vert)
                 
@@ -301,22 +318,25 @@ class particle_pair:
         if len(Davg[1]) > 0:
             for ij, j in enumerate(self.Jp):
                 
+                # sample resonance levels for each spin group with negative parity
                 [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[1][ij])
                 
-                red_gwidth_2 = sample_widths.sample_RRR_widths(levels, Ggavg[1][ij], 100, 0)
-                print('Warning: l-wave is ahrd coded to zero for gamma widths because PT does not hold well for higher order waveforms')
-                gwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_gwidth_2, 0)
+                # a single radiative capture width is sampled w/large DOF because of many 'partial' radiative transitions to ground state
+                red_gwidth = sample_widths.sample_RRR_widths(levels, Ggavg[1][ij], 100)
+                Gwidth = 2*red_gwidth # Gbar = 2*gbar b/c P~1 for gamma channels
                 
-                Gnx = []; gnx = []
-                for ichannel, lwave in enumerate(j[2]):
-                    red_nwidth_2 = sample_widths.sample_RRR_widths(levels, Gnavg[1][ij], 1, lwave)
-                    nwidth = scattering_theory.reduced_width_square_2_partial_width(levels, self.ac, self.M, self.m, red_nwidth_2, lwave)
-                    Gnx.append(nwidth); gnx.append(red_nwidth_2)
-                Gn = pd.DataFrame(Gnx)
+                # reduced width amplitudes are sampled as single channel (PT or chi with 1 DOF) for each contributing channel then summed
+                # while the sum will follow chi square with DOF=#channels, if you just sample the sum over all channels, you ignore
+                # differences in the average widths and differences in the penetrability function assosciated with each width
+                gnx=[]; gn_lwave = []
+                for ichannel, lwave in enumerate(j[2]):      
+                    red_nwidth = sample_widths.sample_RRR_widths(levels, gnavg[1][ij], 1)
+                    gnx.append(red_nwidth); gn_lwave.append(lwave)
+                gn = pd.DataFrame(gnx, index=gn_lwave)
                 
-                E_Gg = pd.DataFrame([levels, gwidth], index=['E','Gg'])
-                E_Gg_Gnx = pd.concat([E_Gg,Gn], axis=0)
-                E_Gg_Gnx_vert = E_Gg_Gnx.transpose()
+                E_Gg = pd.DataFrame([levels, Gwidth], index=['E','Gg'])
+                E_Gg_gnx = pd.concat([E_Gg,gn], axis=0)
+                E_Gg_Gnx_vert = E_Gg_gnx.transpose()
                 
                 Jp_.append(E_Gg_Gnx_vert)
                 
