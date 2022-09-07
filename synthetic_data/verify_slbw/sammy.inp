@@ -21,13 +21,14 @@ SLBW
 broadening is not wanted
 #
 do not include self-shielding of multiple-scattering corrections
+print theoretical cross sections
 # ==== NON-DEFAULT OPTIONS ====
 generate plot file a
 # ==== SPECIAL OPTIONS ====
 # generate spin group cross sections
        
   8.127100  0.120000                       0.00000        
-TRANSMISSION                                                               
+elastic                                                               
   1      1    0  3.0       1.0  3.5
     1    1    0    0       3.0
   2      1    0  4.0       1.0  3.5

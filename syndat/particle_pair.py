@@ -16,12 +16,17 @@ import pandas as pd
 
 
 class particle_pair:
+    """
+    _summary_
+
+    _extended_summary_
+    """
 
     def __init__(self, ac, M, m, I, i, l_max):
         """
         Initialization of particle pair object for a given reaction.
 
-        The pair class houses information about the incident and target particle for a reaction of interest. 
+        The particle_pair class houses information about the incident and target particle for a reaction of interest. 
         The methods for this class include functions to calculate the open channels 
 
         Parameters
