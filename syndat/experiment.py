@@ -16,7 +16,8 @@ import syndat
 
 class experiment:
     
-    def __init__(self, perform_methods, default_exp, add_noise, opendat_filename, theoretical_data):
+    def __init__(self, perform_methods, default_exp, add_noise, opendat_filename, theoretical_data,
+                                                                                    E_limits = []):
         """
         Initializes generation object
 
@@ -59,6 +60,7 @@ class experiment:
             
         # workflow
         self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
+        self.E_limits = E_limits
 
         if perform_methods:
             # import open data from jesse's experiment
@@ -82,6 +84,13 @@ class experiment:
         odat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
         odat['bw'] = odat.bin_width*1e-6 
         odat.rename(columns={"counts": "c", "dcounts": "dc"}, inplace=True)
+
+        # filter if given elimits
+        if not self.E_limits:
+            pass
+        else:
+            odat = odat[(odat.E>self.E_limits[0])&(odat.E<self.E_limits[1])].reset_index(drop=True)
+
         self.odat = odat
         
         
@@ -112,6 +121,13 @@ class experiment:
         sdat['tof'] = syndat.exp_effects.e_to_t(sdat.E, self.redpar.val.tof_dist, True)*1e6+self.redpar.val.t0
         sdat.sort_values('tof', axis=0, ascending=True, inplace=True)
         sdat.reset_index(drop=True, inplace=True)
+
+        # filter if given elimits
+        if not self.E_limits:
+            pass
+        else:
+            sdat = sdat[(sdat.E>self.E_limits[0])&(sdat.E<self.E_limits[1])].reset_index(drop=True)
+
         self.sdat = sdat
     
     
@@ -154,7 +170,7 @@ class experiment:
         # define systematic uncertainties
         sys_unc = self.redpar.unc[['a','b','ks','ko','b0s','b0o','m1','m2','m3','m4']].astype(float)
 
-        self.trans['exp_trans'], self.trans['exp_trans_unc'], self.CovT = syndat.exp_effects.reduce_raw_count_data(self.sdat.tof, 
+        self.trans['exp_trans'], self.trans['exp_trans_unc'], self.CovT, self.CovT_stat, self.CovT_sys = syndat.exp_effects.reduce_raw_count_data(self.sdat.tof, 
                                                                 self.sdat.c, self.odat.c, self.sdat.dc, self.odat.dc,
                                                                 self.odat.bw, self.redpar.val.trig, self.redpar.val.a,self.redpar.val.b, 
                                                                 self.redpar.val.ks, self.redpar.val.ko, self.Bi, self.redpar.val.b0s,

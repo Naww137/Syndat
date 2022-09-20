@@ -20,6 +20,15 @@ class particle_pair:
     _summary_
 
     _extended_summary_
+
+    Methods
+    -------
+    quant_vec_sum: 
+        Calculates the quantum vector sum of two angular momenta.
+    map_quantum_numbers:
+        Maps the possible quantum numbers for pair.
+    sample_all_Jpi:
+        Samples a full resonance parameter ladder for each possible spin group.
     """
 
     def __init__(self, ac, M, m, I, i, l_max):
@@ -288,7 +297,8 @@ class particle_pair:
                 [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[0][ij])
                 
                 # a single radiative capture width is sampled w/large DOF because of many 'partial' radiative transitions to ground state
-                red_gwidth = sample_widths.sample_RRR_widths(levels, Ggavg[0][ij], 100)
+                # must divide average by the DOF in order to maintain proper magnitude
+                red_gwidth = sample_widths.sample_RRR_widths(levels, Ggavg[0][ij]/100, 100)
                 Gwidth = 2*red_gwidth # Gbar = 2*gbar b/c P~1 for gamma channels
                 
                 # reduced width amplitudes are sampled as single channel (PT or chi with 1 DOF) for each contributing channel then summed

@@ -52,11 +52,25 @@ def gaus_noise(vector, std_vec):
     noise = np.random.default_rng().normal(loc=0.0, scale=std_vec, size=len(vector)) #np.mean(vector)*level
     return vector + noise
 
+# def pois_noise(vector):
+#     noise = []
+#     for counts in vector:
+#         noise.append(np.random.default_rng().poisson(lam=counts))
+#     return vector + noise
 def pois_noise(vector):
-    noise = []
-    for counts in vector:
-        noise.append(np.random.default_rng().poisson(lam=counts))
-    return vector + noise
+    """
+    Samples poissonian noise around a vector of values.
+    Parameters
+    ----------
+    vector : array-like
+        vector of expected values.
+    Returns
+    -------
+    noisy_vector
+        Noisy vector sampled as poissonian around each expected value
+    """
+    noisy_vector = np.random.default_rng().poisson(lam=vector)
+    return noisy_vector
 
 def generate_open_counts(energy, flux_mag, mean, std):
     """
@@ -167,8 +181,8 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0,
     # c = np.where(c<0, float(10), c) uneccessary, no negatives
     dc = np.sqrt(c)
     if add_noise:
-        c = gaus_noise(c,dc) # will create some negative counts, force to zero
-        c = np.where(c<0, float(10), c) # replace negative counts with 0
+        c = pois_noise(c)
+        assert(c.all() >= 0)
         dc = np.sqrt(c)
         
     sample_df['c'] = c
@@ -339,5 +353,5 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trig, a,b, k,K, Bi, b0,B0, alpha,
     CovT, CovT_stat, CovT_sys = get_covT(tof, cr,Cr, dcr,dCr, a,b, k,K, Bi, b0,B0, alpha, sys_unc)
     dT = np.sqrt(np.diagonal(CovT))
     
-    return Tn, dT, CovT
+    return Tn, dT, CovT, CovT_stat, CovT_sys
 
