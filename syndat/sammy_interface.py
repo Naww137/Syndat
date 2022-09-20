@@ -42,7 +42,7 @@ def samtools_fmtpar(a, filename, \
                     template = os.path.realpath("../templates/sammy_template_RM_only.par") 
                     ):
     
-    print("WARNING: check parameter file created - formatting in sammy_interface.samtools_fmtpar could be more robust")
+    # print("WARNING: check parameter file created - formatting in sammy_interface.samtools_fmtpar could be more robust")
     
     with open(template, 'r') as f:
         template_lines = f.readlines()
@@ -74,7 +74,7 @@ def samtools_fmtpar(a, filename, \
 # 
 # =============================================================================
 def write_estruct_file(Energies, filename):
-    print("WARNING: if 'twenty' is not specified in sammy.inp, the data file format will change.\nSee 'sammy_interface.write_estruct_file'")
+    # print("WARNING: if 'twenty' is not specified in sammy.inp, the data file format will change.\nSee 'sammy_interface.write_estruct_file'")
     with open(filename,'w') as f:
         for ept in Energies:
             f.write(f'{ept:0<19f} {1.0:<19} {1.0:0<7}\n')
@@ -151,13 +151,14 @@ def create_samtools_array_from_J(Jn_ladders, Jp_ladders):
 
 
 def create_samtools_array_from_DF(df, vary_parm):
+
     
     par_array = np.array(df)
     zero_neutron_widths = 5-(len(par_array[0])-1)
     zero_neutron_array = np.zeros([len(par_array),zero_neutron_widths])
     par_array = np.insert(par_array, [5-zero_neutron_widths], zero_neutron_array, axis=1)
     
-    vary_parm = True
+    #vary_parm = True
     if vary_parm:
         binary_array = np.hstack((np.ones([len(par_array),5-zero_neutron_widths]), np.zeros([len(par_array),zero_neutron_widths])))
     else:
@@ -188,7 +189,26 @@ def create_sammyinp(filename='sammy.inp', \
 # =============================================================================
 # 
 # =============================================================================
-def read_sammy_par(filename):
+def read_sammy_par(filename, calculate_average):
+    """
+    Reads sammy.par file and calculates average parameters.
+
+    _extended_summary_
+
+    Parameters
+    ----------
+    filename : _type_
+        _description_
+    calculate_average : bool
+        Whether or not to calculate average parameters.
+
+    Returns
+    -------
+    DataFrame
+        Contains the average parameters for each spin group
+    DataFrame
+        Contains all resonance parameters for all spin groups
+    """
 
     energies = []; spin_group = []; nwidth = []; gwidth = []
     with open(filename,'r') as f:   
@@ -220,16 +240,19 @@ def read_sammy_par(filename):
     Gg = np.array(gwidth); Gn = np.array(nwidth); E = np.array(energies); jspin = np.array(spin_group)
     df = pd.DataFrame([E, Gg, Gn, jspin], index=['E','Gg','Gn','jspin']); df = df.transpose()
     
-    #avg_widths = df.groupby('jspin', as_index=False)['Gg','Gn'].mean() 
-    gb = df.groupby('jspin')    
-    list_of_dfs=[gb.get_group(x) for x in gb.groups]
-    
-    avg_df = pd.DataFrame(index=df['jspin'].unique(),columns=['dE','Gg','Gn'])
+    if calculate_average:
+        #avg_widths = df.groupby('jspin', as_index=False)['Gg','Gn'].mean() 
+        gb = df.groupby('jspin')    
+        list_of_dfs=[gb.get_group(x) for x in gb.groups]
+        
+        avg_df = pd.DataFrame(index=df['jspin'].unique(),columns=['dE','Gg','Gn'])
 
-    for ij, jdf in enumerate(list_of_dfs):
-        avg_df['dE'][ij+1]=jdf['E'].diff().mean()
-        avg_df['Gg'][ij+1]=jdf['Gg'].mean()
-        avg_df['Gn'][ij+1]=jdf['Gn'].mean()
+        for ij, jdf in enumerate(list_of_dfs):
+            avg_df['dE'][ij+1]=jdf['E'].diff().mean()
+            avg_df['Gg'][ij+1]=jdf['Gg'].mean()
+            avg_df['Gn'][ij+1]=jdf['Gn'].mean()
+    else:
+        avg_df = ''
 
     return avg_df, df
     

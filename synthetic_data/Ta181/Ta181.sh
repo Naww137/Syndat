@@ -1,3 +1,0 @@
-SAMNDF.INP
-SAMNDF.PAR
-syndat

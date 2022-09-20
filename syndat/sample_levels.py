@@ -128,20 +128,22 @@ def sample_RRR_levels(E_range, avg_level_spacing):
     """
     # randomly offset starting point so we are not just finding the distribution fixed to this point with ML
     # is this necessary?
-    # E0 = E_range[0]+avg_level_spacing*np.random.default_rng().uniform(low=0.0,high=1.0)     
-    E0 = min(E_range); E_end = max(E_range)
+    # sample a ladder 5-6 average level spacings before and 5-6 average level spacings after window
+    E0 = min(E_range)-avg_level_spacing*np.random.default_rng().uniform(low=5.0,high=6.0)     
+    E_end = max(E_range)+avg_level_spacing*np.random.default_rng().uniform(low=5.0,high=6.0)   
     
     levels = []; spacings = []
     spacing = avg_level_spacing*sample_wigner_invCDF(1)
     spacings.append(spacing)
     level = E0+spacing
-    levels.append(level)
     
     while level < E_end:
+        levels.append(level)
         spacing = avg_level_spacing*sample_wigner_invCDF(1)
         spacings.append(spacing)
         level = levels[-1] + spacing
-        levels.append(level)
+
+    levels = list(filter(lambda l: l<max(E_range) and l>min(E_range), levels))
             
     return levels, spacings
 
