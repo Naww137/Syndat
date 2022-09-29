@@ -68,11 +68,11 @@ class experiment:
             # vectorize the background function from jesse's experiment
             self.get_bkg()
             # get sample in data 
-            self.get_sdat(theoretical_data)
+            self.get_theoretical(theoretical_data)
             # generate raw count data for sample in given theoretical transmission and assumed true reduction parameters/open count data
-            self.generate_raw_data(add_noise)
+            self.generate_sdat(add_noise)
             # reduce the experimental data
-            self.reduce_raw_data()
+            self.reduce()
             
         
     def get_odat(self,filename):
@@ -99,7 +99,7 @@ class experiment:
             return a*np.exp(ti*-b)
         self.Bi = f(self.odat.tof,self.redpar.val.a,self.redpar.val.b)
 
-    def get_sdat(self, theoretical_data):
+    def get_theoretical(self, theoretical_data):
 
         # check types
         if isinstance(theoretical_data, pd.DataFrame):
@@ -141,7 +141,7 @@ class experiment:
         # if statement to smooth open count data
         
         
-    def generate_raw_data(self, add_noise):
+    def generate_sdat(self, add_noise):
 
         if len(self.odat) != len(self.sdat):
             raise ValueError("Experiment open data and sample data are not of the same length, check energy grid")
@@ -151,7 +151,7 @@ class experiment:
                                                                           self.Bi, self.redpar.val.b0s, self.redpar.val.b0o, 
                                                                           self.redpar.val.m)
         
-    def reduce_raw_data(self):
+    def reduce(self):
 
         # create transmission object
         self.trans = pd.DataFrame()
@@ -160,7 +160,7 @@ class experiment:
         self.trans['theo_trans'] = self.sdat.theo_trans
 
         # rename noisey counts from generation as counts for reduction
-        sdat = self.sdat.filter(['E','tof','bw','c','dc'])
+        sdat = self.sdat.filter(['E','tof','bw','c','dc', 'theo_cts'])
         #sdat.rename(columns={"nc": "c", "dnc": "dc"}, inplace=True)
         self.sdat = sdat
 
