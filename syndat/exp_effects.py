@@ -168,7 +168,7 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0,
     open_df : pandas.DataFrame
         Dataframe containing data for sample out.
     """
-    #calculate open count rates
+    # calculate open count rates
     Cr, dCr = cts_to_ctr(open_df.c, open_df.dc, open_df.bw, trig) # cts_o/(bw*trig)
     open_df['cps'] = Cr; open_df['dcps'] = dCr
     
@@ -176,11 +176,20 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0,
     [m1,m2,m3,m4] = alpha
     cr = (sample_df.theo_trans*(m3*Cr - m4*K*Bi - B0) + m2*k*Bi + b0)/m1
     
-    # calculate sample in counts, noise, and uncertainty
+    # calculate sample in counts from count rate
     c = cr*open_df.bw*trig 
+
+    # correct for dead time
+    # c = c*
+
+
+    sample_df['theo_cts'] = c
     # c = np.where(c<0, float(10), c) uneccessary, no negatives
     dc = np.sqrt(c)
     if add_noise:
+        # c = gaus_noise(c, np.sqrt(c))
+        # c = np.where(c<1, float(10), c)
+        # dc = np.sqrt(c)
         c = pois_noise(c)
         assert(c.all() >= 0)
         dc = np.sqrt(c)
