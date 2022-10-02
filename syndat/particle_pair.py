@@ -57,7 +57,7 @@ class particle_pair:
         # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
 
         if ac < 1e-7:
-            print("WARNING: scattering radius seems to be given in fm rather than m")
+            print("WARNING: scattering radius seems to be given in m rather than sqrt(barns) a.k.a. cm^-12")
 
         self.ac = ac # 6.7e-15 # m or 6.7 femtometers
         self.M = M # amu

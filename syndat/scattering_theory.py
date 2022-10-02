@@ -6,7 +6,7 @@ import os
 import scipy.stats as stats
 
 
-def g(J, I, i):
+def gstat(J, I, i):
     """
     Calculates the spin statistical factor for a given $J_{\pi,\alpha}$.
 
@@ -118,7 +118,7 @@ def PS_recursive(E, ac, M, m, orbital_angular_momentum):
         return S_array, P_array
 
 
-def P_S_psi_explicit(E, ac, M, m, orbital_angular_momentum):
+def FofE_explicit(E, ac, M, m, orbital_angular_momentum):
     """
     Calculates penetrability and shift functions using explicit definitions.
 
@@ -162,8 +162,9 @@ def P_S_psi_explicit(E, ac, M, m, orbital_angular_momentum):
     
     assert(orbital_angular_momentum == 0, "Phase shift function in syndat.scattering theory needs to be updated for higher-order waveforms")
 
-    rho = k_wavenumber(E, M, m)*ac
-    psi = rho
+    k = k_wavenumber(E, M, m)
+    rho = k*ac
+    phi = rho
     
     if orbital_angular_momentum == 0:
         P = rho
@@ -181,15 +182,70 @@ def P_S_psi_explicit(E, ac, M, m, orbital_angular_momentum):
     if orbital_angular_momentum > 3:
         raise ValueError("PS_explicit cannot handle orbital_angular_momenta > 3, use PS_recursive")
         
-    return S, P, psi
+    return S, P, phi, k
 
 
 
 
 def reduced_width_square_2_partial_width(E, ac, M, m, reduced_widths_square, orbital_angular_momentum):
-    S,P,psi = P_S_psi_explicit(np.array(E), ac, M, m, orbital_angular_momentum)
+    S, P, psi, k = FofE_explicit(np.array(E), ac, M, m, orbital_angular_momentum)
     partial_widths = 2*P*reduced_widths_square 
     return partial_widths
+
+
+def SLBW(E, pair, resonance_ladder):
+
+    xs_cap = 0; xs_scat = 0
+    group_by_J = dict(tuple(resonance_ladder.groupby('J')))
+
+    for J in group_by_J:
+        
+        J_df = group_by_J[J]
+        assert J > 0 
+
+        orbital_angular_momentum = J_df.lwave.unique()
+        assert len(orbital_angular_momentum) == 1
+
+        # calculate functions of energy -> shift, penetrability, phase shift
+        g = gstat(J, pair.I, pair.i) #(2*J+1)/( (2*ii+1)*(2*I+1) );   # spin statistical factor g sub(j alpha)
+        S, P, phi, k = FofE_explicit(E, pair.ac, pair.M, pair.m, orbital_angular_momentum)
+
+        # calculate capture
+        xs = 0 
+        constant = (np.pi*g/(k**2))
+        for index, row in J_df.iterrows():
+            E_lambda = row.E
+            Gg = row.Gg * 1e-3
+            gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3  # unnecessary summation here since I will be giving the observed widths (already summed over single channel)
+            Gnx = 2*P*gnx2
+
+            d = (E-E_lambda)**2 + ((Gg+Gnx)/2)**2 
+            xs += (Gg*Gnx) / ( d )
+        xs_cap += constant*xs
+
+
+        # calculate scatter
+        xs = 0
+        constant = (np.pi*g/(k**2))
+        for index, row in J_df.iterrows():
+            E_lambda = row.E
+            Gg = row.Gg * 1e-3
+            gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3 # unnecessary summation here since I will be giving the observed widths (already summed over single channel)
+            Gnx = 2*P*gnx2
+
+            G = Gnx+Gg
+            d = (E-E_lambda)**2 + ((Gg+Gnx)/2)**2 
+            xs += ((1-np.cos(2*phi))*(2-Gnx*G/d) + 2*np.sin(2*phi)*Gnx*(E-E_lambda)/d + (Gnx*(E-E_lambda)/d)**2 + (Gnx*G/d/2)**2)
+        xs_scat += constant*xs
+
+    # calculate total
+    xs_tot = xs_cap+xs_scat
+
+    return xs_tot, xs_scat, xs_cap
+
+
+
+
 
 
 def SLBW_capture(g, k, E, resonance_ladder):
@@ -222,10 +278,13 @@ def SLBW_capture(g, k, E, resonance_ladder):
     constant = (np.pi*g/(k**2))
     for index, row in resonance_ladder.iterrows():
         E_lambda = row.E
-        Gn = sum([row[ign] for ign in range(2,len(row))]) * np.sqrt(E/E_lambda) * 1e-3
+        gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3
+        Gnx = 2*P(E)*gnx2
         Gg = row.Gg * 1e-3
         d = (E-E_lambda)**2 + ((Gg+Gn)/2)**2 
         xs += (Gg*Gn) / ( d )
     xs = constant*xs
     return xs
     
+
+

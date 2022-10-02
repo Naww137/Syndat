@@ -16,7 +16,7 @@ import syndat
 
 class experiment:
     
-    def __init__(self, perform_methods, default_exp, add_noise, opendat_filename, theoretical_data,
+    def __init__(self, perform_methods, default_exp, add_noise, open_dataframe, theoretical_data,
                                                                                     E_limits = []):
         """
         Initializes generation object
@@ -31,7 +31,7 @@ class experiment:
             _description_
         add_noise : _type_
             _description_
-        opendat_filename : _type_
+        open_dataframe : _type_
             _description_
         theoretical_data : str or pd.DataFrame
             Either full path to sammy.lst file or pd.DataFrame, both containing the theoretical values to be put through the syndat methodology 
@@ -64,10 +64,10 @@ class experiment:
 
         if perform_methods:
             # import open data from jesse's experiment
-            self.get_odat(opendat_filename)
+            self.get_odat(open_dataframe)
             # vectorize the background function from jesse's experiment
             self.get_bkg()
-            # get sample in data 
+            # get theoretical cross section 
             self.get_theoretical(theoretical_data)
             # generate raw count data for sample in given theoretical transmission and assumed true reduction parameters/open count data
             self.generate_sdat(add_noise)
@@ -75,21 +75,41 @@ class experiment:
             self.reduce()
             
         
-    def get_odat(self,filename):
+    def get_odat(self,open_dataframe):
         
-        odat = pd.read_csv(filename, sep=',') 
-        odat = odat[odat.tof >= self.redpar.val.t0]
-        odat.sort_values('tof', axis=0, ascending=True, inplace=True)
-        odat.reset_index(drop=True, inplace=True)
-        odat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
-        odat['bw'] = odat.bin_width*1e-6 
-        odat.rename(columns={"counts": "c", "dcounts": "dc"}, inplace=True)
+        if isinstance(open_dataframe, pd.DataFrame):
+            if 'tof' not in open_dataframe.columns:
+                raise ValueError("Column name 'tof' not in open count DataFrame passed to experiment class.")
+            if 'bw' not in open_dataframe.columns:
+                raise ValueError("Column name 'bw' not in open count DataFrame passed to experiment class.")
+            if 'c' not in open_dataframe.columns:
+                raise ValueError("Column name 'c' not in open count DataFrame passed to experiment class.")
+            if 'dc' not in open_dataframe.columns:
+                raise ValueError("Column name 'dc' not in open count DataFrame passed to experiment class.")
+        else:
+            raise ValueError("Theoretical data passed to generation class is not of type DataFrame.")
+
+        # -------------------------------------------
+        # the below code takes open data from Jesse's csv can gets it into the correct format, rather, I want to make thid function take the proper format
+        # -------------------------------------------
+        # # odat = pd.read_csv(filename, sep=',') 
+        # odat = odat[odat.tof >= self.redpar.val.t0]
+        # odat.sort_values('tof', axis=0, ascending=True, inplace=True)
+        # odat.reset_index(drop=True, inplace=True)
+        # odat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
+        # odat['bw'] = odat.bin_width*1e-6 
+        # odat.rename(columns={"counts": "c", "dcounts": "dc"}, inplace=True)
+        # -------------------------------------------
+
+
+        # calculate energy from tof and experiment parameters
+        open_dataframe['E'] = syndat.exp_effects.t_to_e((open_dataframe.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
 
         # filter if given elimits
         if not self.E_limits:
-            pass
+            odat = open_dataframe
         else:
-            odat = odat[(odat.E>self.E_limits[0])&(odat.E<self.E_limits[1])].reset_index(drop=True)
+            odat = open_dataframe[(open_dataframe.E>self.E_limits[0])&(open_dataframe.E<self.E_limits[1])].reset_index(drop=True)
 
         self.odat = odat
         
@@ -105,16 +125,16 @@ class experiment:
         if isinstance(theoretical_data, pd.DataFrame):
             theo_df = theoretical_data
             if 'E' not in theo_df.columns:
-                raise ValueError("Column name 'E' not in theoretical DataFrame passed to generation class.")
+                raise ValueError("Column name 'E' not in theoretical DataFrame passed to experiment class.")
             if 'theo_trans' not in theo_df.columns:
-                raise ValueError("Column name 'E' not in theoretical DataFrame passed to generation class.")
+                raise ValueError("Column name 'E' not in theoretical DataFrame passed to experiment class.")
         elif isinstance(theoretical_data, str):
             theo_df = syndat.sammy_interface.readlst(theoretical_data)
         else:
-            raise ValueError("Theoretical data passed to generation class is neither a DataFrame or path name (string).")
+            raise ValueError("Theoretical data passed to experiment class is neither a DataFrame or path name (string).")
             
 
-        T_theo = np.flipud(theo_df.theo_trans)
+        # T_theo = np.flipud(theo_df.theo_trans)
         sdat = pd.DataFrame()
         sdat['theo_trans'] = theo_df.theo_trans #
         sdat['E'] = theo_df.E
