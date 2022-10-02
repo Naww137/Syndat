@@ -1,0 +1,302 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>syndat.sample_widths &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.sample_widths</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for syndat.sample_widths</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri Jun  3 11:08:47 2022</span>
+
+<span class="sd">@author: noahwalton</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+<span class="kn">from</span> <span class="nn">syndat</span> <span class="kn">import</span> <span class="n">scattering_theory</span>
+
+
+<div class="viewcode-block" id="sample_chisquare"><a class="viewcode-back" href="../../source_api/sample_widths.html#syndat.sample_widths.sample_chisquare">[docs]</a><span class="k">def</span> <span class="nf">sample_chisquare</span><span class="p">(</span><span class="n">N_samples</span><span class="p">,</span> <span class="n">DOF</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sample the chi-squared distribution.</span>
+
+<span class="sd">    This function simply samples from the chi-square distribution and is used</span>
+<span class="sd">    by other functions for generating reduced resonance width samples.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    N_samples : int</span>
+<span class="sd">        Number of samples and/or length of sample vector.</span>
+<span class="sd">    DOF : float</span>
+<span class="sd">        Degrees of freedom for the chi-squared distribution.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray or float</span>
+<span class="sd">        Array of i.i.d. samples from chi-squared distribution.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    chisquare_PDF : Calculate probability density function for chi-squared distribution.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    A more robust/recomended way to set seed for examples would be to create a</span>
+<span class="sd">    random number generator and pass it to the function. The example included</span>
+<span class="sd">    in this documentation sets a global random number seed. See this article</span>
+<span class="sd">    for more information on why this could be improved:</span>
+<span class="sd">    https://towardsdatascience.com/stop-using-numpy-random-seed-581a9972805f.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from sample_resparm import sample_widths</span>
+<span class="sd">    &gt;&gt;&gt; np.random.seed(7)</span>
+<span class="sd">    &gt;&gt;&gt; sample_widths.sample_chisquare(2,10)</span>
+<span class="sd">    array([18.7081546 ,  7.46151704])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">chisquare</span><span class="p">(</span><span class="n">DOF</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">N_samples</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">N_samples</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">samples</span></div>
+    
+<div class="viewcode-block" id="chisquare_PDF"><a class="viewcode-back" href="../../source_api/sample_widths.html#syndat.sample_widths.chisquare_PDF">[docs]</a><span class="k">def</span> <span class="nf">chisquare_PDF</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">DOF</span><span class="p">,</span> <span class="n">avg_reduced_width_square</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate probability density function for chi-squared distribution.</span>
+
+<span class="sd">    This function simply houses the probaility density function for the </span>
+<span class="sd">    chi-squared distribution and allows for a rescaling factor to be applied.</span>
+<span class="sd">    The rescaling factor represents the average resonance width value s.t.</span>
+<span class="sd">    this PDF will represent the distribution of widths for a specific isotope.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : numpy.ndarray</span>
+<span class="sd">        Values at which to evaluation the PDF.</span>
+<span class="sd">    DOF : float or int</span>
+<span class="sd">        Degrees of freedom for the chi-squared distribution.</span>
+<span class="sd">    avg_reduced_width_square : float or int</span>
+<span class="sd">        Re-scaling factor for isotope specific distribution.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Pointwise function evaluated at x, given DOF and rescaling factor.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    sample_chisquare : Sample the chi-squared distribution.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from sample_resparm import sample_widths</span>
+<span class="sd">    &gt;&gt;&gt; import scipy.stats as stats</span>
+<span class="sd">    &gt;&gt;&gt; sample_widths.chisquare_PDF(np.array([1.0, 2.5, 3.0]), 2, 1)</span>
+<span class="sd">    array([0.30326533, 0.1432524 , 0.11156508])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">/</span><span class="n">avg_reduced_width_square</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">chi2</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">DOF</span><span class="p">)</span>
+    <span class="n">y_norm</span> <span class="o">=</span> <span class="n">y</span><span class="o">/</span><span class="n">avg_reduced_width_square</span>
+    <span class="k">return</span> <span class="n">y_norm</span></div>
+
+<span class="k">def</span> <span class="nf">sample_resonance_widths</span><span class="p">(</span><span class="n">DOF</span><span class="p">,</span> <span class="n">N_levels</span><span class="p">,</span> <span class="n">avg_reduced_width_square</span><span class="p">):</span>
+    
+    <span class="n">reduced_widths_square</span> <span class="o">=</span> <span class="n">avg_reduced_width_square</span><span class="o">*</span><span class="n">sample_chisquare</span><span class="p">(</span><span class="n">N_levels</span><span class="p">,</span> <span class="n">DOF</span><span class="p">)</span>
+    <span class="n">partial_widths</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># add function with penetrability =2*P(E)*red_wid_sqr</span>
+    
+    <span class="k">return</span> <span class="n">reduced_widths_square</span><span class="p">,</span> <span class="n">partial_widths</span>
+
+
+<div class="viewcode-block" id="sample_RRR_widths"><a class="viewcode-back" href="../../source_api/sample_widths.html#syndat.sample_widths.sample_RRR_widths">[docs]</a><span class="k">def</span> <span class="nf">sample_RRR_widths</span><span class="p">(</span><span class="n">level_vector</span><span class="p">,</span> <span class="n">avg_reduced_width_square</span><span class="p">,</span> <span class="n">DOF</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Samples resonance widths corresponding to a vector of resonance energies.</span>
+
+<span class="sd">    This function uses the porter thomas distribution to sample a vector of</span>
+<span class="sd">    reduced width amplitudes (gn^2) corresponding to a vector of resonance level energies.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    level_vector : numpy.ndarray</span>
+<span class="sd">        Ladder of resonance energy levels.</span>
+<span class="sd">    avg_reduced_width_square : float or int</span>
+<span class="sd">        Average value for the reduced width for rescale of the PT distribution.</span>
+<span class="sd">    DOF : float or int</span>
+<span class="sd">        Degrees of freedom applied to the PT distiribution (chi-square).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    reduced_widths_square : numpy.ndarray</span>
+<span class="sd">        Array of reduced widths squared, this is what is sampled directly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reduced_widths_square</span> <span class="o">=</span> <span class="n">avg_reduced_width_square</span><span class="o">*</span><span class="n">sample_chisquare</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">level_vector</span><span class="p">),</span> <span class="n">DOF</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">reduced_widths_square</span> </div>
+
+
+<div class="viewcode-block" id="compare_pdf_to_samples"><a class="viewcode-back" href="../../source_api/sample_widths.html#syndat.sample_widths.compare_pdf_to_samples">[docs]</a><span class="k">def</span> <span class="nf">compare_pdf_to_samples</span><span class="p">(</span><span class="n">reduced_widths_square_vector</span><span class="p">,</span> <span class="n">avg_reduced_width_square</span><span class="p">,</span> <span class="n">dof</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compare samples to pdf (re-scaled).</span>
+
+<span class="sd">    This function plots a histogram of the parameter samples with an</span>
+<span class="sd">    overlaid probability density function of the distribution from which the </span>
+<span class="sd">    samples were drawn. In the limit that sample size approaches infinity, the</span>
+<span class="sd">    PDF and histogram should line up exactly, acting as visual verification </span>
+<span class="sd">    for the sampling methods.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    reduced_widths_square_vector : numpy.ndarray</span>
+<span class="sd">        Array of reduced widths/decay amplitudes squared (little gamma squared).</span>
+<span class="sd">    avg_reduced_width_square : float or int</span>
+<span class="sd">        Isotope/spin group specific average reduced width/decay amplitude squared.</span>
+<span class="sd">    dof : float or int</span>
+<span class="sd">        Degrees of freedom for the chi-squared distribution.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    </span>
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Showing the example with a plot included is not working for this docstring.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">max</span><span class="p">(</span><span class="n">reduced_widths_square_vector</span><span class="p">),</span><span class="mi">10000</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">chisquare_PDF</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">dof</span><span class="p">,</span><span class="n">avg_reduced_width_square</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$\chi^2$ PDF&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        
+    <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">reduced_widths_square_vector</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;cornflowerblue&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;samples&#39;</span><span class="p">)</span>
+    
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;whitesmoke&#39;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Reduced Widths Squared ($\gamma^2$)&#39;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Normalized Frequency&#39;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Reduced Widths Squared ($\gamma^2$)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+    <span class="k">return</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.sample_widths</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

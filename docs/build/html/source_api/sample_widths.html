@@ -1,0 +1,268 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Sample Widths &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Sample Widths</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="sample-widths">
+<h1>Sample Widths<a class="headerlink" href="#sample-widths" title="Permalink to this heading">¶</a></h1>
+<p id="id1">This module houses functions used to sample resonance widths.</p>
+<span class="target" id="module-syndat.sample_widths"></span><p>Created on Fri Jun  3 11:08:47 2022</p>
+<p>&#64;author: noahwalton</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.sample_widths.chisquare_PDF">
+<span class="sig-prename descclassname"><span class="pre">syndat.sample_widths.</span></span><span class="sig-name descname"><span class="pre">chisquare_PDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_reduced_width_square</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/sample_widths.html#chisquare_PDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.sample_widths.chisquare_PDF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate probability density function for chi-squared distribution.</p>
+<p>This function simply houses the probaility density function for the
+chi-squared distribution and allows for a rescaling factor to be applied.
+The rescaling factor represents the average resonance width value s.t.
+this PDF will represent the distribution of widths for a specific isotope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numpy.ndarray</em>) – Values at which to evaluation the PDF.</p></li>
+<li><p><strong>DOF</strong> (<em>float</em><em> or </em><em>int</em>) – Degrees of freedom for the chi-squared distribution.</p></li>
+<li><p><strong>avg_reduced_width_square</strong> (<em>float</em><em> or </em><em>int</em>) – Re-scaling factor for isotope specific distribution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pointwise function evaluated at x, given DOF and rescaling factor.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#syndat.sample_widths.sample_chisquare" title="syndat.sample_widths.sample_chisquare"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_chisquare</span></code></a></dt><dd><p>Sample the chi-squared distribution.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sample_resparm</span> <span class="kn">import</span> <span class="n">sample_widths</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sample_widths</span><span class="o">.</span><span class="n">chisquare_PDF</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">array([0.30326533, 0.1432524 , 0.11156508])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.sample_widths.compare_pdf_to_samples">
+<span class="sig-prename descclassname"><span class="pre">syndat.sample_widths.</span></span><span class="sig-name descname"><span class="pre">compare_pdf_to_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_widths_square_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_reduced_width_square</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dof</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/sample_widths.html#compare_pdf_to_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.sample_widths.compare_pdf_to_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare samples to pdf (re-scaled).</p>
+<p>This function plots a histogram of the parameter samples with an
+overlaid probability density function of the distribution from which the
+samples were drawn. In the limit that sample size approaches infinity, the
+PDF and histogram should line up exactly, acting as visual verification
+for the sampling methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>reduced_widths_square_vector</strong> (<em>numpy.ndarray</em>) – Array of reduced widths/decay amplitudes squared (little gamma squared).</p></li>
+<li><p><strong>avg_reduced_width_square</strong> (<em>float</em><em> or </em><em>int</em>) – Isotope/spin group specific average reduced width/decay amplitude squared.</p></li>
+<li><p><strong>dof</strong> (<em>float</em><em> or </em><em>int</em>) – Degrees of freedom for the chi-squared distribution.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Showing the example with a plot included is not working for this docstring.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.sample_widths.sample_RRR_widths">
+<span class="sig-prename descclassname"><span class="pre">syndat.sample_widths.</span></span><span class="sig-name descname"><span class="pre">sample_RRR_widths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_reduced_width_square</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOF</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/sample_widths.html#sample_RRR_widths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.sample_widths.sample_RRR_widths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Samples resonance widths corresponding to a vector of resonance energies.</p>
+<p>This function uses the porter thomas distribution to sample a vector of
+reduced width amplitudes (gn^2) corresponding to a vector of resonance level energies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level_vector</strong> (<em>numpy.ndarray</em>) – Ladder of resonance energy levels.</p></li>
+<li><p><strong>avg_reduced_width_square</strong> (<em>float</em><em> or </em><em>int</em>) – Average value for the reduced width for rescale of the PT distribution.</p></li>
+<li><p><strong>DOF</strong> (<em>float</em><em> or </em><em>int</em>) – Degrees of freedom applied to the PT distiribution (chi-square).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>reduced_widths_square</strong> – Array of reduced widths squared, this is what is sampled directly.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.sample_widths.sample_chisquare">
+<span class="sig-prename descclassname"><span class="pre">syndat.sample_widths.</span></span><span class="sig-name descname"><span class="pre">sample_chisquare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOF</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/sample_widths.html#sample_chisquare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.sample_widths.sample_chisquare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample the chi-squared distribution.</p>
+<p>This function simply samples from the chi-square distribution and is used
+by other functions for generating reduced resonance width samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>N_samples</strong> (<em>int</em>) – Number of samples and/or length of sample vector.</p></li>
+<li><p><strong>DOF</strong> (<em>float</em>) – Degrees of freedom for the chi-squared distribution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of i.i.d. samples from chi-squared distribution.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray or float</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#syndat.sample_widths.chisquare_PDF" title="syndat.sample_widths.chisquare_PDF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chisquare_PDF</span></code></a></dt><dd><p>Calculate probability density function for chi-squared distribution.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>A more robust/recomended way to set seed for examples would be to create a
+random number generator and pass it to the function. The example included
+in this documentation sets a global random number seed. See this article
+for more information on why this could be improved:
+<a class="reference external" href="https://towardsdatascience.com/stop-using-numpy-random-seed-581a9972805f">https://towardsdatascience.com/stop-using-numpy-random-seed-581a9972805f</a>.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sample_resparm</span> <span class="kn">import</span> <span class="n">sample_widths</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_chisquare</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">array([18.7081546 ,  7.46151704])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source_api/sample_widths.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Sample Widths</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

@@ -1,0 +1,415 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>syndat.sammy_interface &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.sammy_interface</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for syndat.sammy_interface</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Jun 22 12:30:52 2022</span>
+
+<span class="sd">@author: nwx</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">syndat</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># </span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="readlst"><a class="viewcode-back" href="../../source_api/sammy_interface.html#syndat.sammy_interface.readlst">[docs]</a><span class="k">def</span> <span class="nf">readlst</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads a sammy .lst or .dat file.</span>
+
+<span class="sd">    _extended_summary_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filepath : str</span>
+<span class="sd">        Full path to the .lst or .dat file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    DataFrame</span>
+<span class="sd">        DataFrame with headers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="s1">&#39;exp_dat&#39;</span><span class="p">,</span><span class="s1">&#39;exp_dat_unc&#39;</span><span class="p">,</span><span class="s1">&#39;theo_xs&#39;</span><span class="p">,</span><span class="s1">&#39;theo_xs_bayes&#39;</span><span class="p">,</span><span class="s1">&#39;exp_trans&#39;</span><span class="p">,</span><span class="s1">&#39;exp_trans_unc&#39;</span><span class="p">,</span><span class="s1">&#39;theo_trans&#39;</span><span class="p">,</span> <span class="s1">&#39;theo_trans_bayes&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># </span>
+<span class="c1"># =============================================================================</span>
+<span class="k">def</span> <span class="nf">samtools_fmtpar</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> \
+                    <span class="n">template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="s2">&quot;../templates/sammy_template_RM_only.par&quot;</span><span class="p">)</span> 
+                    <span class="p">):</span>
+    
+    <span class="c1"># print(&quot;WARNING: check parameter file created - formatting in sammy_interface.samtools_fmtpar could be more robust&quot;)</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">template_lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">template_lines</span><span class="p">:</span>
+            
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%%</span><span class="s1">%ResParms</span><span class="si">%%</span><span class="s1">%&#39;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+                    <span class="c1"># for some reason, the first format string has had problems with the width definition,</span>
+                    <span class="c1">#if using a different sized energy range (digits before decimal) this may become an issue</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">0&lt;11.4f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">0&lt;10f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s1">0&lt;10f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">:</span><span class="s1">0&lt;10f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="si">:</span><span class="s1">0&lt;10f</span><span class="si">}</span><span class="s1"> &#39;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="si">:</span><span class="s1">1g</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="si">:</span><span class="s1">1g</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="si">:</span><span class="s1">1g</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="si">:</span><span class="s1">1g</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="si">:</span><span class="s1">1g</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="si">:</span><span class="s1">1g</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>        
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+    <span class="k">return</span>
+
+<div class="viewcode-block" id="write_sampar"><a class="viewcode-back" href="../../source_api/sammy_interface.html#syndat.sammy_interface.write_sampar">[docs]</a><span class="k">def</span> <span class="nf">write_sampar</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">vary_parm</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> 
+                                <span class="n">template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="s2">&quot;../templates/sammy_template_RM_only.par&quot;</span><span class="p">)</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Writes a formatted sammy.par file.</span>
+
+<span class="sd">    This function writes a formatted sammy parameter file from a DataFrame containing resonance parameters.</span>
+<span class="sd">    The DataFrame may have</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : DataFrame</span>
+<span class="sd">        _description_</span>
+<span class="sd">    vary_parm : Bool</span>
+<span class="sd">        Option to set vary parameters (0 or 1) in sammy.par file.</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        Filepath/name of sammy.par file being created.</span>
+<span class="sd">    template : str, optional</span>
+<span class="sd">        Filepath to template file for sammy.par. Included because of the different options for input to sammy, by default os.path.realpath(&quot;../templates/sammy_template_RM_only.par&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    
+    <span class="n">par_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">zero_neutron_widths</span> <span class="o">=</span> <span class="mi">5</span><span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">zero_neutron_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">),</span><span class="n">zero_neutron_widths</span><span class="p">])</span>
+    <span class="n">par_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">par_array</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="o">-</span><span class="n">zero_neutron_widths</span><span class="p">],</span> <span class="n">zero_neutron_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1">#vary_parm = True</span>
+    <span class="k">if</span> <span class="n">vary_parm</span><span class="p">:</span>
+        <span class="n">binary_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">),</span><span class="mi">5</span><span class="o">-</span><span class="n">zero_neutron_widths</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">),</span><span class="n">zero_neutron_widths</span><span class="p">])))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">binary_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">),</span><span class="mi">5</span><span class="p">])</span>
+        
+    <span class="n">samtools_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">par_array</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">binary_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">samtools_fmtpar</span><span class="p">(</span><span class="n">samtools_array</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
+    
+    <span class="k">return</span></div>
+        
+      
+<span class="c1"># =============================================================================</span>
+<span class="c1"># </span>
+<span class="c1"># =============================================================================</span>
+<span class="k">def</span> <span class="nf">write_estruct_file</span><span class="p">(</span><span class="n">Energies</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="c1"># print(&quot;WARNING: if &#39;twenty&#39; is not specified in sammy.inp, the data file format will change.\nSee &#39;sammy_interface.write_estruct_file&#39;&quot;)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ept</span> <span class="ow">in</span> <span class="n">Energies</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ept</span><span class="si">:</span><span class="s1">0&lt;19f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="mf">1.0</span><span class="si">:</span><span class="s1">&lt;19</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="mf">1.0</span><span class="si">:</span><span class="s1">0&lt;7</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span>
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># </span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="write_samdat"><a class="viewcode-back" href="../../source_api/sammy_interface.html#syndat.sammy_interface.write_samdat">[docs]</a><span class="k">def</span> <span class="nf">write_samdat</span><span class="p">(</span><span class="n">transmission_data</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Writes a formatted sammy.dat file.</span>
+
+<span class="sd">    This function takes a DataFrame with appropriately named columns: &quot;E&quot;, &quot;exp_trans&quot;, and &quot;exp_trans_unc&quot;. </span>
+<span class="sd">    These DataFrame keys correspond to the &quot;trans&quot; DataFrame generated by Syndat. This is an attribute of the experiment object once the experiment is &quot;run&quot;.</span>
+<span class="sd">    The uncertainty on the experimental data point must be absolute for this formatting as it corresponds to the \</span>
+<span class="sd">    sammy format with &quot;use twenty significant digits&quot; or &quot;twenty&quot; in the input file. If this flag is not in the \</span>
+<span class="sd">    sammy input file, the uncertainty should not be absolute and the formatting (space between variables) changes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    transmission_data : DataFrame</span>
+<span class="sd">        DataFrame containing experimental transmission data.</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        Filepath/name for the sammy.dat file being created.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Energy column not in DataFrame.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Experimental transmission column not in DataFrame.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Experimental transmission uncertainty column not in DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># print(&quot;WARNING: if &#39;twenty&#39; is not specified in sammy.inp, the data file format will change.\nSee &#39;sammy_interface.write_estruct_file&#39;&quot;)</span>
+    <span class="n">iterable</span> <span class="o">=</span> <span class="n">transmission_data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">transmission_data</span><span class="o">.</span><span class="n">columns</span>
+    <span class="k">if</span> <span class="s1">&#39;E&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;transmission data passed to &#39;write_expdat_file&#39; does not have the column &#39;E&#39;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;exp_trans&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;transmission data passed to &#39;write_expdat_file&#39; does not have the column &#39;exp&#39;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;exp_trans_unc&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;transmission data passed to &#39;write_expdat_file&#39; does not have the column &#39;dT&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">iE</span> <span class="o">=</span> <span class="n">cols</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+    <span class="n">iexp</span> <span class="o">=</span> <span class="n">cols</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="s1">&#39;exp_trans&#39;</span><span class="p">)</span>
+    <span class="n">idT</span> <span class="o">=</span> <span class="n">cols</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="s1">&#39;exp_trans_unc&#39;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">each</span><span class="p">[</span><span class="n">iE</span><span class="p">]</span><span class="si">:</span><span class="s1">0&lt;19f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">each</span><span class="p">[</span><span class="n">iexp</span><span class="p">]</span><span class="si">:</span><span class="s1">0&lt;19f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">each</span><span class="p">[</span><span class="n">idT</span><span class="p">]</span><span class="si">:</span><span class="s1">0&lt;19f</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1">#         </span>
+<span class="c1"># =============================================================================</span>
+<span class="k">def</span> <span class="nf">create_samtools_array_from_J</span><span class="p">(</span><span class="n">Jn_ladders</span><span class="p">,</span> <span class="n">Jp_ladders</span><span class="p">):</span>
+    
+    <span class="n">J</span> <span class="o">=</span> <span class="n">Jn_ladders</span> <span class="o">+</span> <span class="n">Jp_ladders</span>
+    <span class="n">samtools_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">ij</span><span class="p">,</span> <span class="n">j_df</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">J</span><span class="p">):</span>
+        
+        <span class="n">j_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">j_df</span><span class="p">)</span>
+    
+        <span class="n">levels</span> <span class="o">=</span> <span class="n">j_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">zero_neutron_widths</span> <span class="o">=</span> <span class="mi">5</span><span class="o">-</span><span class="n">j_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># accepts 3 neutron widths</span>
+        
+        <span class="c1"># zeros for additional neutron widths plus zeros for all binary &quot;vary parameter options</span>
+        <span class="n">j_inp_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span> <span class="p">[</span><span class="n">j_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">levels</span><span class="p">,</span> <span class="n">zero_neutron_widths</span><span class="o">+</span><span class="mi">5</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">levels</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">ij</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> <span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">samtools_array</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">samtools_array</span><span class="p">,</span> <span class="n">j_inp_array</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    
+    <span class="k">return</span> <span class="n">samtools_array</span>
+
+
+
+
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># Could update this to do more to the input file, i.e. input energy range</span>
+<span class="c1"># =============================================================================</span>
+<span class="k">def</span> <span class="nf">create_sammyinp</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;sammy.inp&#39;</span><span class="p">,</span> \
+                    <span class="n">template</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;templates/sammy_template.inp&#39;</span><span class="p">)</span> <span class="p">):</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">template_lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">template_lines</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+    <span class="k">return</span>
+    
+<span class="c1"># =============================================================================</span>
+<span class="c1"># </span>
+<span class="c1"># =============================================================================</span>
+<div class="viewcode-block" id="read_sammy_par"><a class="viewcode-back" href="../../source_api/sammy_interface.html#syndat.sammy_interface.read_sammy_par">[docs]</a><span class="k">def</span> <span class="nf">read_sammy_par</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">calculate_average</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads sammy.par file and calculates average parameters.</span>
+
+<span class="sd">    _extended_summary_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : _type_</span>
+<span class="sd">        _description_</span>
+<span class="sd">    calculate_average : bool</span>
+<span class="sd">        Whether or not to calculate average parameters.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    DataFrame</span>
+<span class="sd">        Contains the average parameters for each spin group</span>
+<span class="sd">    DataFrame</span>
+<span class="sd">        Contains all resonance parameters for all spin groups</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">energies</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">spin_group</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">nwidth</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">gwidth</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>   
+        <span class="n">readlines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">in_res_dat</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">readlines</span><span class="p">:</span>   
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># if first line starts with a float, parameter file starts directly with resonance data</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">in_res_dat</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># if that is not the case, parameter file has some keyword input before line &quot;RESONANCES&quot; then resonance parameters</span>
+
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">):</span>
+                <span class="n">in_res_dat</span> <span class="o">=</span> <span class="kc">False</span>  
+            <span class="k">if</span> <span class="n">in_res_dat</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">):</span>
+                    <span class="k">continue</span> <span class="c1">#ignore negative resonances</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">splitline</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    <span class="n">energies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">splitline</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                    <span class="n">gwidth</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">splitline</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">nwidth</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">splitline</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                    <span class="n">spin_group</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">splitline</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;RESONANCE&#39;</span><span class="p">):</span>
+                <span class="n">in_res_dat</span> <span class="o">=</span> <span class="kc">True</span>
+
+                
+                
+    <span class="n">Gg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gwidth</span><span class="p">);</span> <span class="n">Gn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nwidth</span><span class="p">);</span> <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">energies</span><span class="p">);</span> <span class="n">jspin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spin_group</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">E</span><span class="p">,</span> <span class="n">Gg</span><span class="p">,</span> <span class="n">Gn</span><span class="p">,</span> <span class="n">jspin</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="s1">&#39;Gg&#39;</span><span class="p">,</span><span class="s1">&#39;Gn&#39;</span><span class="p">,</span><span class="s1">&#39;jspin&#39;</span><span class="p">]);</span> <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">calculate_average</span><span class="p">:</span>
+        <span class="c1">#avg_widths = df.groupby(&#39;jspin&#39;, as_index=False)[&#39;Gg&#39;,&#39;Gn&#39;].mean() </span>
+        <span class="n">gb</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;jspin&#39;</span><span class="p">)</span>    
+        <span class="n">list_of_dfs</span><span class="o">=</span><span class="p">[</span><span class="n">gb</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">gb</span><span class="o">.</span><span class="n">groups</span><span class="p">]</span>
+        
+        <span class="n">avg_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;jspin&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dE&#39;</span><span class="p">,</span><span class="s1">&#39;Gg&#39;</span><span class="p">,</span><span class="s1">&#39;Gn&#39;</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">ij</span><span class="p">,</span> <span class="n">jdf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_of_dfs</span><span class="p">):</span>
+            <span class="n">avg_df</span><span class="p">[</span><span class="s1">&#39;dE&#39;</span><span class="p">][</span><span class="n">ij</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">jdf</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">avg_df</span><span class="p">[</span><span class="s1">&#39;Gg&#39;</span><span class="p">][</span><span class="n">ij</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">jdf</span><span class="p">[</span><span class="s1">&#39;Gg&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">avg_df</span><span class="p">[</span><span class="s1">&#39;Gn&#39;</span><span class="p">][</span><span class="n">ij</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">jdf</span><span class="p">[</span><span class="s1">&#39;Gn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">avg_df</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">avg_df</span><span class="p">,</span> <span class="n">df</span></div>
+    
+     
+
+           
+
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.sammy_interface</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

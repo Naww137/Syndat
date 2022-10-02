@@ -1,0 +1,511 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>syndat.particle_pair &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.particle_pair</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for syndat.particle_pair</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Thu Jun 16 12:18:04 2022</span>
+
+<span class="sd">@author: nwx</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">syndat</span> <span class="kn">import</span> <span class="n">sample_widths</span>
+<span class="kn">from</span> <span class="nn">syndat</span> <span class="kn">import</span> <span class="n">sample_levels</span>
+<span class="kn">from</span> <span class="nn">syndat</span> <span class="kn">import</span> <span class="n">scattering_theory</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="particle_pair"><a class="viewcode-back" href="../../source_api/particle_pair.html#syndat.particle_pair.particle_pair">[docs]</a><span class="k">class</span> <span class="nc">particle_pair</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    _summary_</span>
+
+<span class="sd">    _extended_summary_</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    quant_vec_sum: </span>
+<span class="sd">        Calculates the quantum vector sum of two angular momenta.</span>
+<span class="sd">    map_quantum_numbers:</span>
+<span class="sd">        Maps the possible quantum numbers for pair.</span>
+<span class="sd">    sample_all_Jpi:</span>
+<span class="sd">        Samples a full resonance parameter ladder for each possible spin group.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l_max</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialization of particle pair object for a given reaction.</span>
+
+<span class="sd">        The particle_pair class houses information about the incident and target particle for a reaction of interest. </span>
+<span class="sd">        The methods for this class include functions to calculate the open channels </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ac : float</span>
+<span class="sd">            Scattering channel radius in 1e-12 cm.</span>
+<span class="sd">        M : float or int</span>
+<span class="sd">            Mass of the target nucleus.</span>
+<span class="sd">        m : float or int</span>
+<span class="sd">            Mass of the incident particle.</span>
+<span class="sd">        I : float or int</span>
+<span class="sd">            Spin and parity of the target particle.</span>
+<span class="sd">        i : float or int</span>
+<span class="sd">            Spin and parity of the incident particle.</span>
+<span class="sd">        l_max : int</span>
+<span class="sd">            Highest order waveform to consider (l-value).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!</span>
+
+        <span class="k">if</span> <span class="n">ac</span> <span class="o">&lt;</span> <span class="mf">1e-7</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: scattering radius seems to be given in m rather than sqrt(barns) a.k.a. cm^-12&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ac</span> <span class="o">=</span> <span class="n">ac</span> <span class="c1"># 6.7e-15 # m or 6.7 femtometers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M</span> <span class="o">=</span> <span class="n">M</span> <span class="c1"># amu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">=</span> <span class="n">m</span> <span class="c1"># 1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">I</span> <span class="o">=</span> <span class="n">I</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span> <span class="o">=</span> <span class="n">l_max</span>
+
+        <span class="c1"># generalized</span>
+        <span class="n">ac_expected</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.23</span><span class="o">*</span><span class="n">M</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">))</span><span class="o">+</span><span class="mf">0.8</span> <span class="c1"># fermi or femtometers</span>
+
+        <span class="c1"># constants</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hbar</span> <span class="o">=</span> <span class="mf">6.582119569e-16</span> <span class="c1"># eV-s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="mf">2.99792458e8</span> <span class="c1"># m/s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_eV</span> <span class="o">=</span> <span class="mf">939.565420e6</span> <span class="c1"># eV/c^2</span>
+
+
+<div class="viewcode-block" id="particle_pair.quant_vec_sum"><a class="viewcode-back" href="../../source_api/particle_pair.html#syndat.particle_pair.particle_pair.quant_vec_sum">[docs]</a>    <span class="k">def</span> <span class="nf">quant_vec_sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates a quantum vector sum.</span>
+
+<span class="sd">        This function performs a quantum vector sum, a.k.a. it maps the quantum </span>
+<span class="sd">        triangular relationship between two integers or half integers.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : float or int</span>
+<span class="sd">            a variable.</span>
+<span class="sd">        b : float or int</span>
+<span class="sd">            a variable.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            Array of all possible quantum values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">);</span> <span class="n">b</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">b</span><span class="p">),</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vec</span></div>
+
+
+<div class="viewcode-block" id="particle_pair.map_quantum_numbers"><a class="viewcode-back" href="../../source_api/particle_pair.html#syndat.particle_pair.particle_pair.map_quantum_numbers">[docs]</a>    <span class="k">def</span> <span class="nf">map_quantum_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_out</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Maps the possible quantum numbers for pair.</span>
+
+<span class="sd">        This function maps out the possible quantum spin numbers (Jpi) for a given</span>
+<span class="sd">        particle pair up to some maximum considered incident waveform (l-wave).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        particle_pair : syndat object</span>
+<span class="sd">            Particle_pair object containing information about the reaction being studied.</span>
+<span class="sd">        print_out : bool</span>
+<span class="sd">            User option to print out quantum spin (J) mapping to console.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Jn : array-like</span>
+<span class="sd">            List containing possible J, # of contibuting channels, and contibuting </span>
+<span class="sd">            waveforms for negative parity. Formatted as (J,#chs,[l-wave, l-wave])</span>
+<span class="sd">        Jp : array-like</span>
+<span class="sd">            List containing possible J, # of contibuting channels, and contibuting </span>
+<span class="sd">            waveforms for positive parity. Formatted as (J,#chs,[l-wave, l-wave])</span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from sample_resparm import sample_spin_groups</span>
+<span class="sd">        &gt;&gt;&gt; sample_spin_groups.map_quantum_numbers(3/2,1/2,2, False)</span>
+<span class="sd">        ([(1.0, 1, [0.0]), (2.0, 1, [0.0])],</span>
+<span class="sd">        [(0.0, 1, [1.0]),</span>
+<span class="sd">        (1.0, 2, [1.0, 1.0]),</span>
+<span class="sd">        (2.0, 2, [1.0, 1.0]),</span>
+<span class="sd">        (3.0, 1, [1.0])])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># define object atributes</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">I</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">i</span>
+        <span class="n">l_wave_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span>
+
+        <span class="c1"># now perform calculations</span>
+        <span class="n">Jn</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">Jp</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quant_vec_sum</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">l_wave_max</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">i_parity</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">I_parity</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">I</span><span class="o">&lt;</span><span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">S_parity</span> <span class="o">=</span> <span class="n">i_parity</span><span class="o">*</span><span class="n">I_parity</span>
+
+        <span class="n">possible_Jpi</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">J_negative</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">J_positive</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i_l</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">L</span><span class="p">):</span>
+            <span class="n">this_l</span> <span class="o">=</span> <span class="p">{}</span>
+            
+            <span class="n">l_parity</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="n">l</span>
+            <span class="n">J_parity</span> <span class="o">=</span> <span class="n">S_parity</span><span class="o">*</span><span class="n">l_parity</span>
+            
+            <span class="k">for</span> <span class="n">i_s</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">S</span><span class="p">):</span>
+                <span class="n">js</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quant_vec_sum</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">l</span><span class="p">)</span>
+                <span class="n">this_l</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s=</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">js</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">js</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">J_parity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">J_positive</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">l</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">J_parity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="n">J_negative</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">l</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+                
+            <span class="n">possible_Jpi</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;l=</span><span class="si">{</span><span class="n">l</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">this_l</span>
+                
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">J_negative</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Jn_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">J_negative</span><span class="p">)</span>
+            <span class="n">Jn_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">Jn_unique</span><span class="p">:</span>
+                <span class="n">entrance_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">j</span><span class="p">)</span>
+                
+                <span class="n">ls</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">ss</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">jtot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">jtot</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                        <span class="n">ls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">ss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+                        
+                <span class="n">Jn</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">j</span><span class="p">,</span><span class="n">entrance_channels</span><span class="p">,</span><span class="n">ls</span><span class="p">))</span>
+            
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">J_positive</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Jp_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">J_positive</span><span class="p">)</span>
+            <span class="n">Jp_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span> 
+            
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">Jp_unique</span><span class="p">:</span>
+                <span class="n">entrance_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">j</span><span class="p">)</span>
+                
+                <span class="n">ls</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">ss</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">jtot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">jtot</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                        <span class="n">ls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">ss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+                    
+                <span class="n">Jp</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">j</span><span class="p">,</span><span class="n">entrance_channels</span><span class="p">,</span><span class="n">ls</span><span class="p">))</span>
+
+            
+            
+        <span class="k">if</span> <span class="n">print_out</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The following arrays describe all possible spin groups for a each parity.</span><span class="se">\n\</span>
+<span class="s1">    The data is given as a tuple where the first value is the integer </span><span class="se">\n\</span>
+<span class="s1">    or half integer total quantum spin J and the second value is the </span><span class="se">\n\</span>
+<span class="s1">    number of entrance channels for that spin group. </span><span class="se">\n\</span>
+<span class="s1">    * See the dictionary &quot;possible_Jpi&quot; for a nested packing structure.&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Spin group data for negative parity</span><span class="se">\n</span><span class="s1">(J-, #Chs, l-waves)&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">Jn</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Spin group data for positive parity</span><span class="se">\n</span><span class="s1">(J+, #Chs, l-waves)&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">Jp</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
+
+        <span class="c1"># define new attributes for particle_pair object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Jn</span> <span class="o">=</span> <span class="n">Jn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Jp</span> <span class="o">=</span> <span class="n">Jp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">J</span> <span class="o">=</span> <span class="n">Jn</span> <span class="o">+</span> <span class="n">Jp</span>
+
+        <span class="k">return</span></div>
+
+
+
+
+<div class="viewcode-block" id="particle_pair.sample_all_Jpi"><a class="viewcode-back" href="../../source_api/particle_pair.html#syndat.particle_pair.particle_pair.sample_all_Jpi">[docs]</a>    <span class="k">def</span> <span class="nf">sample_all_Jpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  
+                        <span class="n">Erange</span><span class="p">,</span> 
+                        <span class="n">Davg</span><span class="p">,</span> <span class="n">Ggavg</span><span class="p">,</span> <span class="n">gnavg</span><span class="p">,</span>
+                        <span class="n">save_csv</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
+                        <span class="n">sammy_run_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Samples a full resonance parameter ladder for each possible spin group.</span>
+
+<span class="sd">        This function samples resonance parameters (Energy and widths) for each </span>
+<span class="sd">        possible spin group (Jpi) of a given particle pair. The results can be </span>
+<span class="sd">        printed to the console and/or saved to a csv. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        self : syndat object</span>
+<span class="sd">            Particle pair object.</span>
+<span class="sd">        Erange : array-like</span>
+<span class="sd">            Array of resolve resonance range energy, only requires min/max.</span>
+<span class="sd">        Davg : array-like</span>
+<span class="sd">            Nested list of average level spacing for each spin group number. First </span>
+<span class="sd">            list is for negative parity (J-) second is for positive parity (J+).</span>
+<span class="sd">        Ggavg : array-like</span>
+<span class="sd">            Nested list of average widths for each spin group number. First </span>
+<span class="sd">            list is for negative parity (J-) second is for positive parity (J+).</span>
+<span class="sd">        gnavg : float</span>
+<span class="sd">            Nested list of average reduced amplitudes (gn_squared) for each spin group number. First </span>
+<span class="sd">            list is for negative parity (J-) second is for positive parity (J+).</span>
+<span class="sd">        print_out : bool</span>
+<span class="sd">            User option to print out quantum spin (J) mapping to console.</span>
+<span class="sd">        save_csv : bool</span>
+<span class="sd">            User option to save resonance ladders to csv.</span>
+<span class="sd">        sammy_run_folder : str</span>
+<span class="sd">            Folder in which the csv(s) containing resparm ladders will be saved.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Unsure of the average capture width for Gg sampling.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Jn_df : DataFrame</span>
+<span class="sd">            Pandas DataFrame conatining a resonance parameter ladder for each </span>
+<span class="sd">            quantum spin group with negative parity (all J-). The column E gives the energy of the level,</span>
+<span class="sd">            the column Gn gives the width of the agregate capture channel, and the following columns give</span>
+<span class="sd">            reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).</span>
+<span class="sd">        Jp_df : DataFrame</span>
+<span class="sd">            Pandas DataFrame conatining a resonance parameter ladder for each </span>
+<span class="sd">            quantum spin group with positive parity (all J+). The column E gives the energy of the level,</span>
+<span class="sd">            the column Gn gives the width of the agregate capture channel, and the following columns give</span>
+<span class="sd">            reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># ensure enough average parameter values were given</span>
+        <span class="n">Jn_avg_length</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">Davg</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ggavg</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">gnavg</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        <span class="n">Jp_avg_length</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">Davg</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ggavg</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">gnavg</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">each</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Jn</span><span class="p">)</span> <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">Jn_avg_length</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not enough avarage parameters given for negative parity spin groups&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">each</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Jp</span><span class="p">)</span> <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">Jp_avg_length</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not enough avarage parameters given for positive parity spin groups&quot;</span><span class="p">)</span>
+            
+    <span class="c1"># =============================================================================</span>
+    <span class="c1">#     negative parity Js</span>
+    <span class="c1"># =============================================================================</span>
+        <span class="n">Jn_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Davg</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ij</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Jn</span><span class="p">):</span>
+                
+                <span class="c1"># sample resonance levels for each spin group with negative parity</span>
+                <span class="p">[</span><span class="n">levels</span><span class="p">,</span> <span class="n">level_spacing</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_levels</span><span class="o">.</span><span class="n">sample_RRR_levels</span><span class="p">(</span><span class="n">Erange</span><span class="p">,</span> <span class="n">Davg</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ij</span><span class="p">])</span>
+                
+                <span class="c1"># a single radiative capture width is sampled w/large DOF because of many &#39;partial&#39; radiative transitions to ground state</span>
+                <span class="c1"># must divide average by the DOF in order to maintain proper magnitude</span>
+                <span class="n">red_gwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">Ggavg</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ij</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+                <span class="n">Gwidth</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">red_gwidth</span> <span class="c1"># Gbar = 2*gbar b/c P~1 for gamma channels</span>
+                
+                <span class="c1"># reduced width amplitudes are sampled as single channel (PT or chi with 1 DOF) for each contributing channel then summed</span>
+                <span class="c1"># while the sum will follow chi square with DOF=#channels, if you just sample the sum over all channels, you ignore</span>
+                <span class="c1"># differences in the average widths and differences in the penetrability function assosciated with each width</span>
+                <span class="n">gnx</span><span class="o">=</span><span class="p">[];</span> <span class="n">gn_lwave</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">ichannel</span><span class="p">,</span> <span class="n">lwave</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>      
+                    <span class="n">red_nwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">gnavg</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ij</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">gnx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">red_nwidth</span><span class="p">);</span> <span class="n">gn_lwave</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lwave</span><span class="p">)</span>
+                <span class="n">gn</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gnx</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">gn_lwave</span><span class="p">)</span>
+                
+                <span class="n">E_Gg</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">levels</span><span class="p">,</span> <span class="n">Gwidth</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="s1">&#39;Gg&#39;</span><span class="p">])</span>
+                <span class="n">E_Gg_gnx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">E_Gg</span><span class="p">,</span><span class="n">gn</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">E_Gg_Gnx_vert</span> <span class="o">=</span> <span class="n">E_Gg_gnx</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+                
+                <span class="n">Jn_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E_Gg_Gnx_vert</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">save_csv</span><span class="p">:</span>
+                    <span class="n">E_Gg_Gnx_vert</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sammy_run_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Jn_</span><span class="si">{</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No average level spacing given for negative parity spin groups&quot;</span><span class="p">)</span>
+                
+    <span class="c1"># =============================================================================</span>
+    <span class="c1">#       positive parity Js</span>
+    <span class="c1"># =============================================================================</span>
+        <span class="n">Jp_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Davg</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ij</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Jp</span><span class="p">):</span>
+                
+                <span class="c1"># sample resonance levels for each spin group with negative parity</span>
+                <span class="p">[</span><span class="n">levels</span><span class="p">,</span> <span class="n">level_spacing</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_levels</span><span class="o">.</span><span class="n">sample_RRR_levels</span><span class="p">(</span><span class="n">Erange</span><span class="p">,</span> <span class="n">Davg</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ij</span><span class="p">])</span>
+                
+                <span class="c1"># a single radiative capture width is sampled w/large DOF because of many &#39;partial&#39; radiative transitions to ground state</span>
+                <span class="n">red_gwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">Ggavg</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ij</span><span class="p">],</span> <span class="mi">100</span><span class="p">)</span>
+                <span class="n">Gwidth</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">red_gwidth</span> <span class="c1"># Gbar = 2*gbar b/c P~1 for gamma channels</span>
+                
+                <span class="c1"># reduced width amplitudes are sampled as single channel (PT or chi with 1 DOF) for each contributing channel then summed</span>
+                <span class="c1"># while the sum will follow chi square with DOF=#channels, if you just sample the sum over all channels, you ignore</span>
+                <span class="c1"># differences in the average widths and differences in the penetrability function assosciated with each width</span>
+                <span class="n">gnx</span><span class="o">=</span><span class="p">[];</span> <span class="n">gn_lwave</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">ichannel</span><span class="p">,</span> <span class="n">lwave</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>      
+                    <span class="n">red_nwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">gnavg</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ij</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">gnx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">red_nwidth</span><span class="p">);</span> <span class="n">gn_lwave</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lwave</span><span class="p">)</span>
+                <span class="n">gn</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gnx</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">gn_lwave</span><span class="p">)</span>
+                
+                <span class="n">E_Gg</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">levels</span><span class="p">,</span> <span class="n">Gwidth</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="s1">&#39;Gg&#39;</span><span class="p">])</span>
+                <span class="n">E_Gg_gnx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">E_Gg</span><span class="p">,</span><span class="n">gn</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">E_Gg_Gnx_vert</span> <span class="o">=</span> <span class="n">E_Gg_gnx</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+                
+                <span class="n">Jp_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E_Gg_Gnx_vert</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">save_csv</span><span class="p">:</span>
+                    <span class="n">E_Gg_Gnx_vert</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sammy_run_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Jp_</span><span class="si">{</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No average level spacing given for positive parity spin groups&quot;</span><span class="p">)</span>
+                
+        
+        <span class="c1"># =============================================================================</span>
+        <span class="c1">#       redefine object attributes</span>
+        <span class="c1"># ============================================================================= </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Jn_resonances</span> <span class="o">=</span> <span class="n">Jn_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Jp_resonances</span> <span class="o">=</span> <span class="n">Jp_</span></div></div>
+
+    
+
+
+
+
+    
+            
+            
+            
+
+
+        
+    
+
+
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.particle_pair</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

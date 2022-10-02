@@ -1,0 +1,330 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Experimental Effects &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Experimental Effects</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="experimental-effects">
+<h1>Experimental Effects<a class="headerlink" href="#experimental-effects" title="Permalink to this heading">¶</a></h1>
+<p id="exp-effects">This modules houses a number of functions to simulate the experimental effects seen in a cross section measurement.
+This includes functions for the inverse-reduction, noise addition, and reduction processes for the synthesis of experimental data.</p>
+<span class="target" id="module-syndat.exp_effects"></span><p>Created on Thu Jun 23 10:34:17 2022</p>
+<p>&#64;author: nwx</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.exp_effects.cts_to_ctr">
+<span class="sig-prename descclassname"><span class="pre">syndat.exp_effects.</span></span><span class="sig-name descname"><span class="pre">cts_to_ctr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_cts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trig</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/exp_effects.html#cts_to_ctr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.exp_effects.cts_to_ctr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts counts to count rate and propagates uncertainty.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cts</strong> (<em>array-like</em>) – Array of count data corresponting to each tof bin.</p></li>
+<li><p><strong>d_cts</strong> (<em>array-like</em>) – Array of uncertainty on each count data point corresponting to each tof bin.</p></li>
+<li><p><strong>bw</strong> (<em>array-like</em>) – Array of tof bin widths.</p></li>
+<li><p><strong>trig</strong> (<em>float</em><em> or </em><em>int</em>) – Number of linac pulses.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Uncertainty propagation with sandwich rule (JxCxJ.T) is over 1000x slower.
+A more simple error propagtion is used because there is no covariance
+between the statistical variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>ctr</strong> (<em>array-like</em>) – Array of count rates corresponding to each tof bin.</p></li>
+<li><p><strong>d_nctr</strong> (<em>array-like</em>) – Array of propagated uncertainty on each count rate point.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.exp_effects.gaus_noise">
+<span class="sig-prename descclassname"><span class="pre">syndat.exp_effects.</span></span><span class="sig-name descname"><span class="pre">gaus_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_vec</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/exp_effects.html#gaus_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.exp_effects.gaus_noise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Samples gaussian noise around a vector of mean values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (<em>array-like</em>) – Vector of mean values.</p></li>
+<li><p><strong>std_vec</strong> (<em>array-like</em>) – Vector of standard deviations (standard errors).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Noisy vector sampled as guassian around each mean/std.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.exp_effects.generate_open_counts">
+<span class="sig-prename descclassname"><span class="pre">syndat.exp_effects.</span></span><span class="sig-name descname"><span class="pre">generate_open_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flux_mag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/exp_effects.html#generate_open_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.exp_effects.generate_open_counts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate open (sample out) raw count data from a wide gaussian wrt energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>energy</strong> (<em>array-like</em>) – Array of energy values for each data point - corresponds to tof.</p></li>
+<li><p><strong>flux_mag</strong> (<em>float</em>) – Magnitude scaling factor applied to flux shape, how many counts!</p></li>
+<li><p><strong>mean</strong> (<em>float</em>) – Average value for gaussian shape.</p></li>
+<li><p><strong>std</strong> (<em>float</em>) – Standard deviation for gaussian shape.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Open counts (sample out).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.exp_effects.generate_raw_count_data">
+<span class="sig-prename descclassname"><span class="pre">syndat.exp_effects.</span></span><span class="sig-name descname"><span class="pre">generate_raw_count_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">open_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_noise</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Bi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/exp_effects.html#generate_raw_count_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.exp_effects.generate_raw_count_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates raw count data for sample-in given a theoretical tranmission.</p>
+<p>This function performs the inverse of the reduction process, calculating raw count data
+from a theoretical transmission. This process requires the assumption of known,
+true underlying reduction parameters and open count data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_df</strong> (<em>pandas.DataFrame</em>) – Sample in dataframe with a column for theoretical tranmission [‘theo_trans’] and energy [‘E’].</p></li>
+<li><p><strong>open_df</strong> (<em>pandas.DataFrame</em>) – Open dataframe, columns [‘E’], [‘bw’]</p></li>
+<li><p><strong>trig</strong> (<em>int</em>) – Number of times the LINAC is fired, corresponding to the number of times each channel is openned for counts.</p></li>
+<li><p><strong>k</strong> (<em>float</em>) – Background normalization for sample in.</p></li>
+<li><p><strong>K</strong> (<em>float</em>) – Background normalization for sample out.</p></li>
+<li><p><strong>Bi</strong> (<em>array-like</em>) – Background shape function stored as a vector.</p></li>
+<li><p><strong>b0</strong> (<em>float</em>) – Constant background for sample in.</p></li>
+<li><p><strong>B0</strong> (<em>float</em>) – Constant background for sample out.</p></li>
+<li><p><strong>alpha</strong> (<em>array-like</em>) – Vector of monitor stability factors [m1,m2,m3,m4]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>sample_df</strong> (<em>pandas.DataFrame</em>) – Dataframe containing data for sample in.</p></li>
+<li><p><strong>open_df</strong> (<em>pandas.DataFrame</em>) – Dataframe containing data for sample out.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.exp_effects.get_covT">
+<span class="sig-prename descclassname"><span class="pre">syndat.exp_effects.</span></span><span class="sig-name descname"><span class="pre">get_covT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tof</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Bi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sys_unc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/exp_effects.html#get_covT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.exp_effects.get_covT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the output covariance matrix of transmission from input uncertainties.</p>
+<p>This function uses the covariance sandwhich rule:
+.. math:: C_y = J^T*C_x*J
+to propagate input variance-covariance to transmission data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tof</strong> (<em>array-like</em>) – Array of time of flight values for each data point - corresponds to energy.</p></li>
+<li><p><strong>c</strong> (<em>float</em>) – Count rate for sample in.</p></li>
+<li><p><strong>C</strong> (<em>float</em>) – Count rate for sample out.</p></li>
+<li><p><strong>dc</strong> (<em>float</em>) – Uncertainty in the count rate for sample-in.</p></li>
+<li><p><strong>dC</strong> (<em>array-like</em>) – Uncertainty in the count rate for sample-out.</p></li>
+<li><p><strong>a</strong> (<em>float</em>) – Shaping parameter for exponential background function.</p></li>
+<li><p><strong>b</strong> (<em>float</em>) – Shaping parameter for exponential background function.</p></li>
+<li><p><strong>k</strong> (<em>float</em>) – Background normalization for sample in.</p></li>
+<li><p><strong>K</strong> (<em>float</em>) – Background normalization for sample out.</p></li>
+<li><p><strong>Bi</strong> (<em>array-like</em>) – Background shape function stored as a vector.</p></li>
+<li><p><strong>b0</strong> (<em>float</em>) – Constant background for sample in.</p></li>
+<li><p><strong>B0</strong> (<em>float</em>) – Constant background for sample out.</p></li>
+<li><p><strong>alpha</strong> (<em>array-like</em>) – Vector of monitor stability factors [m1,m2,m3,m4]</p></li>
+<li><p><strong>sys_unc</strong> (<em>array-like</em>) – Vector of systematic uncertainties: [da,db,dk_i,dk_o,dB0_i,dB0_o,m1,m2,m3,m4].</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Background function must be of form Bi = a*exp(-b). Explicitly coded derivatives for Jacobian.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Output covaraiance matrix for transmission.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.exp_effects.pois_noise">
+<span class="sig-prename descclassname"><span class="pre">syndat.exp_effects.</span></span><span class="sig-name descname"><span class="pre">pois_noise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/exp_effects.html#pois_noise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.exp_effects.pois_noise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Samples poissonian noise around a vector of values.
+:param vector: vector of expected values.
+:type vector: array-like</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Noisy vector sampled as poissonian around each expected value</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>noisy_vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.exp_effects.reduce_raw_count_data">
+<span class="sig-prename descclassname"><span class="pre">syndat.exp_effects.</span></span><span class="sig-name descname"><span class="pre">reduce_raw_count_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tof</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Bi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sys_unc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/exp_effects.html#reduce_raw_count_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.exp_effects.reduce_raw_count_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduces raw count data to transmission data with propagated uncertainty.</p>
+<p>This function uses the covariance sandwhich rule:
+.. math:: C_y = J^T*C_x*J
+to propagate input variance-covariance from both statistical uncertainties
+and systematic uncertainties to transmission data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tof</strong> (<em>array-like</em>) – Array of time of flight values for each data point - corresponds to energy.</p></li>
+<li><p><strong>c</strong> (<em>float</em>) – Count rate for sample in.</p></li>
+<li><p><strong>C</strong> (<em>float</em>) – Count rate for sample out.</p></li>
+<li><p><strong>dc</strong> (<em>float</em>) – Uncertainty in the count rate for sample-in.</p></li>
+<li><p><strong>dC</strong> (<em>array-like</em>) – Uncertainty in the count rate for sample-out.</p></li>
+<li><p><strong>bw</strong> (<em>float</em>) – Width in time a given channel is open, bin width.</p></li>
+<li><p><strong>trig</strong> (<em>int</em>) – Number of times the LINAC is fired, corresponding to the number of times each channel is openned for counts.</p></li>
+<li><p><strong>a</strong> (<em>float</em>) – Shaping parameter for exponential background function.</p></li>
+<li><p><strong>b</strong> (<em>float</em>) – Shaping parameter for exponential background function.</p></li>
+<li><p><strong>k</strong> (<em>float</em>) – Background normalization for sample in.</p></li>
+<li><p><strong>K</strong> (<em>float</em>) – Background normalization for sample out.</p></li>
+<li><p><strong>Bi</strong> (<em>array-like</em>) – Background shape function stored as a vector.</p></li>
+<li><p><strong>b0</strong> (<em>float</em>) – Constant background for sample in.</p></li>
+<li><p><strong>B0</strong> (<em>float</em>) – Constant background for sample out.</p></li>
+<li><p><strong>alpha</strong> (<em>array-like</em>) – Vector of monitor stability factors [m1,m2,m3,m4]</p></li>
+<li><p><strong>sys_unc</strong> (<em>array-like</em>) – Vector of systematic uncertainties: [da,db,dk_i,dk_o,dB0_i,dB0_o,m1,m2,m3,m4].</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Background function must be of form Bi = a*exp(-b)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Output covaraiance matrix for transmission.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source_api/exp_effects.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Experimental Effects</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

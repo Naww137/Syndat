@@ -1,0 +1,224 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Sammy Interface &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Sammy Interface</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="sammy-interface">
+<h1>Sammy Interface<a class="headerlink" href="#sammy-interface" title="Permalink to this heading">¶</a></h1>
+<p id="id1">This module houses a number of functions used to interface with the SAMMY code from ORNL, primarily reading and writing input/output files.</p>
+<span class="target" id="module-syndat.sammy_interface"></span><p>Created on Wed Jun 22 12:30:52 2022</p>
+<p>&#64;author: nwx</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.sammy_interface.read_sammy_par">
+<span class="sig-prename descclassname"><span class="pre">syndat.sammy_interface.</span></span><span class="sig-name descname"><span class="pre">read_sammy_par</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculate_average</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/sammy_interface.html#read_sammy_par"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.sammy_interface.read_sammy_par" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads sammy.par file and calculates average parameters.</p>
+<p>_extended_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>calculate_average</strong> (<em>bool</em>) – Whether or not to calculate average parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>DataFrame</em> – Contains the average parameters for each spin group</p></li>
+<li><p><em>DataFrame</em> – Contains all resonance parameters for all spin groups</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.sammy_interface.readlst">
+<span class="sig-prename descclassname"><span class="pre">syndat.sammy_interface.</span></span><span class="sig-name descname"><span class="pre">readlst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/sammy_interface.html#readlst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.sammy_interface.readlst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a sammy .lst or .dat file.</p>
+<p>_extended_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<em>str</em>) – Full path to the .lst or .dat file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataFrame with headers.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.sammy_interface.write_samdat">
+<span class="sig-prename descclassname"><span class="pre">syndat.sammy_interface.</span></span><span class="sig-name descname"><span class="pre">write_samdat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/sammy_interface.html#write_samdat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.sammy_interface.write_samdat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a formatted sammy.dat file.</p>
+<p>This function takes a DataFrame with appropriately named columns: “E”, “exp_trans”, and “exp_trans_unc”.
+These DataFrame keys correspond to the “trans” DataFrame generated by Syndat. This is an attribute of the experiment object once the experiment is “run”.
+The uncertainty on the experimental data point must be absolute for this formatting as it corresponds to the     sammy format with “use twenty significant digits” or “twenty” in the input file. If this flag is not in the     sammy input file, the uncertainty should not be absolute and the formatting (space between variables) changes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>transmission_data</strong> (<em>DataFrame</em>) – DataFrame containing experimental transmission data.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – Filepath/name for the sammy.dat file being created.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – Energy column not in DataFrame.</p></li>
+<li><p><strong>ValueError</strong> – Experimental transmission column not in DataFrame.</p></li>
+<li><p><strong>ValueError</strong> – Experimental transmission uncertainty column not in DataFrame.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.sammy_interface.write_sampar">
+<span class="sig-prename descclassname"><span class="pre">syndat.sammy_interface.</span></span><span class="sig-name descname"><span class="pre">write_sampar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vary_parm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/noahwalton/Documents/GitHub/nuc_syndat/templates/sammy_template_RM_only.par'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/sammy_interface.html#write_sampar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.sammy_interface.write_sampar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a formatted sammy.par file.</p>
+<p>This function writes a formatted sammy parameter file from a DataFrame containing resonance parameters.
+The DataFrame may have</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>) – _description_</p></li>
+<li><p><strong>vary_parm</strong> (<em>Bool</em>) – Option to set vary parameters (0 or 1) in sammy.par file.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – Filepath/name of sammy.par file being created.</p></li>
+<li><p><strong>template</strong> (<em>str</em><em>, </em><em>optional</em>) – Filepath to template file for sammy.par. Included because of the different options for input to sammy, by default os.path.realpath(“../templates/sammy_template_RM_only.par”)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source_api/sammy_interface.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Sammy Interface</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

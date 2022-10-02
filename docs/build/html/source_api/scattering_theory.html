@@ -1,0 +1,300 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Scattering Theory &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Scattering Theory</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="scattering-theory">
+<h1>Scattering Theory<a class="headerlink" href="#scattering-theory" title="Permalink to this heading">¶</a></h1>
+<p id="id1">This module houses a number of functions for scattering theory.</p>
+<span class="target" id="module-syndat.scattering_theory"></span><dl class="py function">
+<dt class="sig sig-object py" id="syndat.scattering_theory.FofE_explicit">
+<span class="sig-prename descclassname"><span class="pre">syndat.scattering_theory.</span></span><span class="sig-name descname"><span class="pre">FofE_explicit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbital_angular_momentum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/scattering_theory.html#FofE_explicit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.scattering_theory.FofE_explicit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates penetrability and shift functions using explicit definitions.</p>
+<p>This function calculates the centifugal barrier penetrability as well as
+the shift factor for a neutron incident on Cu-63. The explicit implementation
+only allows for l-values up to 3. Some nucelar parameters are housed within
+this function, this could be updated for other nuclei.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>E</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – Energy of the incident neutron.</p></li>
+<li><p><strong>ac</strong> (<em>float</em>) – Scattering channel radius in meters.</p></li>
+<li><p><strong>M</strong> (<em>float</em><em> or </em><em>int</em>) – Mass of the target nucleus.</p></li>
+<li><p><strong>m</strong> (<em>float</em><em> or </em><em>int</em>) – Mass of the incident particle.</p></li>
+<li><p><strong>orbital_angular_momentum</strong> (<em>int</em>) – Orbital angular momentum of the pair, describes waveform (l).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>S_array</strong> (<em>array-like</em>) – Shift factor(s) at given energy.</p></li>
+<li><p><strong>P_array</strong> (<em>array-like</em>) – Penetrability at given energy.</p></li>
+<li><p><strong>psi</strong> (<em>array-like</em>) – Potential scattering phase shift.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#syndat.scattering_theory.PS_recursive" title="syndat.scattering_theory.PS_recursive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PS_recursive</span></code></a></dt><dd><p>Calculates penetrability and shift functions using recursion.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sample_resparm</span> <span class="kn">import</span> <span class="n">PS_functions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">PS_functions</span><span class="o">.</span><span class="n">PS_explicit</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">10.4</span><span class="p">,</span> <span class="mf">10.5</span><span class="p">]),</span> <span class="mf">6.7e-15</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">[array([-1.99999272, -1.99999265]), array([2.4744277e-13, 2.5343386e-13])]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.scattering_theory.PS_recursive">
+<span class="sig-prename descclassname"><span class="pre">syndat.scattering_theory.</span></span><span class="sig-name descname"><span class="pre">PS_recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbital_angular_momentum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/scattering_theory.html#PS_recursive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.scattering_theory.PS_recursive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates penetrability and shift functions using recursion.</p>
+<p>This function calculates the centifugal barrier penetrability as well as
+the shift factor for a neutron incident on Cu-63. The recursive implementation
+will allow for high l values. Some nucelar parameters are housed within
+this function, this could be updated for other nuclei.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>E</strong> (<em>numpy.ndarray</em>) – Energy of the incident neutron.</p></li>
+<li><p><strong>ac</strong> (<em>float</em>) – Scattering channel radius in meters.</p></li>
+<li><p><strong>M</strong> (<em>float</em><em> or </em><em>int</em>) – Mass of the target nucleus.</p></li>
+<li><p><strong>m</strong> (<em>float</em><em> or </em><em>int</em>) – Mass of the incident particle.</p></li>
+<li><p><strong>orbital_angular_momentum</strong> (<em>int</em>) – Orbital angular momentum of the pair, describes waveform (l).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>S_array</strong> (<em>numpy.ndarray</em>) – Array shift factors, each row is an l value, columns traverse energy vector given.</p></li>
+<li><p><strong>P_array</strong> (<em>numpy.ndarray</em>) – Array penetrability, each row is an l value, columns traverse energy vector given.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">PS_explicit</span></code></dt><dd><p>Calculates penetrability and shift functions using explicit definitions.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sample_resparm</span> <span class="kn">import</span> <span class="n">PS_functions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">PS_functions</span><span class="o">.</span><span class="n">PS_recursive</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">10.4</span><span class="p">]),</span> <span class="mf">6.7e-15</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">[array([[ 0.        ],</span>
+<span class="go">        [-0.99997817],</span>
+<span class="go">        [-1.99999272]]),</span>
+<span class="go">array([[4.67244381e-03],</span>
+<span class="go">        [1.02005310e-07],</span>
+<span class="go">        [2.47442770e-13]])]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.scattering_theory.SLBW_capture">
+<span class="sig-prename descclassname"><span class="pre">syndat.scattering_theory.</span></span><span class="sig-name descname"><span class="pre">SLBW_capture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resonance_ladder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/scattering_theory.html#SLBW_capture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.scattering_theory.SLBW_capture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a multi-level capture cross section using SLBW formalism.</p>
+<p>_extended_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>g</strong> (<em>float</em>) – Spin statistical factor $g_{J,lpha}$.</p></li>
+<li><p><strong>k</strong> (<em>float</em><em> or </em><em>array-like</em>) – Angular wavenumber or array of angular wavenumber values corresponding to the energy vector.</p></li>
+<li><p><strong>E</strong> (<em>float</em><em> or </em><em>array-like</em>) – KE of incident particle or array of KE’s.</p></li>
+<li><p><strong>resonance_ladder</strong> (<em>DataFrame</em>) – DF with columns for</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>SLBW capture cross section.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.scattering_theory.gstat">
+<span class="sig-prename descclassname"><span class="pre">syndat.scattering_theory.</span></span><span class="sig-name descname"><span class="pre">gstat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/scattering_theory.html#gstat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.scattering_theory.gstat" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Calculates the spin statistical factor for a given $J_{pi,lpha}$.</p>
+<p>The spin statistical factor (g) is a weigting factor describing the probability of the different total angular momenta, give by:
+&lt;/br&gt; $ g_{Jlpha} =</p>
+</div></blockquote>
+<p>rac{2J+1}{(2i+1)(2I+1)} $ &lt;/br&gt;</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>J</strong><span class="classifier">Float or int</span></dt><dd><p>Total angular momentum of the channel.</p>
+</dd>
+<dt><strong>I</strong><span class="classifier">float or int</span></dt><dd><p>Spin and parity of the target particle.</p>
+</dd>
+<dt><strong>i</strong><span class="classifier">float or int</span></dt><dd><p>Spin and parity of the incident particle.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>_type_</dt><dd><p>_description_</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="syndat.scattering_theory.k_wavenumber">
+<span class="sig-prename descclassname"><span class="pre">syndat.scattering_theory.</span></span><span class="sig-name descname"><span class="pre">k_wavenumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/scattering_theory.html#k_wavenumber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.scattering_theory.k_wavenumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the angular wavenumber of the compound state nucleus at a given incident energy, units .</p>
+<p>This function calculates the wavenumber of the compound state nucleus
+created by an incident neutron and a Cu-63 atom. Some nucelar parameters
+are housed within this function, this could be updated for other nuclei.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>E</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – Energy of the incident neutron.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns either the scalar k or vector of k at different energies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float or numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source_api/scattering_theory.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Scattering Theory</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

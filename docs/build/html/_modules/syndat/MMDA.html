@@ -1,0 +1,337 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>syndat.MMDA &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.MMDA</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for syndat.MMDA</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Thu Jun 23 11:26:07 2022</span>
+
+<span class="sd">@author: nwx</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">syndat</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+
+<span class="k">def</span> <span class="nf">wrapped_sammy_file_creator</span><span class="p">(</span><span class="n">number_of_realizations</span><span class="p">,</span> <span class="n">case_directory</span><span class="p">,</span> <span class="n">Estruct</span><span class="p">,</span> \
+                               <span class="n">I</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l_wave_max</span><span class="p">,</span>  
+                               <span class="n">RRR_Erange</span><span class="p">,</span> 
+                               <span class="n">Davg</span><span class="p">,</span> <span class="n">Gavg</span><span class="p">,</span> 
+                               <span class="n">Gavg_swave</span><span class="p">,</span> 
+                               <span class="n">print_out</span><span class="p">,</span>
+                                   <span class="n">save_csv</span><span class="p">):</span>
+    
+    <span class="n">estruct_created</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">inputs_created</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">par_created</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">for</span> <span class="n">irealize</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">number_of_realizations</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        
+        <span class="n">realization_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;realization_</span><span class="si">{</span><span class="n">irealize</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">realization_dir</span><span class="p">):</span>
+<span class="c1"># in here I could look for existing sammy files and have an option to overwrite or keep</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">realization_dir</span><span class="p">)</span>
+            
+    <span class="c1">#     sample resparms</span>
+        <span class="n">Jn_ladders</span><span class="p">,</span> <span class="n">Jp_ladders</span> <span class="o">=</span> <span class="n">syndat</span><span class="o">.</span><span class="n">spin_groups</span><span class="o">.</span><span class="n">sample_all_Jpi</span><span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l_wave_max</span><span class="p">,</span>  
+                            <span class="n">RRR_Erange</span><span class="p">,</span> 
+                            <span class="n">Davg</span><span class="p">,</span> <span class="n">Gavg</span><span class="p">,</span> 
+                            <span class="n">Gavg_swave</span><span class="p">,</span> 
+                            <span class="n">print_out</span><span class="p">,</span>
+                            <span class="n">save_csv</span><span class="p">,</span> 
+                            <span class="n">realization_dir</span><span class="p">)</span>
+    
+    <span class="c1">#   create necessary sammy files</span>
+        <span class="n">syndat</span><span class="o">.</span><span class="n">sammy_interface</span><span class="o">.</span><span class="n">create_sammyinp</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">realization_dir</span><span class="p">,</span><span class="s1">&#39;sammy.inp&#39;</span><span class="p">));</span> <span class="n">inputs_created</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">syndat</span><span class="o">.</span><span class="n">sammy_interface</span><span class="o">.</span><span class="n">create_sammypar</span><span class="p">(</span><span class="n">Jn_ladders</span><span class="p">,</span> <span class="n">Jp_ladders</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">realization_dir</span><span class="p">,</span><span class="s1">&#39;sammy.par&#39;</span><span class="p">));</span> <span class="n">par_created</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="c1">#   could maybe sample a paremter for energy structure, i.e. detector deadtime</span>
+        <span class="n">syndat</span><span class="o">.</span><span class="n">sammy_interface</span><span class="o">.</span><span class="n">write_estruct_file</span><span class="p">(</span><span class="n">Estruct</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">realization_dir</span><span class="p">,</span><span class="s1">&#39;estruct&#39;</span><span class="p">));</span> <span class="n">estruct_created</span><span class="o">+=</span><span class="mi">1</span>
+    
+    <span class="n">report_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Report for wrapped sammy file creator:</span><span class="se">\n\</span>
+<span class="si">{</span><span class="n">estruct_created</span><span class="si">}</span><span class="s1"> Energy structure files created</span><span class="se">\n\</span>
+<span class="si">{</span><span class="n">inputs_created</span><span class="si">}</span><span class="s1"> sammy.inp files created</span><span class="se">\n\</span>
+<span class="si">{</span><span class="n">par_created</span><span class="si">}</span><span class="s1"> sammy.par files created&#39;</span>
+                    
+    <span class="nb">print</span><span class="p">();</span><span class="nb">print</span><span class="p">(</span><span class="n">report_string</span><span class="p">);</span> <span class="nb">print</span><span class="p">()</span>
+                    
+    <span class="k">return</span> <span class="n">report_string</span>
+
+
+
+
+<span class="k">def</span> <span class="nf">run_sammy_and_wait</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span> <span class="n">case_basename</span><span class="p">,</span> <span class="n">number_of_cases</span><span class="p">):</span>
+        
+    <span class="c1"># delete qsub_icase.sh.* files - these files indicate that qsub job has completed</span>
+    <span class="k">for</span> <span class="n">isample</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">number_of_cases</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">wildcard_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span> <span class="n">case_basename</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">case_basename</span><span class="si">}</span><span class="s1">_smpl_</span><span class="si">{</span><span class="n">isample</span><span class="si">}</span><span class="s1">/qsub_</span><span class="si">{</span><span class="n">isample</span><span class="si">}</span><span class="s1">.sh.*&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;rm </span><span class="si">{</span><span class="n">wildcard_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+    <span class="c1"># run sammy with bayes for all files created</span>
+    <span class="n">irunsammy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">isample</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">number_of_cases</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span> <span class="n">case_basename</span><span class="p">,</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">case_basename</span><span class="si">}</span><span class="s1">_smpl_</span><span class="si">{</span><span class="n">isample</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;ssh -t necluster.ne.utk.edu &#39;cd &quot;</span><span class="o">+</span><span class="n">directory</span><span class="o">+</span><span class="sa">f</span><span class="s2">&quot; ; qsub qsub_</span><span class="si">{</span><span class="n">isample</span><span class="si">}</span><span class="s2">.sh&#39;&quot;</span><span class="p">)</span>
+        <span class="n">irunsammy</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+    <span class="c1"># wait on all cases to complete running - looking for qsub_icase.sh.o file</span>
+    <span class="n">running_sammy</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="nb">print</span><span class="p">();</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Waiting for sammy to run&#39;</span><span class="p">);</span> <span class="nb">print</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">running_sammy</span><span class="p">:</span>
+        <span class="n">case_run_bool</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">isample</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">number_of_cases</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span> <span class="n">case_basename</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">case_basename</span><span class="si">}</span><span class="s1">_smpl_</span><span class="si">{</span><span class="n">isample</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            <span class="n">idone_file</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;qsub_</span><span class="si">{</span><span class="n">isample</span><span class="si">}</span><span class="s1">.sh.o&#39;</span><span class="p">):</span>
+                    <span class="n">idone_file</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">_</span> <span class="o">=</span> <span class="mi">0</span>
+                    
+            <span class="k">if</span> <span class="n">idone_file</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">case_run_bool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">case_run_bool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">case_run_bool</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">running_sammy</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">isamples_still_running</span> <span class="o">=</span> <span class="n">case_run_bool</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Waiting on </span><span class="si">{</span><span class="n">isamples_still_running</span><span class="si">}</span><span class="s1"> to complete&#39;</span><span class="p">)</span> <span class="c1">#!!! this could be done better - only prints this when all are complete for some reason</span>
+        
+    <span class="k">return</span> <span class="n">irunsammy</span>
+
+
+<span class="k">def</span> <span class="nf">copy_syndat</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span><span class="n">case_basename</span><span class="p">,</span><span class="n">first_case</span><span class="p">,</span><span class="n">last_case</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span> <span class="n">case_basename</span><span class="p">,</span><span class="s1">&#39;synthetic_data&#39;</span><span class="p">)):</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span> <span class="n">case_basename</span><span class="p">,</span><span class="s1">&#39;synthetic_data&#39;</span><span class="p">))</span>
+    <span class="n">run_cases</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">last_case</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span> <span class="n">icopy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">run_cases</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span><span class="n">case_basename</span><span class="p">,</span><span class="n">case_basename</span><span class="o">+</span><span class="sa">f</span><span class="s1">&#39;_smpl_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span><span class="sa">f</span><span class="s1">&#39;syndat_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_directory</span><span class="p">,</span><span class="n">case_basename</span><span class="p">,</span><span class="s1">&#39;synthetic_data&#39;</span><span class="p">))</span>
+        <span class="c1">#os.system(&quot;scp nwalton1@necluster.ne.utk.edu:/home/nwalton1/my_sammy/slbw_testing_noexp/slbw_1L_noexp_case1/syndat_{i} /Users/noahwalton/research_local/resonance_fitting/synthetic_data&quot;)</span>
+        <span class="n">icopy</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># ssh -t necluster.ne.utk.edu &#39;cd /home/nwalton1/my_sammy/slbw_testing/slbw_fitting_case1/ ; /home/nwalton1/my_sammy/SAMMY/sammy/build/install/bin/sammy &lt; slbw_fitting_case1.sh&#39;</span>
+    <span class="nb">print</span><span class="p">();</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;copied </span><span class="si">{</span><span class="n">icopy</span><span class="si">}</span><span class="s1"> synthetic data files&#39;</span><span class="p">);</span> <span class="nb">print</span><span class="p">()</span>
+
+
+
+<span class="k">def</span> <span class="nf">write_qsub_shell_script</span><span class="p">(</span><span class="n">isample</span><span class="p">,</span> <span class="n">sample_directory</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_directory</span><span class="p">,</span><span class="sa">f</span><span class="s1">&#39;qsub_</span><span class="si">{</span><span class="n">isample</span><span class="si">}</span><span class="s1">.sh&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;#!/bin/bash</span>
+
+<span class="s2">#PBS -V</span>
+<span class="s2">#PBS -l nodes=1:ppn=1</span>
+<span class="s2">#PBS -q fill</span>
+
+<span class="s2">cd $</span><span class="si">{PBS_O_WORKDIR}</span><span class="s2"></span>
+
+<span class="s2">/home/nwalton1/my_sammy/SAMMY/sammy/build/install/bin/sammy &lt; piped_sammy_commands.sh&quot;&quot;&quot;</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="create_sammy_runfiles"><a class="viewcode-back" href="../../source_api/MMDA.html#syndat.MMDA.create_sammy_runfiles">[docs]</a><span class="k">def</span> <span class="nf">create_sammy_runfiles</span><span class="p">(</span><span class="n">case_basename</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">ladder_sample_function</span><span class="p">,</span> <span class="n">inp_template_file</span><span class="p">,</span> <span class="n">run_sammy</span><span class="p">,</span>
+                            <span class="n">run_directory</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates directories and SAMMY runfiles for a number of sample data cases.</span>
+
+<span class="sd">    This function will create a directory and all files necessary to run SAMMY for each sample. </span>
+<span class="sd">    Currently this funciton is setup to generate theoretical cross sections from resonance parameters</span>
+<span class="sd">    that can then be put through the syndat methodology to generate experimental noise.</span>
+
+<span class="sd">    The directory strucure is:</span>
+<span class="sd">    - cwd</span>
+<span class="sd">        - case_basename</span>
+<span class="sd">            - case_basename_smpl_#</span>
+<span class="sd">                - sammy runfiles for sample #</span>
+
+<span class="sd">    A function for gennerating a resonance ladder must be supplied allowing the user to generate very problem specific resonance ladders.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    case_basename : string</span>
+<span class="sd">        Name of the main directory for which this set of synthetic data will live. This folder is created within the directory that this script is run from.</span>
+<span class="sd">    samples : int</span>
+<span class="sd">        Number of sample cases</span>
+<span class="sd">    energy : array-like</span>
+<span class="sd">        Energy grid for the calculation</span>
+<span class="sd">    ladder_sample_function : function</span>
+<span class="sd">        Function that when called samples a resonance ladder and outputs (dataframe, samtools array).</span>
+<span class="sd">    inp_template_file : string</span>
+<span class="sd">        Full path to the template sammy.inp file</span>
+<span class="sd">    run_sammy : bool</span>
+<span class="sd">        Boolean option to run sammy or not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_directory</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">case_basename</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)):</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_directory</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">case_basename</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+
+        <span class="n">sample_df</span><span class="p">,</span> <span class="n">sample_array</span> <span class="o">=</span> <span class="n">ladder_sample_function</span><span class="p">()</span>
+
+        <span class="n">sample_name</span> <span class="o">=</span> <span class="n">case_basename</span> <span class="o">+</span> <span class="s1">&#39;_smpl_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">sample_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">run_directory</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">case_basename</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">sample_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">sample_directory</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">sample_directory</span><span class="p">)</span>
+        
+        <span class="n">sammy_inp_filename</span> <span class="o">=</span> <span class="s1">&#39;sammy_syndat.inp&#39;</span>
+        <span class="n">sammy_par_filename</span> <span class="o">=</span> <span class="s1">&#39;sammy_syndat.par&#39;</span>
+        <span class="n">estruct_filename</span> <span class="o">=</span> <span class="s1">&#39;estruct&#39;</span>
+        <span class="n">piped_commands_filename</span> <span class="o">=</span> <span class="s1">&#39;piped_sammy_commands.sh&#39;</span>
+        
+        <span class="c1"># write necessary sammy runfiles</span>
+        <span class="n">syndat</span><span class="o">.</span><span class="n">sammy_interface</span><span class="o">.</span><span class="n">write_estruct_file</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_directory</span><span class="p">,</span><span class="n">estruct_filename</span><span class="p">))</span>
+        <span class="n">syndat</span><span class="o">.</span><span class="n">sammy_interface</span><span class="o">.</span><span class="n">create_sammyinp</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_directory</span><span class="p">,</span><span class="n">sammy_inp_filename</span><span class="p">),</span> <span class="n">template</span><span class="o">=</span><span class="n">inp_template_file</span><span class="p">)</span>
+        <span class="n">syndat</span><span class="o">.</span><span class="n">sammy_interface</span><span class="o">.</span><span class="n">samtools_fmtpar</span><span class="p">(</span><span class="n">sample_array</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_directory</span><span class="p">,</span><span class="n">sammy_par_filename</span><span class="p">))</span>
+        
+        <span class="c1"># write qsub shell script and piped sammy input shell script</span>
+        <span class="n">write_qsub_shell_script</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">sample_directory</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_directory</span><span class="p">,</span> <span class="n">piped_commands_filename</span><span class="p">)</span> <span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pipefile</span><span class="p">:</span>
+            <span class="n">line1</span> <span class="o">=</span> <span class="n">sammy_inp_filename</span>
+            <span class="n">line2</span> <span class="o">=</span> <span class="n">sammy_par_filename</span>
+            <span class="n">line3</span> <span class="o">=</span> <span class="n">estruct_filename</span>
+            <span class="n">pipefile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line1</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">line2</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">line3</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">run_sammy</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">();</span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;going to run sammy to create synthetic data&#39;</span><span class="p">);</span> <span class="nb">print</span><span class="p">()</span>
+        <span class="n">irunsammy</span> <span class="o">=</span> <span class="n">syndat</span><span class="o">.</span><span class="n">MMDA</span><span class="o">.</span><span class="n">run_sammy_and_wait</span><span class="p">(</span><span class="n">run_directory</span><span class="p">,</span> <span class="n">case_basename</span><span class="p">,</span> <span class="n">samples</span><span class="p">)</span>
+        <span class="n">syndat</span><span class="o">.</span><span class="n">MMDA</span><span class="o">.</span><span class="n">copy_syndat</span><span class="p">(</span><span class="n">run_directory</span><span class="p">,</span><span class="n">case_basename</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">samples</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">irunsammy</span> <span class="o">=</span> <span class="mi">0</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.MMDA</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

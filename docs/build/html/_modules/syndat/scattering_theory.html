@@ -1,0 +1,422 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>syndat.scattering_theory &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.scattering_theory</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for syndat.scattering_theory</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+
+
+<div class="viewcode-block" id="gstat"><a class="viewcode-back" href="../../source_api/scattering_theory.html#syndat.scattering_theory.gstat">[docs]</a><span class="k">def</span> <span class="nf">gstat</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the spin statistical factor for a given $J_{\pi,\alpha}$.</span>
+
+<span class="sd">    The spin statistical factor (g) is a weigting factor describing the probability of the different total angular momenta, give by:</span>
+<span class="sd">    &lt;/br&gt; $ g_{J\alpha} = \frac{2J+1}{(2i+1)(2I+1)} $ &lt;/br&gt;</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    J : Float or int</span>
+<span class="sd">        Total angular momentum of the channel.</span>
+<span class="sd">    I : float or int</span>
+<span class="sd">        Spin and parity of the target particle.</span>
+<span class="sd">    i : float or int</span>
+<span class="sd">        Spin and parity of the incident particle.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    _type_</span>
+<span class="sd">        _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">J</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">I</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="k_wavenumber"><a class="viewcode-back" href="../../source_api/scattering_theory.html#syndat.scattering_theory.k_wavenumber">[docs]</a><span class="k">def</span> <span class="nf">k_wavenumber</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the angular wavenumber of the compound state nucleus at a given incident energy, units .</span>
+
+<span class="sd">    This function calculates the wavenumber of the compound state nucleus</span>
+<span class="sd">    created by an incident neutron and a Cu-63 atom. Some nucelar parameters </span>
+<span class="sd">    are housed within this function, this could be updated for other nuclei.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    E : float or numpy.ndarray</span>
+<span class="sd">        Energy of the incident neutron.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float or numpy.ndarray</span>
+<span class="sd">        Returns either the scalar k or vector of k at different energies.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># constants </span>
+    <span class="n">hbar</span> <span class="o">=</span> <span class="mf">6.582119569e-16</span> <span class="c1"># eV-s</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mf">2.99792458e8</span> <span class="c1"># m/s</span>
+    <span class="n">mn_eV</span> <span class="o">=</span> <span class="mf">939.565420e6</span> <span class="c1"># eV/c^2</span>
+    <span class="n">constant</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">mn_eV</span><span class="p">)</span><span class="o">/</span><span class="n">c</span><span class="o">/</span><span class="n">hbar</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1e-14</span><span class="p">)</span> <span class="c1"># 0.002197 #sqrt(2Mn)/hbar </span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="p">(</span><span class="n">M</span><span class="o">/</span><span class="p">(</span><span class="n">M</span><span class="o">+</span><span class="n">m</span><span class="p">))</span><span class="o">*</span><span class="n">constant</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">k</span></div>
+    
+
+<div class="viewcode-block" id="PS_recursive"><a class="viewcode-back" href="../../source_api/scattering_theory.html#syndat.scattering_theory.PS_recursive">[docs]</a><span class="k">def</span> <span class="nf">PS_recursive</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">orbital_angular_momentum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates penetrability and shift functions using recursion.</span>
+
+<span class="sd">        This function calculates the centifugal barrier penetrability as well as</span>
+<span class="sd">        the shift factor for a neutron incident on Cu-63. The recursive implementation</span>
+<span class="sd">        will allow for high l values. Some nucelar parameters are housed within </span>
+<span class="sd">        this function, this could be updated for other nuclei.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        E : numpy.ndarray</span>
+<span class="sd">            Energy of the incident neutron.</span>
+<span class="sd">        ac : float</span>
+<span class="sd">            Scattering channel radius in meters.</span>
+<span class="sd">        M : float or int</span>
+<span class="sd">            Mass of the target nucleus.</span>
+<span class="sd">        m : float or int</span>
+<span class="sd">            Mass of the incident particle.</span>
+<span class="sd">        orbital_angular_momentum : int</span>
+<span class="sd">            Orbital angular momentum of the pair, describes waveform (l).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        S_array : numpy.ndarray</span>
+<span class="sd">            Array shift factors, each row is an l value, columns traverse energy vector given.</span>
+<span class="sd">        P_array : numpy.ndarray</span>
+<span class="sd">            Array penetrability, each row is an l value, columns traverse energy vector given.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        PS_explicit : Calculates penetrability and shift functions using explicit definitions.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from sample_resparm import PS_functions</span>
+<span class="sd">        &gt;&gt;&gt; PS_functions.PS_recursive(np.array([10.4]), 6.7e-15, 2)</span>
+<span class="sd">        [array([[ 0.        ],</span>
+<span class="sd">                [-0.99997817],</span>
+<span class="sd">                [-1.99999272]]),</span>
+<span class="sd">        array([[4.67244381e-03],</span>
+<span class="sd">                [1.02005310e-07],</span>
+<span class="sd">                [2.47442770e-13]])]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rho</span> <span class="o">=</span> <span class="n">k_wavenumber</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="n">ac</span>
+
+        <span class="n">S_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">orbital_angular_momentum</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)])</span>
+        <span class="n">P_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">orbital_angular_momentum</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">)])</span>
+        <span class="n">P_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">*=</span> <span class="n">rho</span>
+        
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">orbital_angular_momentum</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">S</span> <span class="o">=</span> <span class="p">(</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">l</span><span class="o">-</span><span class="n">S_array</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">((</span><span class="n">l</span><span class="o">-</span><span class="n">S_array</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">P_array</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="n">l</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="n">P_array</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="p">((</span><span class="n">l</span><span class="o">-</span><span class="n">S_array</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">P_array</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            
+            <span class="n">S_array</span><span class="p">[</span><span class="n">l</span><span class="p">,:]</span><span class="o">=</span><span class="n">S</span><span class="p">;</span> <span class="n">P_array</span><span class="p">[</span><span class="n">l</span><span class="p">,:]</span><span class="o">=</span><span class="n">P</span>
+            
+        <span class="k">return</span> <span class="n">S_array</span><span class="p">,</span> <span class="n">P_array</span></div>
+
+
+<div class="viewcode-block" id="FofE_explicit"><a class="viewcode-back" href="../../source_api/scattering_theory.html#syndat.scattering_theory.FofE_explicit">[docs]</a><span class="k">def</span> <span class="nf">FofE_explicit</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">orbital_angular_momentum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates penetrability and shift functions using explicit definitions.</span>
+
+<span class="sd">    This function calculates the centifugal barrier penetrability as well as</span>
+<span class="sd">    the shift factor for a neutron incident on Cu-63. The explicit implementation</span>
+<span class="sd">    only allows for l-values up to 3. Some nucelar parameters are housed within </span>
+<span class="sd">    this function, this could be updated for other nuclei.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    E : float or numpy.ndarray</span>
+<span class="sd">        Energy of the incident neutron.</span>
+<span class="sd">    ac : float</span>
+<span class="sd">        Scattering channel radius in meters.</span>
+<span class="sd">    M : float or int</span>
+<span class="sd">            Mass of the target nucleus.</span>
+<span class="sd">    m : float or int</span>
+<span class="sd">        Mass of the incident particle.</span>
+<span class="sd">    orbital_angular_momentum : int</span>
+<span class="sd">        Orbital angular momentum of the pair, describes waveform (l).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    S_array : array-like</span>
+<span class="sd">        Shift factor(s) at given energy.</span>
+<span class="sd">    P_array : array-like</span>
+<span class="sd">        Penetrability at given energy.</span>
+<span class="sd">    psi : array-like</span>
+<span class="sd">        Potential scattering phase shift.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    PS_recursive : Calculates penetrability and shift functions using recursion.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from sample_resparm import PS_functions</span>
+<span class="sd">    &gt;&gt;&gt; PS_functions.PS_explicit(np.array([10.4, 10.5]), 6.7e-15, 2)</span>
+<span class="sd">    [array([-1.99999272, -1.99999265]), array([2.4744277e-13, 2.5343386e-13])]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">assert</span><span class="p">(</span><span class="n">orbital_angular_momentum</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Phase shift function in syndat.scattering theory needs to be updated for higher-order waveforms&quot;</span><span class="p">)</span>
+
+    <span class="n">k</span> <span class="o">=</span> <span class="n">k_wavenumber</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">k</span><span class="o">*</span><span class="n">ac</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">rho</span>
+    
+    <span class="k">if</span> <span class="n">orbital_angular_momentum</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">rho</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">orbital_angular_momentum</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">rho</span><span class="o">**</span><span class="mi">3</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">orbital_angular_momentum</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">rho</span><span class="o">**</span><span class="mi">5</span><span class="o">/</span><span class="p">(</span><span class="mi">9</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">rho</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">18</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">9</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">rho</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">orbital_angular_momentum</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">rho</span><span class="o">**</span><span class="mi">7</span><span class="o">/</span><span class="p">(</span><span class="mi">255</span><span class="o">+</span><span class="mi">45</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">6</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">4</span><span class="o">+</span><span class="n">rho</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">675</span><span class="o">+</span><span class="mi">90</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">6</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">4</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">225</span><span class="o">+</span><span class="mi">45</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">6</span><span class="o">*</span><span class="n">rho</span><span class="o">**</span><span class="mi">4</span><span class="o">+</span><span class="n">rho</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">orbital_angular_momentum</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;PS_explicit cannot handle orbital_angular_momenta &gt; 3, use PS_recursive&quot;</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">S</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">k</span></div>
+
+
+
+
+<span class="k">def</span> <span class="nf">reduced_width_square_2_partial_width</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">reduced_widths_square</span><span class="p">,</span> <span class="n">orbital_angular_momentum</span><span class="p">):</span>
+    <span class="n">S</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">psi</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">FofE_explicit</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="n">ac</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">orbital_angular_momentum</span><span class="p">)</span>
+    <span class="n">partial_widths</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="o">*</span><span class="n">reduced_widths_square</span> 
+    <span class="k">return</span> <span class="n">partial_widths</span>
+
+
+<span class="k">def</span> <span class="nf">SLBW</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">resonance_ladder</span><span class="p">):</span>
+
+    <span class="n">xs_cap</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">xs_scat</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">group_by_J</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">resonance_ladder</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;J&#39;</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">J</span> <span class="ow">in</span> <span class="n">group_by_J</span><span class="p">:</span>
+        
+        <span class="n">J_df</span> <span class="o">=</span> <span class="n">group_by_J</span><span class="p">[</span><span class="n">J</span><span class="p">]</span>
+        <span class="c1"># assert J &gt; 0 </span>
+        <span class="n">J</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+
+        <span class="n">orbital_angular_momentum</span> <span class="o">=</span> <span class="n">J_df</span><span class="o">.</span><span class="n">lwave</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">orbital_angular_momentum</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+
+        <span class="c1"># calculate functions of energy -&gt; shift, penetrability, phase shift</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">gstat</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">pair</span><span class="o">.</span><span class="n">I</span><span class="p">,</span> <span class="n">pair</span><span class="o">.</span><span class="n">i</span><span class="p">)</span> <span class="c1">#(2*J+1)/( (2*ii+1)*(2*I+1) );   # spin statistical factor g sub(j alpha)</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">FofE_explicit</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">pair</span><span class="o">.</span><span class="n">ac</span><span class="p">,</span> <span class="n">pair</span><span class="o">.</span><span class="n">M</span><span class="p">,</span> <span class="n">pair</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">orbital_angular_momentum</span><span class="p">)</span>
+
+        <span class="c1"># calculate capture</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="mi">0</span> 
+        <span class="n">constant</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">g</span><span class="o">/</span><span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">J_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">E_lambda</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">E</span>
+            <span class="n">Gg</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Gg</span> <span class="o">*</span> <span class="mf">1e-3</span>
+            <span class="n">gnx2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="n">ign</span><span class="p">]</span> <span class="k">for</span> <span class="n">ign</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">))])</span> <span class="o">*</span> <span class="mf">1e-3</span>  <span class="c1"># unnecessary summation here since I will be giving the observed widths (already summed over single channel)</span>
+            <span class="n">Gnx</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="o">*</span><span class="n">gnx2</span>
+
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">E</span><span class="o">-</span><span class="n">E_lambda</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="n">Gg</span><span class="o">+</span><span class="n">Gnx</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> 
+            <span class="n">xs</span> <span class="o">+=</span> <span class="p">(</span><span class="n">Gg</span><span class="o">*</span><span class="n">Gnx</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span> <span class="n">d</span> <span class="p">)</span>
+        <span class="n">xs_cap</span> <span class="o">+=</span> <span class="n">constant</span><span class="o">*</span><span class="n">xs</span>
+
+
+        <span class="c1"># calculate scatter</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">constant</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">g</span><span class="o">/</span><span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">J_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">E_lambda</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">E</span>
+            <span class="n">Gg</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Gg</span> <span class="o">*</span> <span class="mf">1e-3</span>
+            <span class="n">gnx2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="n">ign</span><span class="p">]</span> <span class="k">for</span> <span class="n">ign</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">))])</span> <span class="o">*</span> <span class="mf">1e-3</span> <span class="c1"># unnecessary summation here since I will be giving the observed widths (already summed over single channel)</span>
+            <span class="n">Gnx</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="o">*</span><span class="n">gnx2</span>
+
+            <span class="n">G</span> <span class="o">=</span> <span class="n">Gnx</span><span class="o">+</span><span class="n">Gg</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">E</span><span class="o">-</span><span class="n">E_lambda</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="n">Gg</span><span class="o">+</span><span class="n">Gnx</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> 
+            <span class="n">xs</span> <span class="o">+=</span> <span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">phi</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="n">Gnx</span><span class="o">*</span><span class="n">G</span><span class="o">/</span><span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">phi</span><span class="p">)</span><span class="o">*</span><span class="n">Gnx</span><span class="o">*</span><span class="p">(</span><span class="n">E</span><span class="o">-</span><span class="n">E_lambda</span><span class="p">)</span><span class="o">/</span><span class="n">d</span> <span class="o">+</span> <span class="p">(</span><span class="n">Gnx</span><span class="o">*</span><span class="p">(</span><span class="n">E</span><span class="o">-</span><span class="n">E_lambda</span><span class="p">)</span><span class="o">/</span><span class="n">d</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">Gnx</span><span class="o">*</span><span class="n">G</span><span class="o">/</span><span class="n">d</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">xs_scat</span> <span class="o">+=</span> <span class="n">constant</span><span class="o">*</span><span class="n">xs</span>
+
+    <span class="c1"># calculate total</span>
+    <span class="n">xs_tot</span> <span class="o">=</span> <span class="n">xs_cap</span><span class="o">+</span><span class="n">xs_scat</span>
+
+    <span class="k">return</span> <span class="n">xs_tot</span><span class="p">,</span> <span class="n">xs_scat</span><span class="p">,</span> <span class="n">xs_cap</span>
+
+
+
+
+
+
+<div class="viewcode-block" id="SLBW_capture"><a class="viewcode-back" href="../../source_api/scattering_theory.html#syndat.scattering_theory.SLBW_capture">[docs]</a><span class="k">def</span> <span class="nf">SLBW_capture</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">resonance_ladder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates a multi-level capture cross section using SLBW formalism.</span>
+
+<span class="sd">    _extended_summary_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    g : float</span>
+<span class="sd">        Spin statistical factor $g_{J,\alpha}$.</span>
+<span class="sd">    k : float or array-like</span>
+<span class="sd">        Angular wavenumber or array of angular wavenumber values corresponding to the energy vector.</span>
+<span class="sd">    E : float or array-like</span>
+<span class="sd">        KE of incident particle or array of KE&#39;s.</span>
+<span class="sd">    resonance_ladder : DataFrame</span>
+<span class="sd">        DF with columns for </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    xs</span>
+<span class="sd">        SLBW capture cross section.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">E</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Vector of angular wavenumbers, k(E), does not match the length of vector E&quot;</span><span class="p">)</span>
+
+    <span class="n">xs</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">constant</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">g</span><span class="o">/</span><span class="p">(</span><span class="n">k</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">resonance_ladder</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">E_lambda</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">E</span>
+        <span class="n">gnx2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">row</span><span class="p">[</span><span class="n">ign</span><span class="p">]</span> <span class="k">for</span> <span class="n">ign</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">))])</span> <span class="o">*</span> <span class="mf">1e-3</span>
+        <span class="n">Gnx</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="p">(</span><span class="n">E</span><span class="p">)</span><span class="o">*</span><span class="n">gnx2</span>
+        <span class="n">Gg</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Gg</span> <span class="o">*</span> <span class="mf">1e-3</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">E</span><span class="o">-</span><span class="n">E_lambda</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">((</span><span class="n">Gg</span><span class="o">+</span><span class="n">Gn</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> 
+        <span class="n">xs</span> <span class="o">+=</span> <span class="p">(</span><span class="n">Gg</span><span class="o">*</span><span class="n">Gn</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span> <span class="n">d</span> <span class="p">)</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">constant</span><span class="o">*</span><span class="n">xs</span>
+    <span class="k">return</span> <span class="n">xs</span></div>
+    
+
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">syndat.scattering_theory</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

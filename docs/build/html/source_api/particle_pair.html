@@ -1,0 +1,287 @@
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Particle Pair &#8212; Syndat 1.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/cloud.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+
+    
+    
+     
+        <script src="../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Particle Pair</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="particle-pair">
+<h1>Particle Pair<a class="headerlink" href="#particle-pair" title="Permalink to this heading">¶</a></h1>
+<p id="id1">The particle pair object defines the reaction of interest. This means defining the properties of the incident and target particles, the scattering radius,
+and the order of orbital angular momenta you wish to consider.</p>
+<span class="target" id="module-syndat.particle_pair"></span><p>Created on Thu Jun 16 12:18:04 2022</p>
+<p>&#64;author: nwx</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="syndat.particle_pair.particle_pair">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">syndat.particle_pair.</span></span><span class="sig-name descname"><span class="pre">particle_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ac</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/particle_pair.html#particle_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.particle_pair.particle_pair" title="Permalink to this definition">¶</a></dt>
+<dd><p>_summary_</p>
+<p>_extended_summary_</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">quant_vec_sum:</span></span></dt>
+<dd><p>Calculates the quantum vector sum of two angular momenta.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">map_quantum_numbers:</span></span></dt>
+<dd><p>Maps the possible quantum numbers for pair.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">sample_all_Jpi:</span></span></dt>
+<dd><p>Samples a full resonance parameter ladder for each possible spin group.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#syndat.particle_pair.particle_pair.map_quantum_numbers" title="syndat.particle_pair.particle_pair.map_quantum_numbers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">map_quantum_numbers</span></code></a>(print_out)</p></td>
+<td><p>Maps the possible quantum numbers for pair.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#syndat.particle_pair.particle_pair.quant_vec_sum" title="syndat.particle_pair.particle_pair.quant_vec_sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quant_vec_sum</span></code></a>(a, b)</p></td>
+<td><p>Calculates a quantum vector sum.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#syndat.particle_pair.particle_pair.sample_all_Jpi" title="syndat.particle_pair.particle_pair.sample_all_Jpi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_all_Jpi</span></code></a>(Erange, Davg, Ggavg, gnavg[, ...])</p></td>
+<td><p>Samples a full resonance parameter ladder for each possible spin group.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="syndat.particle_pair.particle_pair.map_quantum_numbers">
+<span class="sig-name descname"><span class="pre">map_quantum_numbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">print_out</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/particle_pair.html#particle_pair.map_quantum_numbers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.particle_pair.particle_pair.map_quantum_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps the possible quantum numbers for pair.</p>
+<p>This function maps out the possible quantum spin numbers (Jpi) for a given
+particle pair up to some maximum considered incident waveform (l-wave).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>particle_pair</strong> (<em>syndat object</em>) – Particle_pair object containing information about the reaction being studied.</p></li>
+<li><p><strong>print_out</strong> (<em>bool</em>) – User option to print out quantum spin (J) mapping to console.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>Jn</strong> (<em>array-like</em>) – List containing possible J, # of contibuting channels, and contibuting
+waveforms for negative parity. Formatted as (J,#chs,[l-wave, l-wave])</p></li>
+<li><p><strong>Jp</strong> (<em>array-like</em>) – List containing possible J, # of contibuting channels, and contibuting
+waveforms for positive parity. Formatted as (J,#chs,[l-wave, l-wave])</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sample_resparm</span> <span class="kn">import</span> <span class="n">sample_spin_groups</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sample_spin_groups</span><span class="o">.</span><span class="n">map_quantum_numbers</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="go">([(1.0, 1, [0.0]), (2.0, 1, [0.0])],</span>
+<span class="go">[(0.0, 1, [1.0]),</span>
+<span class="go">(1.0, 2, [1.0, 1.0]),</span>
+<span class="go">(2.0, 2, [1.0, 1.0]),</span>
+<span class="go">(3.0, 1, [1.0])])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="syndat.particle_pair.particle_pair.quant_vec_sum">
+<span class="sig-name descname"><span class="pre">quant_vec_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/particle_pair.html#particle_pair.quant_vec_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.particle_pair.particle_pair.quant_vec_sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a quantum vector sum.</p>
+<p>This function performs a quantum vector sum, a.k.a. it maps the quantum
+triangular relationship between two integers or half integers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>float</em><em> or </em><em>int</em>) – a variable.</p></li>
+<li><p><strong>b</strong> (<em>float</em><em> or </em><em>int</em>) – a variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array of all possible quantum values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="syndat.particle_pair.particle_pair.sample_all_Jpi">
+<span class="sig-name descname"><span class="pre">sample_all_Jpi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Erange</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Davg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ggavg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnavg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_csv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sammy_run_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/noahwalton/Documents/GitHub/nuc_syndat/docs'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/syndat/particle_pair.html#particle_pair.sample_all_Jpi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#syndat.particle_pair.particle_pair.sample_all_Jpi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Samples a full resonance parameter ladder for each possible spin group.</p>
+<p>This function samples resonance parameters (Energy and widths) for each
+possible spin group (Jpi) of a given particle pair. The results can be
+printed to the console and/or saved to a csv.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<em>syndat object</em>) – Particle pair object.</p></li>
+<li><p><strong>Erange</strong> (<em>array-like</em>) – Array of resolve resonance range energy, only requires min/max.</p></li>
+<li><p><strong>Davg</strong> (<em>array-like</em>) – Nested list of average level spacing for each spin group number. First
+list is for negative parity (J-) second is for positive parity (J+).</p></li>
+<li><p><strong>Ggavg</strong> (<em>array-like</em>) – Nested list of average widths for each spin group number. First
+list is for negative parity (J-) second is for positive parity (J+).</p></li>
+<li><p><strong>gnavg</strong> (<em>float</em>) – Nested list of average reduced amplitudes (gn_squared) for each spin group number. First
+list is for negative parity (J-) second is for positive parity (J+).</p></li>
+<li><p><strong>print_out</strong> (<em>bool</em>) – User option to print out quantum spin (J) mapping to console.</p></li>
+<li><p><strong>save_csv</strong> (<em>bool</em>) – User option to save resonance ladders to csv.</p></li>
+<li><p><strong>sammy_run_folder</strong> (<em>str</em>) – Folder in which the csv(s) containing resparm ladders will be saved.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Unsure of the average capture width for Gg sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>Jn_df</strong> (<em>DataFrame</em>) – Pandas DataFrame conatining a resonance parameter ladder for each
+quantum spin group with negative parity (all J-). The column E gives the energy of the level,
+the column Gn gives the width of the agregate capture channel, and the following columns give
+reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).</p></li>
+<li><p><strong>Jp_df</strong> (<em>DataFrame</em>) – Pandas DataFrame conatining a resonance parameter ladder for each
+quantum spin group with positive parity (all J+). The column E gives the energy of the level,
+the column Gn gives the width of the agregate capture channel, and the following columns give
+reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source_api/particle_pair.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../index.html">Syndat 1.0.1 documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Particle Pair</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Walton.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>
