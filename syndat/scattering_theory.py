@@ -1,4 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jun 22 12:54:52 2022
 
+@author: noahwalton
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,8 +16,10 @@ def gstat(J, I, i):
     """
     Calculates the spin statistical factor for a given $J_{\pi,\alpha}$.
 
-    The spin statistical factor (g) is a weigting factor describing the probability of the different total angular momenta, give by:
-    </br> $ g_{J\alpha} = \frac{2J+1}{(2i+1)(2I+1)} $ </br>
+    The spin statistical factor (g) is a weigting factor describing the probability of the different total angular momenta, given by:
+    
+    $ g_{J\alpha} = \frac{2J+1}{(2i+1)(2I+1)} $ 
+
 
     Parameters
     ----------
@@ -26,6 +34,7 @@ def gstat(J, I, i):
     -------
     _type_
         _description_
+
     """
     return (2*J+1)/((2*i+1)*(2*I+1))
 

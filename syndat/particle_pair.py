@@ -3,7 +3,7 @@
 """
 Created on Thu Jun 16 12:18:04 2022
 
-@author: nwx
+@author: noahwalton
 """
 
 import os

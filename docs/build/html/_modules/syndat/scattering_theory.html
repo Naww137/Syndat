@@ -64,7 +64,13 @@
           <div class="body" role="main">
             
   <h1>Source code for syndat.scattering_theory</h1><div class="highlight"><pre>
-<span></span>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Jun 22 12:54:52 2022</span>
+
+<span class="sd">@author: noahwalton</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -76,8 +82,10 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the spin statistical factor for a given $J_{\pi,\alpha}$.</span>
 
-<span class="sd">    The spin statistical factor (g) is a weigting factor describing the probability of the different total angular momenta, give by:</span>
-<span class="sd">    &lt;/br&gt; $ g_{J\alpha} = \frac{2J+1}{(2i+1)(2I+1)} $ &lt;/br&gt;</span>
+<span class="sd">    The spin statistical factor (g) is a weigting factor describing the probability of the different total angular momenta, given by:</span>
+<span class="sd">    </span>
+<span class="sd">    $ g_{J\alpha} = \frac{2J+1}{(2i+1)(2I+1)} $ </span>
+
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -92,6 +100,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    _type_</span>
 <span class="sd">        _description_</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">J</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">I</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span></div>
 

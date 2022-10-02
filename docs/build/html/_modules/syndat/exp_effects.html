@@ -69,7 +69,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Created on Thu Jun 23 10:34:17 2022</span>
 
-<span class="sd">@author: nwx</span>
+<span class="sd">@author: noahwalton</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -99,7 +99,7 @@
         <span class="n">t</span> <span class="o">=</span> <span class="n">d</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">E</span><span class="o">*</span><span class="n">jev</span><span class="o">*</span><span class="mi">2</span><span class="o">/</span><span class="n">mn</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">t</span>
 
-<div class="viewcode-block" id="gaus_noise"><a class="viewcode-back" href="../../source_api/exp_effect.html#syndat.exp_effects.gaus_noise">[docs]</a><span class="k">def</span> <span class="nf">gaus_noise</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">std_vec</span><span class="p">):</span>
+<div class="viewcode-block" id="gaus_noise"><a class="viewcode-back" href="../../source_api/exp_effects.html#syndat.exp_effects.gaus_noise">[docs]</a><span class="k">def</span> <span class="nf">gaus_noise</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">std_vec</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Samples gaussian noise around a vector of mean values.</span>
 
@@ -123,7 +123,7 @@
 <span class="c1">#     for counts in vector:</span>
 <span class="c1">#         noise.append(np.random.default_rng().poisson(lam=counts))</span>
 <span class="c1">#     return vector + noise</span>
-<div class="viewcode-block" id="pois_noise"><a class="viewcode-back" href="../../source_api/exp_effect.html#syndat.exp_effects.pois_noise">[docs]</a><span class="k">def</span> <span class="nf">pois_noise</span><span class="p">(</span><span class="n">vector</span><span class="p">):</span>
+<div class="viewcode-block" id="pois_noise"><a class="viewcode-back" href="../../source_api/exp_effects.html#syndat.exp_effects.pois_noise">[docs]</a><span class="k">def</span> <span class="nf">pois_noise</span><span class="p">(</span><span class="n">vector</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Samples poissonian noise around a vector of values.</span>
 <span class="sd">    Parameters</span>
@@ -138,7 +138,7 @@
     <span class="n">noisy_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">vector</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">noisy_vector</span></div>
 
-<div class="viewcode-block" id="generate_open_counts"><a class="viewcode-back" href="../../source_api/exp_effect.html#syndat.exp_effects.generate_open_counts">[docs]</a><span class="k">def</span> <span class="nf">generate_open_counts</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">flux_mag</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">):</span>
+<div class="viewcode-block" id="generate_open_counts"><a class="viewcode-back" href="../../source_api/exp_effects.html#syndat.exp_effects.generate_open_counts">[docs]</a><span class="k">def</span> <span class="nf">generate_open_counts</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">flux_mag</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate open (sample out) raw count data from a wide gaussian wrt energy.</span>
 
@@ -160,7 +160,7 @@
     <span class="n">cts_o</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="n">mean</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">std</span><span class="p">)</span><span class="o">*</span><span class="n">flux_mag</span> <span class="c1"># gaussian in energy, std=range of energy</span>
     <span class="k">return</span> <span class="n">cts_o</span></div>
 
-<div class="viewcode-block" id="cts_to_ctr"><a class="viewcode-back" href="../../source_api/exp_effect.html#syndat.exp_effects.cts_to_ctr">[docs]</a><span class="k">def</span> <span class="nf">cts_to_ctr</span><span class="p">(</span><span class="n">cts</span><span class="p">,</span> <span class="n">d_cts</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">trig</span><span class="p">):</span>
+<div class="viewcode-block" id="cts_to_ctr"><a class="viewcode-back" href="../../source_api/exp_effects.html#syndat.exp_effects.cts_to_ctr">[docs]</a><span class="k">def</span> <span class="nf">cts_to_ctr</span><span class="p">(</span><span class="n">cts</span><span class="p">,</span> <span class="n">d_cts</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">trig</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts counts to count rate and propagates uncertainty.</span>
 
@@ -198,7 +198,7 @@
 
     
 
-<div class="viewcode-block" id="generate_raw_count_data"><a class="viewcode-back" href="../../source_api/exp_effect.html#syndat.exp_effects.generate_raw_count_data">[docs]</a><span class="k">def</span> <span class="nf">generate_raw_count_data</span><span class="p">(</span><span class="n">sample_df</span><span class="p">,</span> <span class="n">open_df</span><span class="p">,</span> <span class="n">add_noise</span><span class="p">,</span> <span class="n">trig</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">K</span><span class="p">,</span> <span class="n">Bi</span><span class="p">,</span> <span class="n">b0</span><span class="p">,</span><span class="n">B0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+<div class="viewcode-block" id="generate_raw_count_data"><a class="viewcode-back" href="../../source_api/exp_effects.html#syndat.exp_effects.generate_raw_count_data">[docs]</a><span class="k">def</span> <span class="nf">generate_raw_count_data</span><span class="p">(</span><span class="n">sample_df</span><span class="p">,</span> <span class="n">open_df</span><span class="p">,</span> <span class="n">add_noise</span><span class="p">,</span> <span class="n">trig</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">K</span><span class="p">,</span> <span class="n">Bi</span><span class="p">,</span> <span class="n">b0</span><span class="p">,</span><span class="n">B0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates raw count data for sample-in given a theoretical tranmission. </span>
 <span class="sd">    </span>
@@ -269,7 +269,7 @@
 
 
 
-<div class="viewcode-block" id="get_covT"><a class="viewcode-back" href="../../source_api/exp_effect.html#syndat.exp_effects.get_covT">[docs]</a><span class="k">def</span> <span class="nf">get_covT</span><span class="p">(</span><span class="n">tof</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span><span class="n">C</span><span class="p">,</span> <span class="n">dc</span><span class="p">,</span><span class="n">dC</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">K</span><span class="p">,</span> <span class="n">Bi</span><span class="p">,</span> <span class="n">b0</span><span class="p">,</span><span class="n">B0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">sys_unc</span><span class="p">):</span>
+<div class="viewcode-block" id="get_covT"><a class="viewcode-back" href="../../source_api/exp_effects.html#syndat.exp_effects.get_covT">[docs]</a><span class="k">def</span> <span class="nf">get_covT</span><span class="p">(</span><span class="n">tof</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span><span class="n">C</span><span class="p">,</span> <span class="n">dc</span><span class="p">,</span><span class="n">dC</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">K</span><span class="p">,</span> <span class="n">Bi</span><span class="p">,</span> <span class="n">b0</span><span class="p">,</span><span class="n">B0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">sys_unc</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the output covariance matrix of transmission from input uncertainties.</span>
 
@@ -366,7 +366,7 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">m1</span><span class="o">*</span><span class="n">cr</span> <span class="o">-</span> <span class="n">m2</span><span class="o">*</span><span class="n">k</span><span class="o">*</span><span class="n">Bi</span> <span class="o">-</span> <span class="n">b0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">m3</span><span class="o">*</span><span class="n">Cr</span> <span class="o">-</span> <span class="n">m4</span><span class="o">*</span><span class="n">K</span><span class="o">*</span><span class="n">Bi</span> <span class="o">-</span> <span class="n">B0</span><span class="p">)</span> 
 
     
-<div class="viewcode-block" id="reduce_raw_count_data"><a class="viewcode-back" href="../../source_api/exp_effect.html#syndat.exp_effects.reduce_raw_count_data">[docs]</a><span class="k">def</span> <span class="nf">reduce_raw_count_data</span><span class="p">(</span><span class="n">tof</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span><span class="n">C</span><span class="p">,</span> <span class="n">dc</span><span class="p">,</span><span class="n">dC</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">trig</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">K</span><span class="p">,</span> <span class="n">Bi</span><span class="p">,</span> <span class="n">b0</span><span class="p">,</span><span class="n">B0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">sys_unc</span><span class="p">):</span>
+<div class="viewcode-block" id="reduce_raw_count_data"><a class="viewcode-back" href="../../source_api/exp_effects.html#syndat.exp_effects.reduce_raw_count_data">[docs]</a><span class="k">def</span> <span class="nf">reduce_raw_count_data</span><span class="p">(</span><span class="n">tof</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span><span class="n">C</span><span class="p">,</span> <span class="n">dc</span><span class="p">,</span><span class="n">dC</span><span class="p">,</span> <span class="n">bw</span><span class="p">,</span> <span class="n">trig</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span><span class="n">K</span><span class="p">,</span> <span class="n">Bi</span><span class="p">,</span> <span class="n">b0</span><span class="p">,</span><span class="n">B0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">sys_unc</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reduces raw count data to transmission data with propagated uncertainty.</span>
 

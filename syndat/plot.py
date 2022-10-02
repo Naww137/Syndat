@@ -3,7 +3,7 @@
 """
 Created on Tue Jul 19 13:16:02 2022
 
-@author: nwx
+@author: noahwalton
 """
 
 from matplotlib.pyplot import *
