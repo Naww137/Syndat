@@ -201,7 +201,8 @@ def SLBW(E, pair, resonance_ladder):
     for J in group_by_J:
         
         J_df = group_by_J[J]
-        assert J > 0 
+        # assert J > 0 
+        J = abs(J)
 
         orbital_angular_momentum = J_df.lwave.unique()
         assert len(orbital_angular_momentum) == 1
