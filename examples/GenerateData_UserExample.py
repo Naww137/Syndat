@@ -162,4 +162,3 @@ exp = syndat.experiment(open_dataframe, theoretical_df,
 syndat.write_samdat(exp.trans,"./test_sammy.dat")
 syndat.sammy_interface.write_sampar(resonance_ladder, Ta_pair, False, "./test_sammy.par")
 
-

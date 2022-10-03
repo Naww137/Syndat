@@ -12,6 +12,8 @@ from pathlib import Path
 import syndat
 import pandas as pd
 
+module_dirname = os.path.dirname(__file__)
+
 # =============================================================================
 # 
 # =============================================================================
@@ -64,7 +66,7 @@ def samtools_fmtpar(a, filename, \
     return
 
 def write_sampar(df, pair, vary_parm, filename, 
-                                template = os.path.realpath("../templates/sammy_template_RM_only.par") ):
+                                template = os.path.join(module_dirname, "../templates/sammy_template_RM_only.par") ):
     """
     Writes a formatted sammy.par file.
 
