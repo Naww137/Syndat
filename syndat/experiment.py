@@ -16,7 +16,7 @@ import syndat
 
 class experiment:
     
-    def __init__(self, open_dataframe, theoretical_data,
+    def __init__(self, open_data, theoretical_data,
                                     E_limits = [],
                                     experiment_parameters = {} , 
                                     options = { 'Perform Experiment':True, 'Add Noise': True} , 
@@ -29,10 +29,10 @@ class experiment:
 
         Parameters
         ----------
-        open_dataframe : DataFrame
-            Open count spectra data.
-        theoretical_data : DataFrame
-            Theoretical cross section expected to be seen in the laboratory setting.
+        open_data : DataFrame or str
+            Open count spectra data. If DataFrame needs columns 'tof', 'bw', 'c', 'dc'. If string, must be filepath to csv from Brown, et al.
+        theoretical_data : DataFrame or str
+            Theoretical cross section expected to be seen in the laboratory setting. If DataFrame needs columns 'E' and 'theo_trans'. If string, must be filepath to sammy.lst.
         E_limits : list, optional
             Energy range of interest, must be within the domain of the open and theoretical data. If empty (Default) the entire open/theoretical domain will be used, by default []
         experiment_parameters : dict, optional
@@ -76,7 +76,7 @@ class experiment:
 
         if perform_methods:
             # import open data from jesse's experiment
-            self.get_odat(open_dataframe)
+            self.get_odat(open_data)
             # vectorize the background function from jesse's experiment
             self.get_bkg()
             # get theoretical cross section 
@@ -124,7 +124,7 @@ class experiment:
         if not self.E_limits:
             pass
         else:
-            odat = open_data[(open_data.E>self.E_limits[0])&(open_data.E<self.E_limits[1])].reset_index(drop=True)
+            odat = odat[(odat.E>self.E_limits[0])&(odat.E<self.E_limits[1])].reset_index(drop=True)
 
         # Define class attribute
         self.odat = odat
@@ -143,7 +143,7 @@ class experiment:
             if 'E' not in theo_df.columns:
                 raise ValueError("Column name 'E' not in theoretical DataFrame passed to experiment class.")
             if 'theo_trans' not in theo_df.columns:
-                raise ValueError("Column name 'E' not in theoretical DataFrame passed to experiment class.")
+                raise ValueError("Column name 'theo_trans' not in theoretical DataFrame passed to experiment class.")
         elif isinstance(theoretical_data, str):
             theo_df = syndat.sammy_interface.readlst(theoretical_data)
         else:
