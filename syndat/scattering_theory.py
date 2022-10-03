@@ -213,12 +213,13 @@ def SLBW(E, pair, resonance_ladder):
         # assert J > 0 
         J = abs(J)
 
-        orbital_angular_momentum = J_df.lwave.unique()
-        assert len(orbital_angular_momentum) == 1
-
+        # orbital_angular_momentum = J_df.lwave.unique()
+        orbital_angular_momentum = np.unique(J_df.lwave.values[0]) # just takes the first level's l-wave vector, all should be the same in each group
+        assert len(orbital_angular_momentum) == 1, "Cannot handle different l-waves contributing to multichannel widths"
+        
         # calculate functions of energy -> shift, penetrability, phase shift
         g = gstat(J, pair.I, pair.i) #(2*J+1)/( (2*ii+1)*(2*I+1) );   # spin statistical factor g sub(j alpha)
-        S, P, phi, k = FofE_explicit(E, pair.ac, pair.M, pair.m, orbital_angular_momentum)
+        S, P, phi, k = FofE_explicit(E, pair.ac, pair.M, pair.m, orbital_angular_momentum[0])
 
         # calculate capture
         xs = 0 
@@ -226,7 +227,8 @@ def SLBW(E, pair, resonance_ladder):
         for index, row in J_df.iterrows():
             E_lambda = row.E
             Gg = row.Gg * 1e-3
-            gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3  # unnecessary summation here since I will be giving the observed widths (already summed over single channel)
+            # gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3  # Not sampling multiple, single-channel particle widths
+            gnx2 = row.gnx2 * 1e-3 
             Gnx = 2*P*gnx2
 
             d = (E-E_lambda)**2 + ((Gg+Gnx)/2)**2 
@@ -240,7 +242,8 @@ def SLBW(E, pair, resonance_ladder):
         for index, row in J_df.iterrows():
             E_lambda = row.E
             Gg = row.Gg * 1e-3
-            gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3 # unnecessary summation here since I will be giving the observed widths (already summed over single channel)
+            # gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3 # Not sampling multiple, single-channel particle widths
+            gnx2 = row.gnx2 * 1e-3 
             Gnx = 2*P*gnx2
 
             G = Gnx+Gg
