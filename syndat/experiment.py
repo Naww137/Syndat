@@ -87,42 +87,46 @@ class experiment:
             self.reduce()
             
         
-    def get_odat(self,open_dataframe):
+    def get_odat(self,open_data):
         
-        if isinstance(open_dataframe, pd.DataFrame):
-            if 'tof' not in open_dataframe.columns:
+        # check types for what to do 
+        if isinstance(open_data, pd.DataFrame):
+            if 'tof' not in open_data.columns:
                 raise ValueError("Column name 'tof' not in open count DataFrame passed to experiment class.")
-            if 'bw' not in open_dataframe.columns:
+            if 'bw' not in open_data.columns:
                 raise ValueError("Column name 'bw' not in open count DataFrame passed to experiment class.")
-            if 'c' not in open_dataframe.columns:
+            if 'c' not in open_data.columns:
                 raise ValueError("Column name 'c' not in open count DataFrame passed to experiment class.")
-            if 'dc' not in open_dataframe.columns:
+            if 'dc' not in open_data.columns:
                 raise ValueError("Column name 'dc' not in open count DataFrame passed to experiment class.")
+
+            # calculate energy from tof and experiment parameters
+            open_data['E'] = syndat.exp_effects.t_to_e((open_data.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
+            odat = open_data
+            
+        elif isinstance(open_data, str):
+            # -------------------------------------------
+            # the below code takes open data from Jesse's csv can gets it into the correct format, rather, I want to make thid function take the proper format
+            # -------------------------------------------
+            odat = pd.read_csv(open_data, sep=',') 
+            odat = odat[odat.tof >= self.redpar.val.t0]
+            odat.sort_values('tof', axis=0, ascending=True, inplace=True)
+            odat.reset_index(drop=True, inplace=True)
+            odat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
+            odat['bw'] = odat.bin_width*1e-6 
+            odat.rename(columns={"counts": "c", "dcounts": "dc"}, inplace=True)
+            # -------------------------------------------
         else:
-            raise ValueError("Theoretical data passed to generation class is not of type DataFrame.")
+            raise ValueError("Theoretical data passed to experiment class is neither a DataFrame or path name (string).")
 
-        # -------------------------------------------
-        # the below code takes open data from Jesse's csv can gets it into the correct format, rather, I want to make thid function take the proper format
-        # -------------------------------------------
-        # # odat = pd.read_csv(filename, sep=',') 
-        # odat = odat[odat.tof >= self.redpar.val.t0]
-        # odat.sort_values('tof', axis=0, ascending=True, inplace=True)
-        # odat.reset_index(drop=True, inplace=True)
-        # odat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
-        # odat['bw'] = odat.bin_width*1e-6 
-        # odat.rename(columns={"counts": "c", "dcounts": "dc"}, inplace=True)
-        # -------------------------------------------
-
-
-        # calculate energy from tof and experiment parameters
-        open_dataframe['E'] = syndat.exp_effects.t_to_e((open_dataframe.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
 
         # filter if given elimits
         if not self.E_limits:
-            odat = open_dataframe
+            pass
         else:
-            odat = open_dataframe[(open_dataframe.E>self.E_limits[0])&(open_dataframe.E<self.E_limits[1])].reset_index(drop=True)
+            odat = open_data[(open_data.E>self.E_limits[0])&(open_data.E<self.E_limits[1])].reset_index(drop=True)
 
+        # Define class attribute
         self.odat = odat
         
         
