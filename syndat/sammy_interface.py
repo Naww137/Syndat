@@ -63,7 +63,7 @@ def samtools_fmtpar(a, filename, \
         
     return
 
-def write_sampar(df, vary_parm, filename, 
+def write_sampar(df, pair, vary_parm, filename, 
                                 template = os.path.realpath("../templates/sammy_template_RM_only.par") ):
     """
     Writes a formatted sammy.par file.
@@ -83,19 +83,31 @@ def write_sampar(df, vary_parm, filename,
         Filepath to template file for sammy.par. Included because of the different options for input to sammy, by default os.path.realpath("../templates/sammy_template_RM_only.par")
     """
 
+    def gn2G(row):
+        S, P, phi, k = syndat.scattering_theory.FofE_explicit([row.E], pair.ac, pair.M, pair.m, row.lwave[0])
+        Gnx = 2*P*row.gnx2
+        return np.asscalar(Gnx)
+
+    if "Gnx" not in df:   
+        df['Gnx'] = df.apply(lambda row: gn2G(row), axis=1)
+    else:
+        pass
+
     
-    par_array = np.array(df)
-    zero_neutron_widths = 5-(len(par_array[0])-1)
+    par_array = np.array([df.E, df.Gg, df.Gnx]).T
+    zero_neutron_widths = 5-(len(par_array[0]))
     zero_neutron_array = np.zeros([len(par_array),zero_neutron_widths])
     par_array = np.insert(par_array, [5-zero_neutron_widths], zero_neutron_array, axis=1)
-    
+
     #vary_parm = True
     if vary_parm:
         binary_array = np.hstack((np.ones([len(par_array),5-zero_neutron_widths]), np.zeros([len(par_array),zero_neutron_widths])))
     else:
         binary_array = np.zeros([len(par_array),5])
-        
+
     samtools_array = np.insert(par_array, [5], binary_array, axis=1)
+    j_array = np.array([df.J_ID]).T
+    samtools_array = np.hstack((samtools_array, j_array))
 
     samtools_fmtpar(samtools_array, filename, template)
     
