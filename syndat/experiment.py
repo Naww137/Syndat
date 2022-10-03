@@ -16,49 +16,61 @@ import syndat
 
 class experiment:
     
-    def __init__(self, perform_methods, default_exp, add_noise, open_dataframe, theoretical_data,
-                                                                                    E_limits = []):
+    def __init__(self, open_dataframe, theoretical_data,
+                                    E_limits = [],
+                                    experiment_parameters = {} , 
+                                    options = { 'Perform Experiment':True, 'Add Noise': True} , 
+                                                    ):
         """
-        Initializes generation object
+        Instantiates the experiment object
 
-        _extended_summary_
+        To synthesize an experiment, you must provide open count data and a theoretical cross section. 
+        Options and alternative experimental parameters are optional inputs.
 
         Parameters
         ----------
-        perform_methods : _type_
-            _description_
-        default_exp : _type_
-            _description_
-        add_noise : _type_
-            _description_
-        open_dataframe : _type_
-            _description_
-        theoretical_data : str or pd.DataFrame
-            Either full path to sammy.lst file or pd.DataFrame, both containing the theoretical values to be put through the syndat methodology 
+        open_dataframe : DataFrame
+            Open count spectra data.
+        theoretical_data : DataFrame
+            Theoretical cross section expected to be seen in the laboratory setting.
+        E_limits : list, optional
+            Energy range of interest, must be within the domain of the open and theoretical data. If empty (Default) the entire open/theoretical domain will be used, by default []
+        experiment_parameters : dict, optional
+            Experimental parameters alternative to default. Default parameters are described in Walton, et al., based on work by Brown, et al.,
+            any parameters given here will replace the default parameters before the experiment is synthesized, by default {}
+        options : dict, optional
+            Keyword options, mostly for debugging, by default { 'Perform Experiment':True, 'Add Noise': True}
         """
         
-        if default_exp:
-            pardict = {
-                'n'         :   {'val'  :   0.12,                'unc'  :   0},
-                'trig'      :   {'val'  :   9760770,             'unc'  :   0},
-                'tof_dist'  :   {'val'  :   35.185,              'unc'  :   0},
-                't0'        :   {'val'  :   3.326,               'unc'  :   0},
-                'm'         :   {'val'  :   [1,1,1,1],           'unc'  :   [0.016,0.008,0.018,0.005]},
-                'm1'        :   {'val'  :   1,                   'unc'  :   0.016},
-                'm2'        :   {'val'  :   1,                   'unc'  :   0.008},
-                'm3'        :   {'val'  :   1,                   'unc'  :   0.018},
-                'm4'        :   {'val'  :   1,                   'unc'  :   0.005},
-                'a'         :   {'val'  :   582.8061256946647,   'unc'  :   np.sqrt(1.14174241e+03)},
-                'b'         :   {'val'  :   0.0515158865500879,  'unc'  :   np.sqrt(2.18755273e-05)},
-                'ks'        :   {'val'  :   0.563,               'unc'  :   0.563*0.0427},
-                'ko'        :   {'val'  :   1.471,               'unc'  :   1.471*0.0379},
-                'b0s'       :   {'val'  :   9.9,                 'unc'  :   0.1},
-                'b0o'       :   {'val'  :   13.4,                'unc'  :   0.7}    }
-        else:
-            print("Please define a reduction parameter dictionary specific to your experiment")
-            pardict = {}
+        ### Gather options
+        perform_methods = options['Perform Experiment']
+        add_noise = options['Add Noise']
+
+        ### Default experiment parameter dictionary
+        default_exp = {
+                        'n'         :   {'val'  :   0.12,                'unc'  :   0},
+                        'trig'      :   {'val'  :   9760770,             'unc'  :   0},
+                        'tof_dist'  :   {'val'  :   35.185,              'unc'  :   0},
+                        't0'        :   {'val'  :   3.326,               'unc'  :   0},
+                        'm'         :   {'val'  :   [1,1,1,1],           'unc'  :   [0.016,0.008,0.018,0.005]},
+                        'm1'        :   {'val'  :   1,                   'unc'  :   0.016},
+                        'm2'        :   {'val'  :   1,                   'unc'  :   0.008},
+                        'm3'        :   {'val'  :   1,                   'unc'  :   0.018},
+                        'm4'        :   {'val'  :   1,                   'unc'  :   0.005},
+                        'a'         :   {'val'  :   582.8061256946647,   'unc'  :   np.sqrt(1.14174241e+03)},
+                        'b'         :   {'val'  :   0.0515158865500879,  'unc'  :   np.sqrt(2.18755273e-05)},
+                        'ks'        :   {'val'  :   0.563,               'unc'  :   0.563*0.0427},
+                        'ko'        :   {'val'  :   1.471,               'unc'  :   1.471*0.0379},
+                        'b0s'       :   {'val'  :   9.9,                 'unc'  :   0.1},
+                        'b0o'       :   {'val'  :   13.4,                'unc'  :   0.7}    }
+
+        ### redefine experiment parameter dictionary if any new values are given
+        pardict = default_exp
+        for old_parameter in default_exp:
+            if old_parameter in experiment_parameters:
+                pardict.update({old_parameter:experiment_parameters[old_parameter]})
             
-        # workflow
+        ### workflow
         self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
         self.E_limits = E_limits
 
