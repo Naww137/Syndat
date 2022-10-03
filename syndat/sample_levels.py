@@ -42,7 +42,7 @@ def sample_wigner_invCDF(N_samples):
     samples = np.sqrt(-4/np.pi*np.log(np.random.default_rng().uniform(low=0.0,high=1.0,size=N_samples)))
     #samples = np.sqrt(-4*np.log(np.random.default_rng().uniform(low=0.0,high=1.0,size=N_samples)))      # remove the pi terms to match GOE
     if N_samples == 1:
-        samples = np.asscalar(samples)
+        samples = np.ndarray.item(samples)
     return samples
 
 def generate_GOE(N):
