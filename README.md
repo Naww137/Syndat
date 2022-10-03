@@ -3,7 +3,7 @@
 
 
 
-The guides below are primarily for development.
+The guides below are primarily for development. Namely, the install setup below uses git clone, allowing for modules within the Syndat source code to be edited. The quick install guide in the above documentation allows for a user-only experience.
 
 
 
