@@ -54,7 +54,7 @@ def sample_chisquare(N_samples, DOF):
     """
     samples = np.random.chisquare(DOF, size=N_samples)
     if N_samples == 1:
-        samples = np.asscalar(samples)
+        samples = samples.item()
     return samples
     
 def chisquare_PDF(x, DOF, avg_reduced_width_square):

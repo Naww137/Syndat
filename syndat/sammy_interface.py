@@ -88,7 +88,7 @@ def write_sampar(df, pair, vary_parm, filename,
     def gn2G(row):
         S, P, phi, k = syndat.scattering_theory.FofE_explicit([row.E], pair.ac, pair.M, pair.m, row.lwave[0])
         Gnx = 2*P*row.gnx2
-        return np.asscalar(Gnx)
+        return Gnx.item()
 
     if "Gnx" not in df:   
         df['Gnx'] = df.apply(lambda row: gn2G(row), axis=1)
@@ -123,7 +123,7 @@ def write_estruct_file(Energies, filename):
     # print("WARNING: if 'twenty' is not specified in sammy.inp, the data file format will change.\nSee 'sammy_interface.write_estruct_file'")
     with open(filename,'w') as f:
         for ept in Energies:
-            f.write(f'{ept:0<19f} {1.0:<19} {1.0:0<7}\n')
+            f.write(f'{ept:0<19} {1.0:<19} {1.0:0<7}\n')
         f.close()
     return
 
