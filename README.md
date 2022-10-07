@@ -1,4 +1,4 @@
-## [Full Syndat Documentation](https://naww137.github.io/nuc_syndat/build/html/index.html).
+# [Full Syndat Documentation](https://naww137.github.io/nuc_syndat/build/html/index.html)
 
 ## Quick and easy install instructions
 
@@ -29,5 +29,5 @@ pip install -e .
 or 
 `python -m pip install -e .`
 
-## A user example can be found in the examples folder.
+## A user example can be found in the examples folder
 
