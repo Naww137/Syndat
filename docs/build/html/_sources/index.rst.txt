@@ -13,6 +13,7 @@ Welcome to Syndat's documentation!
    :caption: Contents:
 
    usage
+   installation
    source_api/index
 
 

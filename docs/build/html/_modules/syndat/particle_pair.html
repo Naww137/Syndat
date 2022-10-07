@@ -207,7 +207,8 @@
         <span class="n">l_wave_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_max</span>
 
         <span class="c1"># now perform calculations</span>
-        <span class="n">Jn</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">Jp</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Jn = []; Jp = []; </span>
+        <span class="n">Jall</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quant_vec_sum</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
         <span class="n">L</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">l_wave_max</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 
@@ -217,6 +218,7 @@
 
         <span class="n">possible_Jpi</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">J_negative</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">J_positive</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">J_all</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i_l</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">L</span><span class="p">):</span>
             <span class="n">this_l</span> <span class="o">=</span> <span class="p">{}</span>
             
@@ -228,42 +230,28 @@
                 <span class="n">this_l</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;s=</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">js</span>
                 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">js</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">J_parity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">J_positive</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">l</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+                        <span class="c1"># J_positive.append([l,s,j])</span>
+                        <span class="n">J_all</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">l</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
                     <span class="k">if</span> <span class="n">J_parity</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                        <span class="n">J_negative</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">l</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+                        <span class="c1"># J_negative.append([l,s,j])</span>
+                        <span class="n">J_all</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">l</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="o">-</span><span class="n">j</span><span class="p">])</span>
                 
             <span class="n">possible_Jpi</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;l=</span><span class="si">{</span><span class="n">l</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">this_l</span>
                 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">J_negative</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">Jn_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">J_negative</span><span class="p">)</span>
-            <span class="n">Jn_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">J_all</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">J_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">J_all</span><span class="p">)</span>
+            <span class="n">J_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">J_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
 
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">Jn_unique</span><span class="p">:</span>
-                <span class="n">entrance_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">j</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">J_unique</span><span class="p">:</span>
+                <span class="n">entrance_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">J_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">j</span><span class="p">)</span>
                 
                 <span class="n">ls</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">ss</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">jtot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">jtot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">J_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]):</span>
                     <span class="k">if</span> <span class="n">jtot</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
-                        <span class="n">ls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
-                        <span class="n">ss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Jn_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">ls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">J_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">ss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">J_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
                         
-                <span class="n">Jn</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">j</span><span class="p">,</span><span class="n">entrance_channels</span><span class="p">,</span><span class="n">ls</span><span class="p">))</span>
-            
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">J_positive</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">Jp_total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">J_positive</span><span class="p">)</span>
-            <span class="n">Jp_unique</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span> 
-            
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">Jp_unique</span><span class="p">:</span>
-                <span class="n">entrance_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">j</span><span class="p">)</span>
-                
-                <span class="n">ls</span> <span class="o">=</span> <span class="p">[];</span> <span class="n">ss</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">jtot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]):</span>
-                    <span class="k">if</span> <span class="n">jtot</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
-                        <span class="n">ls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
-                        <span class="n">ss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Jp_total</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
-                    
-                <span class="n">Jp</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">j</span><span class="p">,</span><span class="n">entrance_channels</span><span class="p">,</span><span class="n">ls</span><span class="p">))</span>
-
+                <span class="n">Jall</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">j</span><span class="p">,</span><span class="n">entrance_channels</span><span class="p">,</span><span class="n">ls</span><span class="p">))</span>
             
             
         <span class="k">if</span> <span class="n">print_out</span><span class="p">:</span>
@@ -273,160 +261,204 @@
 <span class="s1">    or half integer total quantum spin J and the second value is the </span><span class="se">\n\</span>
 <span class="s1">    number of entrance channels for that spin group. </span><span class="se">\n\</span>
 <span class="s1">    * See the dictionary &quot;possible_Jpi&quot; for a nested packing structure.&#39;</span><span class="p">)</span>
+        
             <span class="nb">print</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Spin group data for negative parity</span><span class="se">\n</span><span class="s1">(J-, #Chs, l-waves)&#39;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">Jn</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Spin group data for positive parity</span><span class="se">\n</span><span class="s1">(J+, #Chs, l-waves)&#39;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">Jp</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Spin group data for all parity</span><span class="se">\n</span><span class="s1">(Jpi, #Chs, l-waves)&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">Jall</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">each</span><span class="p">)</span>
 
         <span class="c1"># define new attributes for particle_pair object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Jn</span> <span class="o">=</span> <span class="n">Jn</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Jp</span> <span class="o">=</span> <span class="n">Jp</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">J</span> <span class="o">=</span> <span class="n">Jn</span> <span class="o">+</span> <span class="n">Jp</span>
+        <span class="c1"># self.Jn = Jn</span>
+        <span class="c1"># self.Jp = Jp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">J</span> <span class="o">=</span> <span class="n">Jall</span> <span class="c1"># Jn + Jp</span>
 
         <span class="k">return</span></div>
 
 
-
-
-<div class="viewcode-block" id="particle_pair.sample_all_Jpi"><a class="viewcode-back" href="../../source_api/particle_pair.html#syndat.particle_pair.particle_pair.sample_all_Jpi">[docs]</a>    <span class="k">def</span> <span class="nf">sample_all_Jpi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  
-                        <span class="n">Erange</span><span class="p">,</span> 
-                        <span class="n">Davg</span><span class="p">,</span> <span class="n">Ggavg</span><span class="p">,</span> <span class="n">gnavg</span><span class="p">,</span>
-                        <span class="n">save_csv</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
-                        <span class="n">sammy_run_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()):</span>
+<div class="viewcode-block" id="particle_pair.sample_resonance_ladder"><a class="viewcode-back" href="../../source_api/particle_pair.html#syndat.particle_pair.particle_pair.sample_resonance_ladder">[docs]</a>    <span class="k">def</span> <span class="nf">sample_resonance_ladder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Erange</span><span class="p">,</span> <span class="n">spin_groups</span><span class="p">,</span> <span class="n">average_parameters</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Samples a full resonance parameter ladder for each possible spin group.</span>
+<span class="sd">        Samples a full resonance ladder.</span>
 
-<span class="sd">        This function samples resonance parameters (Energy and widths) for each </span>
-<span class="sd">        possible spin group (Jpi) of a given particle pair. The results can be </span>
-<span class="sd">        printed to the console and/or saved to a csv. </span>
+<span class="sd">        _extended_summary_</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        self : syndat object</span>
-<span class="sd">            Particle pair object.</span>
 <span class="sd">        Erange : array-like</span>
-<span class="sd">            Array of resolve resonance range energy, only requires min/max.</span>
-<span class="sd">        Davg : array-like</span>
-<span class="sd">            Nested list of average level spacing for each spin group number. First </span>
-<span class="sd">            list is for negative parity (J-) second is for positive parity (J+).</span>
-<span class="sd">        Ggavg : array-like</span>
-<span class="sd">            Nested list of average widths for each spin group number. First </span>
-<span class="sd">            list is for negative parity (J-) second is for positive parity (J+).</span>
-<span class="sd">        gnavg : float</span>
-<span class="sd">            Nested list of average reduced amplitudes (gn_squared) for each spin group number. First </span>
-<span class="sd">            list is for negative parity (J-) second is for positive parity (J+).</span>
-<span class="sd">        print_out : bool</span>
-<span class="sd">            User option to print out quantum spin (J) mapping to console.</span>
-<span class="sd">        save_csv : bool</span>
-<span class="sd">            User option to save resonance ladders to csv.</span>
-<span class="sd">        sammy_run_folder : str</span>
-<span class="sd">            Folder in which the csv(s) containing resparm ladders will be saved.</span>
+<span class="sd">            _description_</span>
+<span class="sd">        spin_groups : list</span>
+<span class="sd">            List of tuples defining the spin groups being considered.</span>
+<span class="sd">        average_parameters : DataFrame</span>
+<span class="sd">            DataFrame containing the average resonance parameters for each spin group.</span>
 
-<span class="sd">        Notes</span>
-<span class="sd">        -----</span>
-<span class="sd">        Unsure of the average capture width for Gg sampling.</span>
-<span class="sd">        </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Jn_df : DataFrame</span>
-<span class="sd">            Pandas DataFrame conatining a resonance parameter ladder for each </span>
-<span class="sd">            quantum spin group with negative parity (all J-). The column E gives the energy of the level,</span>
-<span class="sd">            the column Gn gives the width of the agregate capture channel, and the following columns give</span>
-<span class="sd">            reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).</span>
-<span class="sd">        Jp_df : DataFrame</span>
-<span class="sd">            Pandas DataFrame conatining a resonance parameter ladder for each </span>
-<span class="sd">            quantum spin group with positive parity (all J+). The column E gives the energy of the level,</span>
-<span class="sd">            the column Gn gives the width of the agregate capture channel, and the following columns give</span>
-<span class="sd">            reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">            Resonance ladder information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
-        <span class="c1"># ensure enough average parameter values were given</span>
-        <span class="n">Jn_avg_length</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">Davg</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ggavg</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">gnavg</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
-        <span class="n">Jp_avg_length</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">Davg</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ggavg</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">gnavg</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">each</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Jn</span><span class="p">)</span> <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">Jn_avg_length</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not enough avarage parameters given for negative parity spin groups&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">each</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Jp</span><span class="p">)</span> <span class="k">for</span> <span class="n">each</span> <span class="ow">in</span> <span class="n">Jp_avg_length</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not enough avarage parameters given for positive parity spin groups&quot;</span><span class="p">)</span>
+
+        <span class="n">resonance_ladder</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">J_ID</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ij</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spin_groups</span><span class="p">):</span>
+            <span class="n">J_ID</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># sample resonance levels for each spin group with negative parity</span>
+            <span class="p">[</span><span class="n">levels</span><span class="p">,</span> <span class="n">level_spacing</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_levels</span><span class="o">.</span><span class="n">sample_RRR_levels</span><span class="p">(</span><span class="n">Erange</span><span class="p">,</span> <span class="n">average_parameters</span><span class="o">.</span><span class="n">dE</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
             
-    <span class="c1"># =============================================================================</span>
-    <span class="c1">#     negative parity Js</span>
-    <span class="c1"># =============================================================================</span>
-        <span class="n">Jn_</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Davg</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">ij</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Jn</span><span class="p">):</span>
+            <span class="c1"># a single radiative capture width is sampled w/large DOF because of many &#39;partial&#39; radiative transitions to ground state</span>
+            <span class="c1"># must divide average by the 2*DOF in order to maintain proper magnitude</span>
+            <span class="n">red_gwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">average_parameters</span><span class="o">.</span><span class="n">Gg</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">/</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+            <span class="n">Gwidth</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">red_gwidth</span> <span class="c1"># Gbar = 2*gbar b/c P~1 for gamma channels</span>
+
+            <span class="c1"># sample observable width as sum of multiple single-channel width with the same average (chi2, DOF=channels)</span>
+            <span class="n">red_nwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">average_parameters</span><span class="o">.</span><span class="n">gn2</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span><span class="o">/</span><span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">E_Gn_gnx2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">levels</span><span class="p">,</span> <span class="n">Gwidth</span><span class="p">,</span> <span class="n">red_nwidth</span><span class="p">,</span> <span class="p">[</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="p">[</span><span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="p">[</span><span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="p">[</span><span class="n">J_ID</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">)],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="s1">&#39;Gg&#39;</span><span class="p">,</span> <span class="s1">&#39;gnx2&#39;</span><span class="p">,</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span> <span class="s1">&#39;chs&#39;</span><span class="p">,</span> <span class="s1">&#39;lwave&#39;</span><span class="p">,</span> <span class="s1">&#39;J_ID&#39;</span><span class="p">])</span>   
+            <span class="c1"># assert len(np.unique(j[2]))==1, &quot;Code cannot consider different l-waves contributing to a spin group&quot;</span>
+            <span class="n">resonance_ladder</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">resonance_ladder</span><span class="p">,</span> <span class="n">E_Gn_gnx2</span><span class="o">.</span><span class="n">T</span><span class="p">])</span>
+
+        <span class="n">resonance_ladder</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">resonance_ladder</span></div></div>
+
+
+
+
+<span class="c1">### legacy code </span>
+
+    <span class="c1"># def sample_all_Jpi(self,  </span>
+    <span class="c1">#                     Erange, </span>
+    <span class="c1">#                     Davg, Ggavg, gnavg,</span>
+    <span class="c1">#                     save_csv = False, </span>
+    <span class="c1">#                     sammy_run_folder = os.getcwd()):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Samples a full resonance parameter ladder for each possible spin group.</span>
+
+    <span class="c1">#     This function samples resonance parameters (Energy and widths) for each </span>
+    <span class="c1">#     possible spin group (Jpi) of a given particle pair. The results can be </span>
+    <span class="c1">#     printed to the console and/or saved to a csv. </span>
+
+    <span class="c1">#     Parameters</span>
+    <span class="c1">#     ----------</span>
+    <span class="c1">#     self : syndat object</span>
+    <span class="c1">#         Particle pair object.</span>
+    <span class="c1">#     Erange : array-like</span>
+    <span class="c1">#         Array of resolve resonance range energy, only requires min/max.</span>
+    <span class="c1">#     Davg : array-like</span>
+    <span class="c1">#         Nested list of average level spacing for each spin group number. First </span>
+    <span class="c1">#         list is for negative parity (J-) second is for positive parity (J+).</span>
+    <span class="c1">#     Ggavg : array-like</span>
+    <span class="c1">#         Nested list of average widths for each spin group number. First </span>
+    <span class="c1">#         list is for negative parity (J-) second is for positive parity (J+).</span>
+    <span class="c1">#     gnavg : float</span>
+    <span class="c1">#         Nested list of average reduced amplitudes (gn_squared) for each spin group number. First </span>
+    <span class="c1">#         list is for negative parity (J-) second is for positive parity (J+).</span>
+    <span class="c1">#     print_out : bool</span>
+    <span class="c1">#         User option to print out quantum spin (J) mapping to console.</span>
+    <span class="c1">#     save_csv : bool</span>
+    <span class="c1">#         User option to save resonance ladders to csv.</span>
+    <span class="c1">#     sammy_run_folder : str</span>
+    <span class="c1">#         Folder in which the csv(s) containing resparm ladders will be saved.</span>
+
+    <span class="c1">#     Notes</span>
+    <span class="c1">#     -----</span>
+    <span class="c1">#     Unsure of the average capture width for Gg sampling.</span>
+        
+    <span class="c1">#     Returns</span>
+    <span class="c1">#     -------</span>
+    <span class="c1">#     Jn_df : DataFrame</span>
+    <span class="c1">#         Pandas DataFrame conatining a resonance parameter ladder for each </span>
+    <span class="c1">#         quantum spin group with negative parity (all J-). The column E gives the energy of the level,</span>
+    <span class="c1">#         the column Gn gives the width of the agregate capture channel, and the following columns give</span>
+    <span class="c1">#         reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).</span>
+    <span class="c1">#     Jp_df : DataFrame</span>
+    <span class="c1">#         Pandas DataFrame conatining a resonance parameter ladder for each </span>
+    <span class="c1">#         quantum spin group with positive parity (all J+). The column E gives the energy of the level,</span>
+    <span class="c1">#         the column Gn gives the width of the agregate capture channel, and the following columns give</span>
+    <span class="c1">#         reduced width amplitudes for particle channels (gn^2), with the headers indicating the waveform (l-wave).</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+        
+    <span class="c1">#     # ensure enough average parameter values were given</span>
+    <span class="c1">#     Jn_avg_length = [len(Davg[0]), len(Ggavg[0]), len(gnavg[0])]</span>
+    <span class="c1">#     Jp_avg_length = [len(Davg[1]), len(Ggavg[1]), len(gnavg[1])]</span>
+    <span class="c1">#     if any(each != len(self.Jn) for each in Jn_avg_length):</span>
+    <span class="c1">#         raise ValueError(&quot;Not enough avarage parameters given for negative parity spin groups&quot;)</span>
+    <span class="c1">#     if any(each != len(self.Jp) for each in Jp_avg_length):</span>
+    <span class="c1">#         raise ValueError(&quot;Not enough avarage parameters given for positive parity spin groups&quot;)</span>
+            
+    <span class="c1"># # =============================================================================</span>
+    <span class="c1"># #     negative parity Js</span>
+    <span class="c1"># # =============================================================================</span>
+    <span class="c1">#     Jn_ = []</span>
+    <span class="c1">#     if len(Davg[0]) &gt; 0:</span>
+    <span class="c1">#         for ij, j in enumerate(self.Jn):</span>
                 
-                <span class="c1"># sample resonance levels for each spin group with negative parity</span>
-                <span class="p">[</span><span class="n">levels</span><span class="p">,</span> <span class="n">level_spacing</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_levels</span><span class="o">.</span><span class="n">sample_RRR_levels</span><span class="p">(</span><span class="n">Erange</span><span class="p">,</span> <span class="n">Davg</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ij</span><span class="p">])</span>
+    <span class="c1">#             # sample resonance levels for each spin group with negative parity</span>
+    <span class="c1">#             [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[0][ij])</span>
                 
-                <span class="c1"># a single radiative capture width is sampled w/large DOF because of many &#39;partial&#39; radiative transitions to ground state</span>
-                <span class="c1"># must divide average by the DOF in order to maintain proper magnitude</span>
-                <span class="n">red_gwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">Ggavg</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ij</span><span class="p">]</span><span class="o">/</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-                <span class="n">Gwidth</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">red_gwidth</span> <span class="c1"># Gbar = 2*gbar b/c P~1 for gamma channels</span>
+    <span class="c1">#             # a single radiative capture width is sampled w/large DOF because of many &#39;partial&#39; radiative transitions to ground state</span>
+    <span class="c1">#             # must divide average by the DOF in order to maintain proper magnitude</span>
+    <span class="c1">#             red_gwidth = sample_widths.sample_RRR_widths(levels, Ggavg[0][ij]/100, 100)</span>
+    <span class="c1">#             Gwidth = 2*red_gwidth # Gbar = 2*gbar b/c P~1 for gamma channels</span>
                 
-                <span class="c1"># reduced width amplitudes are sampled as single channel (PT or chi with 1 DOF) for each contributing channel then summed</span>
-                <span class="c1"># while the sum will follow chi square with DOF=#channels, if you just sample the sum over all channels, you ignore</span>
-                <span class="c1"># differences in the average widths and differences in the penetrability function assosciated with each width</span>
-                <span class="n">gnx</span><span class="o">=</span><span class="p">[];</span> <span class="n">gn_lwave</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">ichannel</span><span class="p">,</span> <span class="n">lwave</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>      
-                    <span class="n">red_nwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">gnavg</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ij</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="n">gnx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">red_nwidth</span><span class="p">);</span> <span class="n">gn_lwave</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lwave</span><span class="p">)</span>
-                <span class="n">gn</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gnx</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">gn_lwave</span><span class="p">)</span>
+    <span class="c1">#             # reduced width amplitudes are sampled as single channel (PT or chi with 1 DOF) for each contributing channel then summed</span>
+    <span class="c1">#             # while the sum will follow chi square with DOF=#channels, if you just sample the sum over all channels, you ignore</span>
+    <span class="c1">#             # differences in the average widths and differences in the penetrability function assosciated with each width</span>
+    <span class="c1">#             gnx=[]; gn_lwave = []</span>
+    <span class="c1">#             for ichannel, lwave in enumerate(j[2]):      </span>
+    <span class="c1">#                 red_nwidth = sample_widths.sample_RRR_widths(levels, gnavg[0][ij], 1)</span>
+    <span class="c1">#                 gnx.append(red_nwidth); gn_lwave.append(lwave)</span>
+    <span class="c1">#             gn = pd.DataFrame(gnx, index=gn_lwave)</span>
                 
-                <span class="n">E_Gg</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">levels</span><span class="p">,</span> <span class="n">Gwidth</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="s1">&#39;Gg&#39;</span><span class="p">])</span>
-                <span class="n">E_Gg_gnx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">E_Gg</span><span class="p">,</span><span class="n">gn</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">E_Gg_Gnx_vert</span> <span class="o">=</span> <span class="n">E_Gg_gnx</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="c1">#             E_Gg = pd.DataFrame([levels, Gwidth], index=[&#39;E&#39;,&#39;Gg&#39;])</span>
+    <span class="c1">#             E_Gg_gnx = pd.concat([E_Gg,gn], axis=0)</span>
+    <span class="c1">#             E_Gg_Gnx_vert = E_Gg_gnx.transpose()</span>
                 
-                <span class="n">Jn_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E_Gg_Gnx_vert</span><span class="p">)</span>
+    <span class="c1">#             Jn_.append(E_Gg_Gnx_vert)</span>
                 
-                <span class="k">if</span> <span class="n">save_csv</span><span class="p">:</span>
-                    <span class="n">E_Gg_Gnx_vert</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sammy_run_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Jn_</span><span class="si">{</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No average level spacing given for negative parity spin groups&quot;</span><span class="p">)</span>
+    <span class="c1">#             if save_csv:</span>
+    <span class="c1">#                 E_Gg_Gnx_vert.to_csv(os.path.join(sammy_run_folder, f&#39;Jn_{j[0]}.csv&#39;))</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         print(&quot;No average level spacing given for negative parity spin groups&quot;)</span>
                 
-    <span class="c1"># =============================================================================</span>
-    <span class="c1">#       positive parity Js</span>
-    <span class="c1"># =============================================================================</span>
-        <span class="n">Jp_</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Davg</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">ij</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Jp</span><span class="p">):</span>
+    <span class="c1"># # =============================================================================</span>
+    <span class="c1"># #       positive parity Js</span>
+    <span class="c1"># # =============================================================================</span>
+    <span class="c1">#     Jp_ = []</span>
+    <span class="c1">#     if len(Davg[1]) &gt; 0:</span>
+    <span class="c1">#         for ij, j in enumerate(self.Jp):</span>
                 
-                <span class="c1"># sample resonance levels for each spin group with negative parity</span>
-                <span class="p">[</span><span class="n">levels</span><span class="p">,</span> <span class="n">level_spacing</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_levels</span><span class="o">.</span><span class="n">sample_RRR_levels</span><span class="p">(</span><span class="n">Erange</span><span class="p">,</span> <span class="n">Davg</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ij</span><span class="p">])</span>
+    <span class="c1">#             # sample resonance levels for each spin group with negative parity</span>
+    <span class="c1">#             [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, Davg[1][ij])</span>
                 
-                <span class="c1"># a single radiative capture width is sampled w/large DOF because of many &#39;partial&#39; radiative transitions to ground state</span>
-                <span class="n">red_gwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">Ggavg</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ij</span><span class="p">],</span> <span class="mi">100</span><span class="p">)</span>
-                <span class="n">Gwidth</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">red_gwidth</span> <span class="c1"># Gbar = 2*gbar b/c P~1 for gamma channels</span>
+    <span class="c1">#             # a single radiative capture width is sampled w/large DOF because of many &#39;partial&#39; radiative transitions to ground state</span>
+    <span class="c1">#             red_gwidth = sample_widths.sample_RRR_widths(levels, Ggavg[1][ij], 100)</span>
+    <span class="c1">#             Gwidth = 2*red_gwidth # Gbar = 2*gbar b/c P~1 for gamma channels</span>
                 
-                <span class="c1"># reduced width amplitudes are sampled as single channel (PT or chi with 1 DOF) for each contributing channel then summed</span>
-                <span class="c1"># while the sum will follow chi square with DOF=#channels, if you just sample the sum over all channels, you ignore</span>
-                <span class="c1"># differences in the average widths and differences in the penetrability function assosciated with each width</span>
-                <span class="n">gnx</span><span class="o">=</span><span class="p">[];</span> <span class="n">gn_lwave</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">ichannel</span><span class="p">,</span> <span class="n">lwave</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>      
-                    <span class="n">red_nwidth</span> <span class="o">=</span> <span class="n">sample_widths</span><span class="o">.</span><span class="n">sample_RRR_widths</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">gnavg</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ij</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="n">gnx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">red_nwidth</span><span class="p">);</span> <span class="n">gn_lwave</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lwave</span><span class="p">)</span>
-                <span class="n">gn</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">gnx</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">gn_lwave</span><span class="p">)</span>
+    <span class="c1">#             # reduced width amplitudes are sampled as single channel (PT or chi with 1 DOF) for each contributing channel then summed</span>
+    <span class="c1">#             # while the sum will follow chi square with DOF=#channels, if you just sample the sum over all channels, you ignore</span>
+    <span class="c1">#             # differences in the average widths and differences in the penetrability function assosciated with each width</span>
+    <span class="c1">#             gnx=[]; gn_lwave = []</span>
+    <span class="c1">#             for ichannel, lwave in enumerate(j[2]):      </span>
+    <span class="c1">#                 red_nwidth = sample_widths.sample_RRR_widths(levels, gnavg[1][ij], 1)</span>
+    <span class="c1">#                 gnx.append(red_nwidth); gn_lwave.append(lwave)</span>
+    <span class="c1">#             gn = pd.DataFrame(gnx, index=gn_lwave)</span>
                 
-                <span class="n">E_Gg</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">levels</span><span class="p">,</span> <span class="n">Gwidth</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="s1">&#39;Gg&#39;</span><span class="p">])</span>
-                <span class="n">E_Gg_gnx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">E_Gg</span><span class="p">,</span><span class="n">gn</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">E_Gg_Gnx_vert</span> <span class="o">=</span> <span class="n">E_Gg_gnx</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+    <span class="c1">#             E_Gg = pd.DataFrame([levels, Gwidth], index=[&#39;E&#39;,&#39;Gg&#39;])</span>
+    <span class="c1">#             E_Gg_gnx = pd.concat([E_Gg,gn], axis=0)</span>
+    <span class="c1">#             E_Gg_Gnx_vert = E_Gg_gnx.transpose()</span>
                 
-                <span class="n">Jp_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E_Gg_Gnx_vert</span><span class="p">)</span>
+    <span class="c1">#             Jp_.append(E_Gg_Gnx_vert)</span>
                 
-                <span class="k">if</span> <span class="n">save_csv</span><span class="p">:</span>
-                    <span class="n">E_Gg_Gnx_vert</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sammy_run_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Jp_</span><span class="si">{</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No average level spacing given for positive parity spin groups&quot;</span><span class="p">)</span>
+    <span class="c1">#             if save_csv:</span>
+    <span class="c1">#                 E_Gg_Gnx_vert.to_csv(os.path.join(sammy_run_folder, f&#39;Jp_{j[0]}.csv&#39;))</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         print(&quot;No average level spacing given for positive parity spin groups&quot;)</span>
                 
         
-        <span class="c1"># =============================================================================</span>
-        <span class="c1">#       redefine object attributes</span>
-        <span class="c1"># ============================================================================= </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Jn_resonances</span> <span class="o">=</span> <span class="n">Jn_</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Jp_resonances</span> <span class="o">=</span> <span class="n">Jp_</span></div></div>
+    <span class="c1">#     # =============================================================================</span>
+    <span class="c1">#     #       redefine object attributes</span>
+    <span class="c1">#     # ============================================================================= </span>
+    <span class="c1">#     self.Jn_resonances = Jn_</span>
+    <span class="c1">#     self.Jp_resonances = Jp_</span>
 
     
 

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>How to Use Syndat &#8212; Syndat 1.0.1 documentation</title>
+    <title>Installation &#8212; Syndat 1.0.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/cloud.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noticia+Text:400,i,b,bi|Open+Sans:400,i,b,bi|Roboto+Mono:400,i,b,bi&amp;display=swap" type="text/css" />
@@ -37,8 +37,8 @@
 
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="installation.html" />
-    <link rel="prev" title="Welcome to Syndat’s documentation!" href="index.html" /> 
+    <link rel="next" title="Source API" href="source_api/index.html" />
+    <link rel="prev" title="How to Use Syndat" href="usage.html" /> 
         <meta name="viewport" content="width=device-width, initial-scale=1">
   </head><body>
     <div class="relbar-top">
@@ -53,14 +53,14 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="installation.html" title="Installation"
+          <a href="source_api/index.html" title="Source API"
              accesskey="N">next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to Syndat’s documentation!"
+          <a href="usage.html" title="How to Use Syndat"
              accesskey="P">previous</a> &nbsp; &nbsp;</li>
     <li><a href="index.html">Syndat 1.0.1 documentation</a> &#187;</li>
 
-        <li class="nav-item nav-item-this"><a href="">How to Use Syndat</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Installation</a></li> 
       </ul>
     </div>
     </div>
@@ -71,15 +71,32 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="how-to-use-syndat">
-<h1>How to Use Syndat<a class="headerlink" href="#how-to-use-syndat" title="Permalink to this heading">¶</a></h1>
-<section id="methodology">
-<h2>Methodology<a class="headerlink" href="#methodology" title="Permalink to this heading">¶</a></h2>
-<p>Write up some of the methodology here.</p>
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
+<section id="quick-easy-install">
+<h2>Quick &amp; Easy Install<a class="headerlink" href="#quick-easy-install" title="Permalink to this heading">¶</a></h2>
+<p>To use <strong>Syndat</strong>, you can simply install it using python’s command line utility pip:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">git+https://github.com/Naww137/nuc_syndat</span></code></p>
+<p>This will install the <strong>Syndat</strong> package in the site-packages directory for the currently active python environment you are in.</p>
+<p>If a new version of Syndat has been released, you can update Syndat by running:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">git+https://github.com/Naww137/nuc_syndat</span></code></p>
+<p>If you would like to run in <a class="reference external" href="https://setuptools.pypa.io/en/latest/userguide/development_mode.html">development mode</a>, install using:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span></code></p>
 </section>
-<section id="users-guide">
-<span id="usersguide"></span><h2>Users Guide<a class="headerlink" href="#users-guide" title="Permalink to this heading">¶</a></h2>
-<p>There is a standard example for generating data in the examples folder of this repository. A more detailed user guid is coming soon.</p>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">¶</a></h2>
+<p>This project comes with significant documentation. In order to devlop and compile this documentation with <a class="reference external" href="https://www.sphinx-doc.org/en/master/">sphinx</a>
+follow the next few steps. If you are only a user, all of the Syndat documentation is hosted on this site.</p>
+<p>First make sure you have sphinx installed as well as the cloud theme</p>
+<p><code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">sphinx</span></code></p>
+<p><code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">cloud-sptheme</span></code></p>
+<p>From the directory where you cloned ADAM run:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">sphinx-build</span> <span class="pre">-b</span> <span class="pre">html</span> <span class="pre">docs/source/</span> <span class="pre">docs/build/html</span></code></p>
+<p>To update documetation from the restructured text files without having to rebuild, navigate to the docs/ directory and run:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">make</span> <span class="pre">html</span></code></p>
+<p>Any changes to the conf.py file will not take effect unless you rebuild.
+The HTML files will be created in docs/build/html. The main page can be reached by openning the index.html file.
+This will launch an HTML page and any of the subsequent pages can be reached from here.</p>
 </section>
 </section>
 
@@ -92,9 +109,9 @@
         <div class="sphinxsidebarwrapper"><div class="sphinx-toc sphinxlocaltoc">
     <h3><a href="index.html">Page contents</a></h3>
     <ul>
-<li><a class="reference internal" href="#">How to Use Syndat</a><ul>
-<li><a class="reference internal" href="#methodology">Methodology</a></li>
-<li><a class="reference internal" href="#users-guide">Users Guide</a></li>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#quick-easy-install">Quick &amp; Easy Install</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
 </ul>
 </li>
 </ul>
@@ -102,18 +119,18 @@
   </div>
   <div class="sphinxprev">
     <h4>Previous page</h4>
-    <p class="topless"><a href="index.html"
-                          title="Previous page">&larr; Welcome to Syndat’s documentation!</a></p>
+    <p class="topless"><a href="usage.html"
+                          title="Previous page">&larr; How to Use Syndat</a></p>
   </div>
   <div class="sphinxnext">
     <h4>Next page</h4>
-    <p class="topless"><a href="installation.html"
-                          title="Next page">&rarr; Installation</a></p>
+    <p class="topless"><a href="source_api/index.html"
+                          title="Next page">&rarr; Source API</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/usage.rst.txt"
+      <li><a href="_sources/installation.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -160,14 +177,14 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="installation.html" title="Installation"
+          <a href="source_api/index.html" title="Source API"
              >next</a> &nbsp; &nbsp;</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to Syndat’s documentation!"
+          <a href="usage.html" title="How to Use Syndat"
              >previous</a> &nbsp; &nbsp;</li>
     <li><a href="index.html">Syndat 1.0.1 documentation</a> &#187;</li>
 
-        <li class="nav-item nav-item-this"><a href="">How to Use Syndat</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Installation</a></li> 
       </ul>
     </div>
     </div>

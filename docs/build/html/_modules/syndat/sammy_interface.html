@@ -78,6 +78,8 @@
 <span class="kn">import</span> <span class="nn">syndat</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
+<span class="n">module_dirname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+
 <span class="c1"># =============================================================================</span>
 <span class="c1"># </span>
 <span class="c1"># =============================================================================</span>
@@ -104,9 +106,7 @@
 <span class="c1"># =============================================================================</span>
 <span class="c1"># </span>
 <span class="c1"># =============================================================================</span>
-<span class="k">def</span> <span class="nf">samtools_fmtpar</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> \
-                    <span class="n">template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="s2">&quot;../templates/sammy_template_RM_only.par&quot;</span><span class="p">)</span> 
-                    <span class="p">):</span>
+<span class="k">def</span> <span class="nf">samtools_fmtpar</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">template</span><span class="p">):</span>
     
     <span class="c1"># print(&quot;WARNING: check parameter file created - formatting in sammy_interface.samtools_fmtpar could be more robust&quot;)</span>
     
@@ -129,8 +129,8 @@
         
     <span class="k">return</span>
 
-<div class="viewcode-block" id="write_sampar"><a class="viewcode-back" href="../../source_api/sammy_interface.html#syndat.sammy_interface.write_sampar">[docs]</a><span class="k">def</span> <span class="nf">write_sampar</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">vary_parm</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> 
-                                <span class="n">template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="s2">&quot;../templates/sammy_template_RM_only.par&quot;</span><span class="p">)</span> <span class="p">):</span>
+<div class="viewcode-block" id="write_sampar"><a class="viewcode-back" href="../../source_api/sammy_interface.html#syndat.sammy_interface.write_sampar">[docs]</a><span class="k">def</span> <span class="nf">write_sampar</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">pair</span><span class="p">,</span> <span class="n">vary_parm</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> 
+                                <span class="n">template</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">module_dirname</span><span class="p">),</span> <span class="s2">&quot;templates/sammy_template_RM_only.par&quot;</span><span class="p">)</span> <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes a formatted sammy.par file.</span>
 
@@ -149,19 +149,31 @@
 <span class="sd">        Filepath to template file for sammy.par. Included because of the different options for input to sammy, by default os.path.realpath(&quot;../templates/sammy_template_RM_only.par&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="k">def</span> <span class="nf">gn2G</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">syndat</span><span class="o">.</span><span class="n">scattering_theory</span><span class="o">.</span><span class="n">FofE_explicit</span><span class="p">([</span><span class="n">row</span><span class="o">.</span><span class="n">E</span><span class="p">],</span> <span class="n">pair</span><span class="o">.</span><span class="n">ac</span><span class="p">,</span> <span class="n">pair</span><span class="o">.</span><span class="n">M</span><span class="p">,</span> <span class="n">pair</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">lwave</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">Gnx</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">P</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">gnx2</span>
+        <span class="k">return</span> <span class="n">Gnx</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="s2">&quot;Gnx&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>   
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Gnx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">gn2G</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
     
-    <span class="n">par_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-    <span class="n">zero_neutron_widths</span> <span class="o">=</span> <span class="mi">5</span><span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">par_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">df</span><span class="o">.</span><span class="n">E</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Gg</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Gnx</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">zero_neutron_widths</span> <span class="o">=</span> <span class="mi">5</span><span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="n">zero_neutron_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">),</span><span class="n">zero_neutron_widths</span><span class="p">])</span>
     <span class="n">par_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">par_array</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="o">-</span><span class="n">zero_neutron_widths</span><span class="p">],</span> <span class="n">zero_neutron_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    
+
     <span class="c1">#vary_parm = True</span>
     <span class="k">if</span> <span class="n">vary_parm</span><span class="p">:</span>
         <span class="n">binary_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">),</span><span class="mi">5</span><span class="o">-</span><span class="n">zero_neutron_widths</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">),</span><span class="n">zero_neutron_widths</span><span class="p">])))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">binary_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">par_array</span><span class="p">),</span><span class="mi">5</span><span class="p">])</span>
-        
+
     <span class="n">samtools_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">par_array</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">binary_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">j_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">df</span><span class="o">.</span><span class="n">J_ID</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">samtools_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">samtools_array</span><span class="p">,</span> <span class="n">j_array</span><span class="p">))</span>
 
     <span class="n">samtools_fmtpar</span><span class="p">(</span><span class="n">samtools_array</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
     
@@ -175,7 +187,7 @@
     <span class="c1"># print(&quot;WARNING: if &#39;twenty&#39; is not specified in sammy.inp, the data file format will change.\nSee &#39;sammy_interface.write_estruct_file&#39;&quot;)</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">ept</span> <span class="ow">in</span> <span class="n">Energies</span><span class="p">:</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ept</span><span class="si">:</span><span class="s1">0&lt;19f</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="mf">1.0</span><span class="si">:</span><span class="s1">&lt;19</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="mf">1.0</span><span class="si">:</span><span class="s1">0&lt;7</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ept</span><span class="si">:</span><span class="s1">0&lt;19</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="mf">1.0</span><span class="si">:</span><span class="s1">&lt;19</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="mf">1.0</span><span class="si">:</span><span class="s1">0&lt;7</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">return</span>
 
@@ -187,16 +199,16 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes a formatted sammy.dat file.</span>
 
-<span class="sd">    This function takes a DataFrame with appropriately named columns: &quot;E&quot;, &quot;exp_trans&quot;, and &quot;exp_trans_unc&quot;. </span>
-<span class="sd">    These DataFrame keys correspond to the &quot;trans&quot; DataFrame generated by Syndat. This is an attribute of the experiment object once the experiment is &quot;run&quot;.</span>
-<span class="sd">    The uncertainty on the experimental data point must be absolute for this formatting as it corresponds to the \</span>
-<span class="sd">    sammy format with &quot;use twenty significant digits&quot; or &quot;twenty&quot; in the input file. If this flag is not in the \</span>
+<span class="sd">    These DataFrame keys required correspond to the &quot;trans&quot; DataFrame generated by Syndat.</span>
+<span class="sd">    This is an attribute of the experiment object once the experiment is &quot;run&quot;.</span>
+<span class="sd">    The uncertainty on the experimental data point must be absolute for this formatting as it corresponds to the</span>
+<span class="sd">    sammy format with &quot;use twenty significant digits&quot; or &quot;twenty&quot; in the input file. If this flag is not in the</span>
 <span class="sd">    sammy input file, the uncertainty should not be absolute and the formatting (space between variables) changes.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    transmission_data : DataFrame</span>
-<span class="sd">        DataFrame containing experimental transmission data.</span>
+<span class="sd">        DataFrame containing experimental transmission data, requires columns [&quot;E&quot;, &quot;exp_trans&quot;, and &quot;exp_trans_unc&quot;].</span>
 <span class="sd">    filename : str</span>
 <span class="sd">        Filepath/name for the sammy.dat file being created.</span>
 
