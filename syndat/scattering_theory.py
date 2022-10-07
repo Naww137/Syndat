@@ -222,8 +222,7 @@ def SLBW(E, pair, resonance_ladder):
         S, P, phi, k = FofE_explicit(E, pair.ac, pair.M, pair.m, orbital_angular_momentum[0])
 
         # calculate capture
-        xs = 0 
-        constant = (np.pi*g/(k**2))
+        sum1 = 0
         for index, row in J_df.iterrows():
             E_lambda = row.E
             Gg = row.Gg * 1e-3
@@ -232,13 +231,15 @@ def SLBW(E, pair, resonance_ladder):
             Gnx = 2*P*gnx2
 
             d = (E-E_lambda)**2 + ((Gg+Gnx)/2)**2 
-            xs += (Gg*Gnx) / ( d )
-        xs_cap += constant*xs
+            sum1 += (Gg*Gnx) / ( d )
+
+        xs_cap += (np.pi*g/(k**2))*sum1
 
 
         # calculate scatter
-        xs = 0
-        constant = (np.pi*g/(k**2))
+        sum1 = 0
+        sum2 = 0
+        sum3 = 0
         for index, row in J_df.iterrows():
             E_lambda = row.E
             Gg = row.Gg * 1e-3
@@ -248,8 +249,11 @@ def SLBW(E, pair, resonance_ladder):
 
             G = Gnx+Gg
             d = (E-E_lambda)**2 + ((Gg+Gnx)/2)**2 
-            xs += ((1-np.cos(2*phi))*(2-Gnx*G/d) + 2*np.sin(2*phi)*Gnx*(E-E_lambda)/d + (Gnx*(E-E_lambda)/d)**2 + (Gnx*G/d/2)**2)
-        xs_scat += constant*xs
+            sum1 += Gnx*G/d
+            sum2 += Gnx*(E-E_lambda)/d
+            sum3 += (Gnx*(E-E_lambda)/d)**2 + (Gnx*G/d/2)**2
+
+        xs_scat += (np.pi*g/(k**2))*( (1-np.cos(2*phi))*(2-sum1) + 2*np.sin(2*phi)*sum2 + sum3)
 
     # calculate total
     xs_tot = xs_cap+xs_scat

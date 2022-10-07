@@ -132,7 +132,7 @@ def cts_to_ctr(cts, d_cts, bw, trig):
 
     
 
-def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0, alpha):
+def generate_raw_count_data(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi, b0,B0, alpha):
     """
     Generates raw count data for sample-in given a theoretical tranmission. 
     
@@ -146,8 +146,10 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0,
         Sample in dataframe with a column for theoretical tranmission ['theo_trans'] and energy ['E'].
     open_df : pandas.DataFrame
         Open dataframe, columns ['E'], ['bw']
-    trig : int
-        Number of times the LINAC is fired, corresponding to the number of times each channel is openned for counts.
+    trigo : int
+        Number of times the LINAC is fired for the open counts, corresponding to the number of times each channel is openned for counts.
+    trigs : int
+        Number of times the LINAC is fired for the sample-in counts, corresponding to the number of times each channel is openned for counts.
     k : float
         Background normalization for sample in.
     K : float
@@ -169,7 +171,7 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0,
         Dataframe containing data for sample out.
     """
     # calculate open count rates
-    Cr, dCr = cts_to_ctr(open_df.c, open_df.dc, open_df.bw, trig) # cts_o/(bw*trig)
+    Cr, dCr = cts_to_ctr(open_df.c, open_df.dc, open_df.bw, trigo) # cts_o/(bw*trig)
     open_df['cps'] = Cr; open_df['dcps'] = dCr
     
     # calculate sample in count rate from theoretical transmission, bkg, m,k, and open count rate
@@ -177,7 +179,7 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trig, k,K, Bi, b0,B0,
     cr = (sample_df.theo_trans*(m3*Cr - m4*K*Bi - B0) + m2*k*Bi + b0)/m1
     
     # calculate sample in counts from count rate
-    c = cr*open_df.bw*trig 
+    c = cr*open_df.bw*trigs
 
     # correct for dead time
     # c = c*
@@ -271,13 +273,13 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
     # construct systematic covariance and jacobian
     Cov_sys = np.diag(sys_unc**2)
     # print("WARNING: Need to update getCov function to take a/b covariances, currently it says cov = var*var")
-    Cov_sys[0,1] = 1.42405866e-01 # sys_unc[0]*sys_unc[1]  
-    Cov_sys[1,0] = 1.42405866e-01 #sys_unc[1]*sys_unc[0]        
+    Cov_sys[0,1] = 1.42659922e-1 # 1.42405866e-01 # sys_unc[0]*sys_unc[1]  
+    Cov_sys[1,0] = 1.42659922e-1 # 1.42405866e-01 #sys_unc[1]*sys_unc[0]        
     
     # systematic derivatives
-    dTi_da = -(k*alpha[1]*D+K*alpha[3]*N)*np.exp(-b*tof) / (D**2)
-    dTi_db = (k*alpha[1]*D)*Bi*tof / (D**2)
-    dTi_dk = -alpha[1]*Bi/D**2
+    dTi_da = -1*(k*D+K*N)/(a*D**2)  #   -(k*alpha[1]*D+K*alpha[3]*N)*np.exp(-b*tof) / (D**2)
+    dTi_db = (k*D+K*N)*Bi*tof/D**2  #   (k*alpha[1]*D)*Bi*tof / (D**2)
+    dTi_dk = -alpha[1]*Bi/D         #   D**2
     dTi_dK = N*alpha[3]*Bi/D**2
     dTi_db0 = -1/D
     dTi_dB0 = N/D**2
@@ -300,7 +302,7 @@ def transmission(cr,Cr, Bi, k,K, b0,B0, alpha):
     return (m1*cr - m2*k*Bi - b0) / (m3*Cr - m4*K*Bi - B0) 
 
     
-def reduce_raw_count_data(tof, c,C, dc,dC, bw, trig, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
+def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
     """
     Reduces raw count data to transmission data with propagated uncertainty.
 
@@ -353,8 +355,9 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trig, a,b, k,K, Bi, b0,B0, alpha,
     Output covaraiance matrix for transmission.
     """
     # calculate count rate and propagate uncertainty
-    Cr, dCr = cts_to_ctr(C, dC, bw, trig) 
-    cr, dcr = cts_to_ctr(c, dc, bw, trig)
+    Cr, dCr = cts_to_ctr(C, dC, bw, trigo) 
+    cr, dcr = cts_to_ctr(c, dc, bw, trigs)
+    rates = Cr,dCr, cr,dcr
     
     # calculate transmission
     Tn = transmission(cr,Cr, Bi, k,K, b0,B0, alpha)
@@ -362,5 +365,5 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trig, a,b, k,K, Bi, b0,B0, alpha,
     CovT, CovT_stat, CovT_sys = get_covT(tof, cr,Cr, dcr,dCr, a,b, k,K, Bi, b0,B0, alpha, sys_unc)
     dT = np.sqrt(np.diagonal(CovT))
     
-    return Tn, dT, CovT, CovT_stat, CovT_sys
+    return Tn, dT, CovT, CovT_stat, CovT_sys, rates
 

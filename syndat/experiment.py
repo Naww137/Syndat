@@ -16,11 +16,15 @@ import syndat
 
 class experiment:
     
-    def __init__(self, open_data, theoretical_data,
-                                    E_limits = [],
-                                    experiment_parameters = {} , 
-                                    options = { 'Perform Experiment':True, 'Add Noise': True} , 
-                                                    ):
+    def __init__(self, theoretical_data,
+
+                    open_data=None, energy_domain = None,
+
+                    experiment_parameters = {} , 
+                    options = { 'Perform Experiment':True, 
+                                'Add Noise':True, 
+                                'Sample TURP':False} , 
+                                                                ):
         """
         Instantiates the experiment object
 
@@ -29,12 +33,15 @@ class experiment:
 
         Parameters
         ----------
-        open_data : DataFrame or str
-            Open count spectra data. If DataFrame needs columns 'tof', 'bw', 'c', 'dc'. If string, must be filepath to csv from Brown, et al.
         theoretical_data : DataFrame or str
             Theoretical cross section expected to be seen in the laboratory setting. If DataFrame needs columns 'E' and 'theo_trans'. If string, must be filepath to sammy.lst.
-        E_limits : list, optional
-            Energy range of interest, must be within the domain of the open and theoretical data. If empty (Default) the entire open/theoretical domain will be used, by default []
+        open_data : DataFrame or str, optional
+            Open count data. If passing a DataFrame, needs columns 'tof', 'bw', 'c', 'dc'. If passing a string, must be filepath to csv with format from Brown, et al.
+            If empty (Default), the open count spectra will be approximated with an exponential function as detailed in Walton, et al.
+        energy_domain : array-like, optional
+            Energy domain of interest, can be just min/max or entire energy grid. If giving min/max, must be within the domain of the theoretical data.
+            If giving energy grid, it must align with the energy grid given with the theoretical data.
+            If empty (Default) the entire energy grid from the theoretical data will be used.
         experiment_parameters : dict, optional
             Experimental parameters alternative to default. Default parameters are described in Walton, et al., based on work by Brown, et al.,
             any parameters given here will replace the default parameters before the experiment is synthesized, by default {}
@@ -42,14 +49,17 @@ class experiment:
             Keyword options, mostly for debugging, by default { 'Perform Experiment':True, 'Add Noise': True}
         """
         
+
         ### Gather options
         perform_methods = options['Perform Experiment']
         add_noise = options['Add Noise']
 
+
         ### Default experiment parameter dictionary
         default_exp = {
                         'n'         :   {'val'  :   0.12,                'unc'  :   0},
-                        'trig'      :   {'val'  :   9760770,             'unc'  :   0},
+                        'trigo'     :   {'val'  :   9758727,             'unc'  :   0},
+                        'trigs'     :   {'val'  :   18476117,            'unc'  :   0},
                         'tof_dist'  :   {'val'  :   35.185,              'unc'  :   0},
                         't0'        :   {'val'  :   3.326,               'unc'  :   0},
                         'm'         :   {'val'  :   [1,1,1,1],           'unc'  :   [0.016,0.008,0.018,0.005]},
@@ -57,10 +67,10 @@ class experiment:
                         'm2'        :   {'val'  :   1,                   'unc'  :   0.008},
                         'm3'        :   {'val'  :   1,                   'unc'  :   0.018},
                         'm4'        :   {'val'  :   1,                   'unc'  :   0.005},
-                        'a'         :   {'val'  :   582.8061256946647,   'unc'  :   np.sqrt(1.14174241e+03)},
-                        'b'         :   {'val'  :   0.0515158865500879,  'unc'  :   np.sqrt(2.18755273e-05)},
-                        'ks'        :   {'val'  :   0.563,               'unc'  :   0.563*0.0427},
-                        'ko'        :   {'val'  :   1.471,               'unc'  :   1.471*0.0379},
+                        'a'         :   {'val'  :   582.7768594580712,   'unc'  :   np.sqrt(1.14395753e+03)},
+                        'b'         :   {'val'  :   0.05149689096209191, 'unc'  :   np.sqrt(2.19135003e-05)},
+                        'ks'        :   {'val'  :   0.563,               'unc'  :   0.02402339737495515},
+                        'ko'        :   {'val'  :   1.471,               'unc'  :   0.05576763648617445},
                         'b0s'       :   {'val'  :   9.9,                 'unc'  :   0.1},
                         'b0o'       :   {'val'  :   13.4,                'unc'  :   0.7}    }
 
@@ -69,25 +79,120 @@ class experiment:
         for old_parameter in default_exp:
             if old_parameter in experiment_parameters:
                 pardict.update({old_parameter:experiment_parameters[old_parameter]})
-            
-        ### workflow
-        self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
-        self.E_limits = E_limits
 
+        ### set attributes from given options
+        self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
+
+        
+    
+        ### read in theoretical cross section/transmission data - defines self.sdat
+        self.read_theoretical(theoretical_data)
+
+
+
+        ### Determine energy grid
+        if energy_domain is None:
+            self.energy_domain = self.sdat.E
+        else:
+            if len(energy_domain) != len(self.sdat.E):
+                self.sdat = self.sdat[(self.sdat.E>=min(energy_domain))&(self.sdat.E<=max(energy_domain))].reset_index(drop=True)
+            if len(energy_domain) == 2:
+                self.energy_domain = self.sdat.E
+            if np.array_equal(np.array(self.energy_domain), np.array(self.sdat.E)):
+                pass
+            else:
+                raise ValueError("An energy grid was given but it does not line up with that of the theoretical data")
+
+
+
+        ### Decide on an open spectra
+        if open_data is None:
+            self.odat = self.approximate_open_spectra(self.energy_domain)
+        else:
+            self.read_odat(open_data)
+            
+            
+
+        ### Automatically perform experiment
         if perform_methods:
-            # import open data from jesse's experiment
-            self.get_odat(open_data)
             # vectorize the background function from jesse's experiment
             self.get_bkg()
-            # get theoretical cross section 
-            self.get_theoretical(theoretical_data)
             # generate raw count data for sample in given theoretical transmission and assumed true reduction parameters/open count data
             self.generate_sdat(add_noise)
             # reduce the experimental data
             self.reduce()
             
+
+    # ----------------------------------------------------------
+    #    Begin Methods
+    # ----------------------------------------------------------
+
+    def read_theoretical(self, theoretical_data):
+        """
+        Reads in a theoretical cross section.
+
+        Parameters
+        ----------
+        theoretical_data : DataFrame or str
+            If DataFrame, must contain clumns 'E' and 'theo_trans'. If str, must be the full path to a sammy.lst file.
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         
-    def get_odat(self,open_data):
+        # check types
+        if isinstance(theoretical_data, pd.DataFrame):
+            theo_df = theoretical_data
+            if 'E' not in theo_df.columns:
+                raise ValueError("Column name 'E' not in theoretical DataFrame passed to experiment class.")
+            if 'theo_trans' not in theo_df.columns:
+                raise ValueError("Column name 'theo_trans' not in theoretical DataFrame passed to experiment class.")
+        elif isinstance(theoretical_data, str):
+            theo_df = syndat.sammy_interface.readlst(theoretical_data)
+        else:
+            raise ValueError("Theoretical data passed to experiment class is neither a DataFrame or path name (string).")
+            
+        sdat = pd.DataFrame()
+        sdat['theo_trans'] = theo_df.theo_trans #
+        sdat['E'] = theo_df.E
+        sdat['tof'] = syndat.exp_effects.e_to_t(sdat.E, self.redpar.val.tof_dist, True)*1e6+self.redpar.val.t0
+        sdat.sort_values('tof', axis=0, ascending=True, inplace=True)
+        sdat.reset_index(drop=True, inplace=True)
+
+        self.sdat = sdat
+
+
+# --------------------------------------------------------------------------------------------------------------------------
+    
+  
+    def read_odat(self,open_data):
+        """
+        Reads in an open count dataset.
+
+        Parameters
+        ----------
+        open_data : DataFrame or str
+            If DataFrame, must contain clumns 'tof','bw', 'c', and 'dc'. If str, must be the full path to a csv file.
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         
         # check types for what to do 
         if isinstance(open_data, pd.DataFrame):
@@ -117,55 +222,33 @@ class experiment:
             odat.rename(columns={"counts": "c", "dcounts": "dc"}, inplace=True)
             # -------------------------------------------
         else:
-            raise ValueError("Theoretical data passed to experiment class is neither a DataFrame or path name (string).")
+            raise TypeError("Open data passed to experiment class is not of type DataFrame or string (pathname).")
 
 
-        # filter if given elimits
-        if not self.E_limits:
+        # filter to energy limits
+        if len(odat.E) != len(self.energy_domain):
+            # must round to match .LST precision
+            odat = odat[(round(odat.E,10)>=min(self.energy_domain))&(round(odat.E,10)<=max(self.energy_domain))].reset_index(drop=True)
+        if np.allclose(np.array(odat.E), np.array(self.energy_domain)):
             pass
         else:
-            odat = odat[(odat.E>self.E_limits[0])&(odat.E<self.E_limits[1])].reset_index(drop=True)
+            raise ValueError("The open data's energy grid does not align with the defined experiment.energy_domain")
 
         # Define class attribute
         self.odat = odat
         
+
+# --------------------------------------------------------------------------------------------------------------------------
+
         
     def get_bkg(self):
         def f(ti,a,b):
             return a*np.exp(ti*-b)
         self.Bi = f(self.odat.tof,self.redpar.val.a,self.redpar.val.b)
 
-    def get_theoretical(self, theoretical_data):
 
-        # check types
-        if isinstance(theoretical_data, pd.DataFrame):
-            theo_df = theoretical_data
-            if 'E' not in theo_df.columns:
-                raise ValueError("Column name 'E' not in theoretical DataFrame passed to experiment class.")
-            if 'theo_trans' not in theo_df.columns:
-                raise ValueError("Column name 'theo_trans' not in theoretical DataFrame passed to experiment class.")
-        elif isinstance(theoretical_data, str):
-            theo_df = syndat.sammy_interface.readlst(theoretical_data)
-        else:
-            raise ValueError("Theoretical data passed to experiment class is neither a DataFrame or path name (string).")
-            
+# --------------------------------------------------------------------------------------------------------------------------
 
-        # T_theo = np.flipud(theo_df.theo_trans)
-        sdat = pd.DataFrame()
-        sdat['theo_trans'] = theo_df.theo_trans #
-        sdat['E'] = theo_df.E
-        sdat['tof'] = syndat.exp_effects.e_to_t(sdat.E, self.redpar.val.tof_dist, True)*1e6+self.redpar.val.t0
-        sdat.sort_values('tof', axis=0, ascending=True, inplace=True)
-        sdat.reset_index(drop=True, inplace=True)
-
-        # filter if given elimits
-        if not self.E_limits:
-            pass
-        else:
-            sdat = sdat[(sdat.E>self.E_limits[0])&(sdat.E<self.E_limits[1])].reset_index(drop=True)
-
-        self.sdat = sdat
-    
     
     def sample_turp(self):
         print("Update this function")
@@ -176,18 +259,43 @@ class experiment:
         # if statement to possibly sample open count data based on dcounts
         # if statement to smooth open count data
         
-        
+
+# --------------------------------------------------------------------------------------------------------------------------
+
+
     def generate_sdat(self, add_noise):
+        """
+        Generates a set of noisy, sample in count data from a theoretical cross section via the novel un-reduction method (Walton, et al.).
+
+        Parameters
+        ----------
+        add_noise : bool
+            Whether or not to add noise to the generated sample in data.
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
 
         if len(self.odat) != len(self.sdat):
-            raise ValueError("Experiment open data and sample data are not of the same length, check energy grid")
+            raise ValueError("Experiment open data and sample data are not of the same length, check energy domain")
 
         self.sdat, self.odat = syndat.exp_effects.generate_raw_count_data(self.sdat, self.odat, add_noise,
-                                                                          self.redpar.val.trig, self.redpar.val.ks,self.redpar.val.ko, 
+                                                                          self.redpar.val.trigo, self.redpar.val.trigs, 
+                                                                          self.redpar.val.ks,self.redpar.val.ko, 
                                                                           self.Bi, self.redpar.val.b0s, self.redpar.val.b0o, 
                                                                           self.redpar.val.m)
         
+
+# --------------------------------------------------------------------------------------------------------------------------
+
+
     def reduce(self):
+        """
+        Reduces the raw count data (sample in/out) to Transmission data and propagates uncertainty.
+
+        """
 
         # create transmission object
         self.trans = pd.DataFrame()
@@ -201,19 +309,43 @@ class experiment:
         self.sdat = sdat
 
         # get count rates for sample in data
-        self.sdat['cps'], self.sdat['dcps'] = syndat.exp_effects.cts_to_ctr(self.sdat.c, self.sdat.dc, self.odat.bw, self.redpar.val.trig)
+        self.sdat['cps'], self.sdat['dcps'] = syndat.exp_effects.cts_to_ctr(self.sdat.c, self.sdat.dc, self.odat.bw, self.redpar.val.trigs)
 
         # define systematic uncertainties
         sys_unc = self.redpar.unc[['a','b','ks','ko','b0s','b0o','m1','m2','m3','m4']].astype(float)
 
-        self.trans['exp_trans'], self.trans['exp_trans_unc'], self.CovT, self.CovT_stat, self.CovT_sys = syndat.exp_effects.reduce_raw_count_data(self.sdat.tof, 
-                                                                self.sdat.c, self.odat.c, self.sdat.dc, self.odat.dc,
-                                                                self.odat.bw, self.redpar.val.trig, self.redpar.val.a,self.redpar.val.b, 
-                                                                self.redpar.val.ks, self.redpar.val.ko, self.Bi, self.redpar.val.b0s,
-                                                                self.redpar.val.b0o, self.redpar.val.m, sys_unc)
+        self.trans['exp_trans'], self.trans['exp_trans_unc'], self.CovT, self.CovT_stat, self.CovT_sys, rates = syndat.exp_effects.reduce_raw_count_data(self.sdat.tof, 
+                                                                                                        self.sdat.c, self.odat.c, self.sdat.dc, self.odat.dc,
+                                                                                                        self.odat.bw, self.redpar.val.trigo, self.redpar.val.trigs, self.redpar.val.a,self.redpar.val.b, 
+                                                                                                        self.redpar.val.ks, self.redpar.val.ko, self.Bi, self.redpar.val.b0s,
+                                                                                                        self.redpar.val.b0o, self.redpar.val.m, sys_unc)
         
 
+# --------------------------------------------------------------------------------------------------------------------------
 
+
+    def approximate_open_spectra(self, energy_grid):
+
+        def open_count_rate(tof):
+            return (2212.70180199 * np.exp(-3365.55134779 * tof*1e-6) + 23.88486286) 
+
+        tof = syndat.exp_effects.e_to_t(energy_grid,35.185,True)*1e6 # microseconds
+
+        # calculate a tof count rate spectra, convert to counts, add noise 
+        cps_open = open_count_rate(tof)
+        bin_width = abs(np.append(np.diff(tof), np.diff(tof)[-1])*1e-6)
+        cts_open = cps_open*bin_width*self.redpar.val.trigo
+        cts_open_noisy = syndat.exp_effects.pois_noise(cts_open)
+        cps_open_noisy = cts_open_noisy/bin_width/self.redpar.val.trigo
+
+        open_dataframe = pd.DataFrame({'tof'    :   tof,
+                                        'bw'    :   bin_width,
+                                        'c'     :   cts_open_noisy,
+                                        'dc'    :   np.sqrt(cts_open_noisy)})
+
+        open_dataframe['E'] = syndat.exp_effects.t_to_e((open_dataframe.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
+
+        return open_dataframe
 
 
     
