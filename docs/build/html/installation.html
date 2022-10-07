@@ -73,6 +73,11 @@
             
   <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
+<section id="setup-your-environment">
+<h2>Setup Your Environment<a class="headerlink" href="#setup-your-environment" title="Permalink to this heading">¶</a></h2>
+<p>If you would like to separate this package from your root python installation, you can create a virtual environment as a workspace. If you are unfamiliar with this process or why to do it, see [this article](<a class="reference external" href="https://towardsdatascience.com/virtual-environments-for-absolute-beginners-what-is-it-and-how-to-create-one-examples-a48da8982d4b">https://towardsdatascience.com/virtual-environments-for-absolute-beginners-what-is-it-and-how-to-create-one-examples-a48da8982d4b</a>).
+To create an alias to easily activate this venv, see these links for [bash](<a class="reference external" href="https://wpbeaches.com/make-an-alias-in-bash-or-zsh-shell-in-macos-with-terminal/">https://wpbeaches.com/make-an-alias-in-bash-or-zsh-shell-in-macos-with-terminal/</a>) or [zsh](<a class="reference external" href="https://linuxhint.com/configure-use-aliases-zsh/">https://linuxhint.com/configure-use-aliases-zsh/</a>) shells.</p>
+</section>
 <section id="quick-easy-install">
 <h2>Quick &amp; Easy Install<a class="headerlink" href="#quick-easy-install" title="Permalink to this heading">¶</a></h2>
 <p>To use <strong>Syndat</strong>, you can simply install it using python’s command line utility pip:</p>
@@ -82,6 +87,19 @@
 <p><code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">git+https://github.com/Naww137/nuc_syndat</span></code></p>
 <p>If you would like to run in <a class="reference external" href="https://setuptools.pypa.io/en/latest/userguide/development_mode.html">development mode</a>, install using:</p>
 <p><code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span></code></p>
+</section>
+<section id="install-from-a-cloned-directory">
+<h2>Install From a Cloned directory<a class="headerlink" href="#install-from-a-cloned-directory" title="Permalink to this heading">¶</a></h2>
+<p>Clone this repository in the location of your choice, this will be refered to as the toplevel directory. From the toplevel directory run the following command:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code></p>
+<p>or</p>
+<p><code class="code docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code></p>
+<p>if your python environment is not active.</p>
+<p>This command will install the default branch of nuc_syndat to whatever environment you are working in. You will be required to rebuild/reinstall in order to reflect updates.</p>
+<p>To install using [develoment mode](<a class="reference external" href="https://setuptools.pypa.io/en/latest/userguide/development_mode.html">https://setuptools.pypa.io/en/latest/userguide/development_mode.html</a>) use the <cite>-e</cite> option with pip install. This will install an editable version of the packages with links to the source code s.t. you do not have to re-build to reflect updates made to the source.</p>
+<p>:code:<code class="docutils literal notranslate"><span class="pre">`pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.`</span></code></p>
+<p>or</p>
+<p><code class="code docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code></p>
 </section>
 <section id="documentation">
 <h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">¶</a></h2>
@@ -110,7 +128,9 @@ This will launch an HTML page and any of the subsequent pages can be reached fro
     <h3><a href="index.html">Page contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#setup-your-environment">Setup Your Environment</a></li>
 <li><a class="reference internal" href="#quick-easy-install">Quick &amp; Easy Install</a></li>
+<li><a class="reference internal" href="#install-from-a-cloned-directory">Install From a Cloned directory</a></li>
 <li><a class="reference internal" href="#documentation">Documentation</a></li>
 </ul>
 </li>
