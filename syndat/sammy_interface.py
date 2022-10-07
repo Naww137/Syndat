@@ -40,9 +40,7 @@ def readlst(filepath):
 # =============================================================================
 # 
 # =============================================================================
-def samtools_fmtpar(a, filename, \
-                    template = os.path.realpath("../templates/sammy_template_RM_only.par") 
-                    ):
+def samtools_fmtpar(a, filename, template):
     
     # print("WARNING: check parameter file created - formatting in sammy_interface.samtools_fmtpar could be more robust")
     
@@ -66,7 +64,7 @@ def samtools_fmtpar(a, filename, \
     return
 
 def write_sampar(df, pair, vary_parm, filename, 
-                                template = os.path.join(module_dirname, "/templates/sammy_template_RM_only.par") ):
+                                template = os.path.join(module_dirname, "templates/sammy_template_RM_only.par") ):
     """
     Writes a formatted sammy.par file.
 
