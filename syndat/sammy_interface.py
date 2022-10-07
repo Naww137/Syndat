@@ -64,7 +64,7 @@ def samtools_fmtpar(a, filename, template):
     return
 
 def write_sampar(df, pair, vary_parm, filename, 
-                                template = os.path.join(module_dirname, "templates/sammy_template_RM_only.par") ):
+                                template = os.path.join(os.path.dirname(module_dirname), "templates/sammy_template_RM_only.par") ):
     """
     Writes a formatted sammy.par file.
 
