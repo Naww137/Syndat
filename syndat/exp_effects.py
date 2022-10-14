@@ -172,7 +172,7 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi,
     """
     # calculate open count rates
     Cr, dCr = cts_to_ctr(open_df.c, open_df.dc, open_df.bw, trigo) # cts_o/(bw*trig)
-    open_df['cps'] = Cr; open_df['dcps'] = dCr
+    # open_df['cps'] = Cr; open_df['dcps'] = dCr
     
     # calculate sample in count rate from theoretical transmission, bkg, m,k, and open count rate
     [m1,m2,m3,m4] = alpha
@@ -186,12 +186,9 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi,
 
 
     sample_df['theo_cts'] = c
-    # c = np.where(c<0, float(10), c) uneccessary, no negatives
+    
     dc = np.sqrt(c)
     if add_noise:
-        # c = gaus_noise(c, np.sqrt(c))
-        # c = np.where(c<1, float(10), c)
-        # dc = np.sqrt(c)
         c = pois_noise(c)
         assert(c.all() >= 0)
         dc = np.sqrt(c)
@@ -199,13 +196,13 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi,
     sample_df['c'] = c
     sample_df['dc'] = dc
 
-    return sample_df, open_df
+    return sample_df
 
 
 
 
 
-def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
+def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov):
     """
     Calculates the output covariance matrix of transmission from input uncertainties.
 
@@ -243,6 +240,8 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
         Vector of monitor stability factors [m1,m2,m3,m4]
     sys_unc : array-like
         Vector of systematic uncertainties: [da,db,dk_i,dk_o,dB0_i,dB0_o,m1,m2,m3,m4].
+    ab_cov  : float
+        Covariance between a & b background function parameters.
     
     Notes
     -----
@@ -260,7 +259,7 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
     Bi = np.array(Bi)
     sys_unc = np.array(sys_unc)
 
-    # derivatives
+    # numerator and denominator
     D = alpha[2]*C - alpha[3]*K*Bi - B0
     N = alpha[0]*c - alpha[1]*k*Bi - b0
     
@@ -273,13 +272,13 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
     # construct systematic covariance and jacobian
     Cov_sys = np.diag(sys_unc**2)
     # print("WARNING: Need to update getCov function to take a/b covariances, currently it says cov = var*var")
-    Cov_sys[0,1] = 1.42659922e-1 # 1.42405866e-01 # sys_unc[0]*sys_unc[1]  
-    Cov_sys[1,0] = 1.42659922e-1 # 1.42405866e-01 #sys_unc[1]*sys_unc[0]        
+    Cov_sys[0,1] = ab_cov #1.42659922e-1 # 1.42405866e-01 # sys_unc[0]*sys_unc[1]  
+    Cov_sys[1,0] = ab_cov #1.42659922e-1 # 1.42405866e-01 #sys_unc[1]*sys_unc[0]        
     
     # systematic derivatives
     dTi_da = -1*(k*D+K*N)/(a*D**2)  #   -(k*alpha[1]*D+K*alpha[3]*N)*np.exp(-b*tof) / (D**2)
     dTi_db = (k*D+K*N)*Bi*tof/D**2  #   (k*alpha[1]*D)*Bi*tof / (D**2)
-    dTi_dk = -alpha[1]*Bi/D         #   D**2
+    dTi_dk = -alpha[1]*Bi/D       
     dTi_dK = N*alpha[3]*Bi/D**2
     dTi_db0 = -1/D
     dTi_dB0 = N/D**2
@@ -302,7 +301,7 @@ def transmission(cr,Cr, Bi, k,K, b0,B0, alpha):
     return (m1*cr - m2*k*Bi - b0) / (m3*Cr - m4*K*Bi - B0) 
 
     
-def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0, alpha, sys_unc):
+def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov):
     """
     Reduces raw count data to transmission data with propagated uncertainty.
 
@@ -345,6 +344,8 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0,
         Vector of monitor stability factors [m1,m2,m3,m4]
     sys_unc : array-like
         Vector of systematic uncertainties: [da,db,dk_i,dk_o,dB0_i,dB0_o,m1,m2,m3,m4].
+    ab_cov  : float
+        Covariance between a & b background function parameters.
     
     Notes
     -----
@@ -362,7 +363,7 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0,
     # calculate transmission
     Tn = transmission(cr,Cr, Bi, k,K, b0,B0, alpha)
     # propagate uncertainty to transmission
-    CovT, CovT_stat, CovT_sys = get_covT(tof, cr,Cr, dcr,dCr, a,b, k,K, Bi, b0,B0, alpha, sys_unc)
+    CovT, CovT_stat, CovT_sys = get_covT(tof, cr,Cr, dcr,dCr, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov)
     dT = np.sqrt(np.diagonal(CovT))
     
     return Tn, dT, CovT, CovT_stat, CovT_sys, rates
