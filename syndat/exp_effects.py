@@ -202,7 +202,7 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi,
 
 
 
-def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov):
+def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov, calc_cov):
     """
     Calculates the output covariance matrix of transmission from input uncertainties.
 
@@ -242,6 +242,8 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov):
         Vector of systematic uncertainties: [da,db,dk_i,dk_o,dB0_i,dB0_o,m1,m2,m3,m4].
     ab_cov  : float
         Covariance between a & b background function parameters.
+    calc_cov : bool
+        Option to calculate covariances, if false, only the diagonal of the covariance matrix will be calculated.
     
     Notes
     -----
@@ -249,7 +251,7 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov):
     
     Returns
     -------
-    Output covaraiance matrix for transmission.
+    Output variance/covariance data for transmission.
     """
     
     # cast all into numpy arrays
@@ -266,33 +268,46 @@ def get_covT(tof, c,C, dc,dC, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov):
     # construct statistical covariance and jacobian
     dTi_dci = alpha[0]/D
     dTi_dCi = N*alpha[2]/D**2
-    diag = (dc**2)*(dTi_dci**2) + (dC**2)*(dTi_dCi**2)
-    CovT_stat = np.diag(diag)
-
-    # construct systematic covariance and jacobian
-    Cov_sys = np.diag(sys_unc**2)
-    # print("WARNING: Need to update getCov function to take a/b covariances, currently it says cov = var*var")
-    Cov_sys[0,1] = ab_cov #1.42659922e-1 # 1.42405866e-01 # sys_unc[0]*sys_unc[1]  
-    Cov_sys[1,0] = ab_cov #1.42659922e-1 # 1.42405866e-01 #sys_unc[1]*sys_unc[0]        
+    diag_stat = (dc**2)*(dTi_dci**2) + (dC**2)*(dTi_dCi**2)
     
     # systematic derivatives
-    dTi_da = -1*(k*D+K*N)/(a*D**2)  #   -(k*alpha[1]*D+K*alpha[3]*N)*np.exp(-b*tof) / (D**2)
-    dTi_db = (k*D+K*N)*Bi*tof/D**2  #   (k*alpha[1]*D)*Bi*tof / (D**2)
+    # dTi_da = -1*(k*D+K*N)/(a*D**2)  
+    # dTi_db = (k*D+K*N)*Bi*tof/D**2 
+    dTi_da = -(k*alpha[1]*D+K*alpha[3]*N)*np.exp(-b*tof) / (D**2)
+    dTi_db =  (k*alpha[1]*D-N*alpha[3]*K)*Bi*tof / (D**2)
     dTi_dk = -alpha[1]*Bi/D       
     dTi_dK = N*alpha[3]*Bi/D**2
     dTi_db0 = -1/D
     dTi_dB0 = N/D**2
     dTi_dalpha = [ c/D, -k*Bi/D, -C*N/D**2, K*Bi*N/D**2 ]
-    
-    Jac_sys = np.array([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0, dTi_dalpha[0], dTi_dalpha[1],dTi_dalpha[2],dTi_dalpha[3]])
-    
-                
-    # calculate covariance of output
-    CovT_sys = Jac_sys.T @ Cov_sys @ Jac_sys
-    
-    CovT = CovT_stat + CovT_sys
-    
-    return CovT, CovT_stat, CovT_sys
+
+    if calc_cov:
+
+        ### statistical covarance
+        CovT_stat = np.diag(diag_stat)
+
+        ### systematic covariance
+        Cov_sys = np.diag(sys_unc**2)
+        Cov_sys[0,1] = ab_cov   
+        Cov_sys[1,0] = ab_cov      
+        Jac_sys = np.array([dTi_da, dTi_db, dTi_dk, dTi_dK, dTi_db0, dTi_dB0, dTi_dalpha[0], dTi_dalpha[1],dTi_dalpha[2],dTi_dalpha[3]])
+        CovT_sys = Jac_sys.T @ Cov_sys @ Jac_sys
+        
+        ### T covariance is sum of systematic and statistical covariance 
+        CovT = CovT_stat + CovT_sys
+
+        data = [CovT, CovT_stat, CovT_sys]
+    else:
+        
+        diag_sys = (sys_unc[0]**2)*(dTi_da**2) + (sys_unc[1]**2)*(dTi_db**2) + (sys_unc[2]**2)*(dTi_dk**2) + (sys_unc[3]**2)*(dTi_dK**2) + (sys_unc[4]**2)*(dTi_db0**2) \
+                + (sys_unc[5]**2)*(dTi_dB0**2) + (sys_unc[6]**2)*(dTi_dalpha[0]**2) + (sys_unc[7]**2)*(dTi_dalpha[1]**2) + (sys_unc[8]**2)*(dTi_dalpha[2]**2) + (sys_unc[9]**2)*(dTi_dalpha[3]**2)
+
+        diag_tot = diag_stat + diag_sys
+
+        data = [diag_tot, diag_stat, diag_sys]
+
+
+    return data
 
 
 
@@ -301,7 +316,7 @@ def transmission(cr,Cr, Bi, k,K, b0,B0, alpha):
     return (m1*cr - m2*k*Bi - b0) / (m3*Cr - m4*K*Bi - B0) 
 
     
-def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov):
+def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov, calc_cov):
     """
     Reduces raw count data to transmission data with propagated uncertainty.
 
@@ -346,6 +361,8 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0,
         Vector of systematic uncertainties: [da,db,dk_i,dk_o,dB0_i,dB0_o,m1,m2,m3,m4].
     ab_cov  : float
         Covariance between a & b background function parameters.
+    calc_cov : bool
+        Option to calculate covariances, if false, only the diagonal of the covariance matrix will be calculated.
     
     Notes
     -----
@@ -353,7 +370,10 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0,
     
     Returns
     -------
-    Output covaraiance matrix for transmission.
+    Tn : array-like
+        Transmission data.
+    dT
+
     """
     # calculate count rate and propagate uncertainty
     Cr, dCr = cts_to_ctr(C, dC, bw, trigo) 
@@ -363,8 +383,7 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0,
     # calculate transmission
     Tn = transmission(cr,Cr, Bi, k,K, b0,B0, alpha)
     # propagate uncertainty to transmission
-    CovT, CovT_stat, CovT_sys = get_covT(tof, cr,Cr, dcr,dCr, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov)
-    dT = np.sqrt(np.diagonal(CovT))
+    unc_data = get_covT(tof, cr,Cr, dcr,dCr, a,b, k,K, Bi, b0,B0, alpha, sys_unc, ab_cov, calc_cov)
     
-    return Tn, dT, CovT, CovT_stat, CovT_sys, rates
+    return Tn, unc_data, rates
 

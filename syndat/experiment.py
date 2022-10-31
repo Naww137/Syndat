@@ -21,10 +21,8 @@ class experiment:
                     open_data=None, energy_domain = None,
 
                     experiment_parameters = {} , 
-                    options = { 'Perform Experiment':True, 
-                                'Add Noise':True, 
-                                'Sample TURP':False} , 
-                                                                ):
+                    input_options = {}, 
+                                                     ):
         """
         Instantiates the experiment object
 
@@ -49,10 +47,22 @@ class experiment:
             Keyword options, mostly for debugging, by default { 'Perform Experiment':True, 'Add Noise': True}
         """
         
+        ### Default options
+        default_options = { 'Perform Experiment':True, 
+                            'Add Noise':True, 
+                            'Sample TURP':True,
+                            'Calculate Covariance':True} 
 
+        ### redefine options dictionary if any input options are given
+        options = default_options
+        for old_parameter in default_options:
+            if old_parameter in input_options:
+                options.update({old_parameter:input_options[old_parameter]})
+        
         ### Gather options
         perform_experiment = options['Perform Experiment']
         add_noise = options['Add Noise']
+        self.calc_cov = options['Calculate Covariance']
 
 
         ### Default experiment parameter dictionary
@@ -80,9 +90,9 @@ class experiment:
             if old_parameter in experiment_parameters:
                 pardict.update({old_parameter:experiment_parameters[old_parameter]})
 
-        ### set reduction parameter attributes from given options
+        ### set reduction parameter attributes from input
         self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
-        ### sample true underlying resonance parameters
+        ### sample true underlying resonance parameters from measured values
         self.sample_turp(default_exp)
 
         
@@ -113,7 +123,7 @@ class experiment:
         else:
             self.read_odat(open_data)
             
-        ### sample a realization of the theoretical, true, underlying open count spectra
+        ### sample a realization of the theoretical, true-underlying open count spectra
         self.sample_true_open_spectrum()
 
         ### Automatically perform experiment
@@ -328,13 +338,22 @@ class experiment:
         sys_unc = self.redpar.unc[['a','b','ks','ko','b0s','b0o','m1','m2','m3','m4']].astype(float)
         monitor_array = [self.redpar.val.m1, self.redpar.val.m2, self.redpar.val.m3, self.redpar.val.m4]
 
-        self.trans['exp_trans'], self.trans['exp_trans_unc'], self.CovT, self.CovT_stat, self.CovT_sys, rates = syndat.exp_effects.reduce_raw_count_data(self.sdat.tof, 
-                                                                                                        self.sdat.c, self.odat.c, self.sdat.dc, self.odat.dc,
-                                                                                                        self.odat.bw, self.redpar.val.trigo, self.redpar.val.trigs, self.redpar.val.a,self.redpar.val.b, 
-                                                                                                        self.redpar.val.ks, self.redpar.val.ko, self.Bi, self.redpar.val.b0s,
-                                                                                                        self.redpar.val.b0o, monitor_array, sys_unc, self.redpar.val.ab_cov)
+        self.trans['exp_trans'], unc_data, rates = syndat.exp_effects.reduce_raw_count_data(self.sdat.tof, 
+                                                                                    self.sdat.c, self.odat.c, self.sdat.dc, self.odat.dc,
+                                                                                    self.odat.bw, self.redpar.val.trigo, self.redpar.val.trigs, self.redpar.val.a,self.redpar.val.b, 
+                                                                                    self.redpar.val.ks, self.redpar.val.ko, self.Bi, self.redpar.val.b0s,
+                                                                                    self.redpar.val.b0o, monitor_array, sys_unc, self.redpar.val.ab_cov, self.calc_cov)
         
+        self.CovT, self.CovT_stat, self.CovT_sys = unc_data
+        if self.calc_cov:
+            self.trans['exp_trans_unc'] = np.sqrt(np.diag(self.CovT))
+        else:
+            self.trans['exp_trans_unc'] = np.sqrt(self.CovT)
+            
 
+        # define open data cps
+        self.odat['cps'] = rates[0]
+        self.odat['dcps'] = rates[1]
 # --------------------------------------------------------------------------------------------------------------------------
 
 
