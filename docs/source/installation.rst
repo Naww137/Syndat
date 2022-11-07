@@ -6,7 +6,8 @@ Installation
 Setup Your Environment
 ----------------------
 
-If you would like to separate this package from your root python installation, you can create a virtual environment as a workspace. If you are unfamiliar with this process or why to do it, see [this article](https://towardsdatascience.com/virtual-environments-for-absolute-beginners-what-is-it-and-how-to-create-one-examples-a48da8982d4b). 
+If you would like to separate this package from your root python installation, you can create a virtual environment as a workspace. 
+If you are unfamiliar with this process or why to do it, see [this article](https://towardsdatascience.com/virtual-environments-for-absolute-beginners-what-is-it-and-how-to-create-one-examples-a48da8982d4b). 
 To create an alias to easily activate this venv, see these links for [bash](https://wpbeaches.com/make-an-alias-in-bash-or-zsh-shell-in-macos-with-terminal/) or [zsh](https://linuxhint.com/configure-use-aliases-zsh/) shells.
 
 
@@ -27,6 +28,7 @@ If a new version of Syndat has been released, you can update Syndat by running:
 If you would like to run in `development mode <https://setuptools.pypa.io/en/latest/userguide/development_mode.html>`_, install using:
 
 :code:`pip install -e`
+
 
 Install From a Cloned directory
 -------------------------------
