@@ -1,6 +1,7 @@
 # misc
 *.DS_Store
 workspace/
+examples/SAMMY_runDIR/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
