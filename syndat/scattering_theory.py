@@ -207,19 +207,19 @@ def SLBW(E, pair, resonance_ladder):
     xs_cap = 0; xs_scat = 0
     group_by_J = dict(tuple(resonance_ladder.groupby('J')))
 
-    for J in group_by_J:
+    for Jpi in group_by_J:
         
-        J_df = group_by_J[J]
+        J_df = group_by_J[Jpi]
         # assert J > 0 
-        J = abs(J)
+        Jpi = abs(Jpi)
 
         # orbital_angular_momentum = J_df.lwave.unique()
         orbital_angular_momentum = np.unique(J_df.lwave.values[0]) # just takes the first level's l-wave vector, all should be the same in each group
         assert len(orbital_angular_momentum) == 1, "Cannot handle different l-waves contributing to multichannel widths"
         
         # calculate functions of energy -> shift, penetrability, phase shift
-        g = gstat(J, pair.I, pair.i) #(2*J+1)/( (2*ii+1)*(2*I+1) );   # spin statistical factor g sub(j alpha)
-        S, P, phi, k = FofE_explicit(E, pair.ac, pair.M, pair.m, orbital_angular_momentum[0])
+        g = gstat(Jpi, pair.I, pair.i) #(2*J+1)/( (2*ii+1)*(2*I+1) );   # spin statistical factor g sub(j alpha)
+        shift, penetration, phi, k = FofE_explicit(E, pair.ac, pair.M, pair.m, orbital_angular_momentum[0])
 
         # calculate capture
         sum1 = 0
@@ -228,7 +228,7 @@ def SLBW(E, pair, resonance_ladder):
             Gg = row.Gg * 1e-3
             # gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3  # Not sampling multiple, single-channel particle widths
             gnx2 = row.gnx2 * 1e-3 
-            Gnx = 2*P*gnx2
+            Gnx = 2*penetration*gnx2
 
             d = (E-E_lambda)**2 + ((Gg+Gnx)/2)**2 
             sum1 += (Gg*Gnx) / ( d )
@@ -245,15 +245,15 @@ def SLBW(E, pair, resonance_ladder):
             Gg = row.Gg * 1e-3
             # gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3 # Not sampling multiple, single-channel particle widths
             gnx2 = row.gnx2 * 1e-3 
-            Gnx = 2*P*gnx2
+            Gnx = 2*penetration*gnx2
 
-            G = Gnx+Gg
+            Gtot = Gnx+Gg
             d = (E-E_lambda)**2 + ((Gg+Gnx)/2)**2 
-            sum1 += Gnx*G/d
+            sum1 += Gnx*Gtot/d
             sum2 += Gnx*(E-E_lambda)/d
-            sum3 += (Gnx*(E-E_lambda)/d)**2 + (Gnx*G/d/2)**2
+            sum3 += (Gnx*(E-E_lambda)/d)**2 + (Gnx*Gtot/d/2)**2
 
-        xs_scat += (np.pi*g/(k**2))*( (1-np.cos(2*phi))*(2-sum1) + 2*np.sin(2*phi)*sum2 + sum3)
+        xs_scat += (np.pi*g/(k**2))* ( (1-np.cos(2*phi))*(2-sum1) + 2*np.sin(2*phi)*sum2 + sum3 )
 
     # calculate total
     xs_tot = xs_cap+xs_scat
