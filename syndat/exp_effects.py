@@ -8,7 +8,7 @@ Created on Thu Jun 23 10:34:17 2022
 
 import numpy as np
 import scipy.stats as stat
-
+import pandas as pd
 
 def t_to_e(t,d,rel):
     if rel:
@@ -57,6 +57,7 @@ def gaus_noise(vector, std_vec):
 #     for counts in vector:
 #         noise.append(np.random.default_rng().poisson(lam=counts))
 #     return vector + noise
+
 def pois_noise(vector):
     """
     Samples poissonian noise around a vector of values.
@@ -132,7 +133,7 @@ def cts_to_ctr(cts, d_cts, bw, trig):
 
     
 
-def generate_raw_count_data(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi, b0,B0, alpha):
+def inverse_reduction(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi, b0,B0, alpha):
     """
     Generates raw count data for sample-in given a theoretical tranmission. 
     
@@ -178,25 +179,32 @@ def generate_raw_count_data(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi,
     [m1,m2,m3,m4] = alpha
     cr = (sample_df.theo_trans*(m3*Cr - m4*K*Bi - B0) + m2*k*Bi + b0)/m1
     
-    # calculate sample in counts from count rate
+    # calculate expected sample in counts from count rate
     c = cr*open_df.bw*trigs
+    theo_c = c
 
-    # correct for dead time
-    # c = c*
-
-
-    sample_df['theo_cts'] = c
-    
-    dc = np.sqrt(c)
+    # split into cycles and apply monitor normalizations
+            # TODO: also include deadtime corrections at each cycle
+            # TODO: update function to take in # of cycles and std of monitor normalizations
+    cycles = 35
+    c_cycle = c/cycles
+    monitor_factors = np.random.default_rng().normal(1,0.0174*2, size=cycles)
     if add_noise:
-        c = pois_noise(c)
-        assert(c.all() >= 0)
-        dc = np.sqrt(c)
-        
+        c = pois_noise(c_cycle)*monitor_factors[0]
+        for i in range(cycles-1):
+            c += pois_noise(c_cycle)*monitor_factors[i]
+    else:
+        c = c_cycle*monitor_factors[0]
+        for i in range(cycles-1):
+            c += c_cycle*monitor_factors[i]
+
+    assert(c.all() >= 0)
+    dc = np.sqrt(c)
+    
     sample_df['c'] = c
     sample_df['dc'] = dc
 
-    return sample_df
+    return sample_df, theo_c
 
 
 
@@ -379,7 +387,7 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0,
     Cr, dCr = cts_to_ctr(C, dC, bw, trigo) 
     cr, dcr = cts_to_ctr(c, dc, bw, trigs)
     rates = Cr,dCr, cr,dcr
-    
+
     # calculate transmission
     Tn = transmission(cr,Cr, Bi, k,K, b0,B0, alpha)
     # propagate uncertainty to transmission
@@ -387,3 +395,47 @@ def reduce_raw_count_data(tof, c,C, dc,dC, bw, trigo,trigs, a,b, k,K, Bi, b0,B0,
     
     return Tn, unc_data, rates
 
+
+
+def regroup(tof, c, grouping_factors, compression_points):
+
+    if len(compression_points) != 0:
+        raise ValueError('Need to implement capability for multiple compression points for re-binning')
+
+    c = np.array(c)
+    tof = np.array(tof)
+    length = len(tof)
+    leftover_bins = length%grouping_factors[0]
+    full_bins = length-leftover_bins
+    new_length = int(full_bins/grouping_factors[0])
+
+    if leftover_bins > 0:
+        grouping_factors = grouping_factors + [leftover_bins]        # last bin structure
+    else:
+        leftover_c = []
+        leftover_tof = []
+        leftover_dt = []
+
+    for i, g in enumerate(grouping_factors):
+        if i == 1:
+            leftover_c = c[full_bins:-1].sum()
+            leftover_tof = tof[full_bins:-1].mean()
+            leftover_dt = max(tof[full_bins:-1])-min(tof[full_bins:-1])
+        elif i == 0:
+            grouped_c = np.reshape(c[0:full_bins], (new_length,grouping_factors[0])).sum(axis=1)
+            grouped_tof = np.reshape(tof[0:full_bins], (new_length,grouping_factors[0])).mean(axis=1)
+
+            grouped_tof_median = np.median(np.reshape(tof[0:full_bins], (new_length,grouping_factors[0])), axis=1)
+            if max(grouped_tof_median-grouped_tof) > 1e-5:
+                raise ValueError('Median/mean of tof grouping is diverging')
+
+            grouped_dt = np.diff(grouped_tof)
+            grouped_dt = np.insert(grouped_dt,0,grouped_dt[0])
+
+    gc = np.append(grouped_c,leftover_c)
+    gtof = np.append(grouped_tof,leftover_tof)
+    gdt = np.append(grouped_dt, leftover_dt)*1e-6
+
+    data = np.array([gtof, gdt, gc, np.sqrt(gc)]).T
+
+    return data
