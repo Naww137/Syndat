@@ -51,7 +51,12 @@ class experiment:
         default_options = { 'Perform Experiment':True, 
                             'Add Noise':True, 
                             'Sample TURP':True,
-                            'Calculate Covariance':True} 
+                            'Sample TOCS':True, 
+                            'Calculate Covariance':True,
+                            'Compression Points':[],
+                            'Grouping Factors':[100], 
+
+                            'Smooth Open Spectrum':False } 
 
         ### redefine options dictionary if any input options are given
         options = default_options
@@ -62,15 +67,19 @@ class experiment:
         ### Gather options
         perform_experiment = options['Perform Experiment']
         add_noise = options['Add Noise']
+        sample_turp = options['Sample TURP']
+        sample_odat = options['Sample TOCS']
+        smooth_open = options['Smooth Open Spectrum']
         self.calc_cov = options['Calculate Covariance']
-
+        self.cpts = options['Compression Points']
+        self.gfactors = options['Grouping Factors']
 
         ### Default experiment parameter dictionary
         default_exp = {
                         'n'         :   {'val'  :   0.12,                'unc'  :   0},
                         'trigo'     :   {'val'  :   9758727,             'unc'  :   0},
                         'trigs'     :   {'val'  :   18476117,            'unc'  :   0},
-                        'tof_dist'  :   {'val'  :   35.185,              'unc'  :   0},
+                        'FP'        :   {'val'  :   35.185,              'unc'  :   0},
                         't0'        :   {'val'  :   3.326,               'unc'  :   0},
                         'm1'        :   {'val'  :   1,                   'unc'  :   0.016},
                         'm2'        :   {'val'  :   1,                   'unc'  :   0.008},
@@ -93,7 +102,7 @@ class experiment:
         ### set reduction parameter attributes from input
         self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
         ### sample true underlying resonance parameters from measured values
-        self.sample_turp(default_exp)
+        self.sample_turp(default_exp, sample_turp)
 
         
     
@@ -119,17 +128,19 @@ class experiment:
 
         ### Decide on an open spectra
         if open_data is None:
-            self.odat = self.approximate_open_spectra(self.energy_domain)
+            self.odat = self.approximate_open_spectra(self.energy_domain, smooth_open)
         else:
+            if smooth_open == True:
+                print("Warning: The user option 'Smooth Open Spectrum' was set to true but you are reading an open spectrum - this option will have no effect")
             self.read_odat(open_data)
             
         ### sample a realization of the theoretical, true-underlying open count spectra
-        self.sample_true_open_spectrum()
+        self.sample_true_open_spectrum(sample_odat)
 
         ### Automatically perform experiment
         if perform_experiment:
             # vectorize the background function from jesse's experiment
-            self.get_bkg()
+            self.Bi = self.bkg(self.odat.tof,self.redpar.val.a,self.redpar.val.b)
             # generate raw count data for sample in given theoretical transmission and assumed true reduction parameters/open count data
             self.generate_sdat(add_noise)
             # reduce the experimental data
@@ -174,7 +185,7 @@ class experiment:
         sdat = pd.DataFrame()
         sdat['theo_trans'] = theo_df.theo_trans #
         sdat['E'] = theo_df.E
-        sdat['tof'] = syndat.exp_effects.e_to_t(sdat.E, self.redpar.val.tof_dist, True)*1e6+self.redpar.val.t0
+        sdat['tof'] = syndat.exp_effects.e_to_t(sdat.E, self.redpar.val.FP, True)*1e6+self.redpar.val.t0
         sdat.sort_values('tof', axis=0, ascending=True, inplace=True)
         sdat.reset_index(drop=True, inplace=True)
 
@@ -219,7 +230,7 @@ class experiment:
                 raise ValueError("Column name 'dc' not in open count DataFrame passed to experiment class.")
 
             # calculate energy from tof and experiment parameters
-            open_data['E'] = syndat.exp_effects.t_to_e((open_data.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
+            open_data['E'] = syndat.exp_effects.t_to_e((open_data.tof-self.redpar.val.t0)*1e-6, self.redpar.val.FP, True) 
             odat = open_data
             
         elif isinstance(open_data, str):
@@ -230,7 +241,7 @@ class experiment:
             odat = odat[odat.tof >= self.redpar.val.t0]
             odat.sort_values('tof', axis=0, ascending=True, inplace=True)
             odat.reset_index(drop=True, inplace=True)
-            odat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
+            odat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.FP, True) 
             odat['bw'] = odat.bin_width*1e-6 
             odat.rename(columns={"counts": "c", "dcounts": "dc"}, inplace=True)
             # -------------------------------------------
@@ -254,31 +265,49 @@ class experiment:
 # --------------------------------------------------------------------------------------------------------------------------
 
         
-    def get_bkg(self):
-        def f(ti,a,b):
-            return a*np.exp(ti*-b)
-        self.Bi = f(self.odat.tof,self.redpar.val.a,self.redpar.val.b)
+    def bkg(self,tof,a,b):
+        return a*np.exp(tof*-b)
 
 
 # --------------------------------------------------------------------------------------------------------------------------
 
-    def sample_true_open_spectrum(self):
+    def sample_true_open_spectrum(self, bool):
         
         theo_odat = self.odat.copy()
-        realization_of_true_cts = syndat.exp_effects.pois_noise(theo_odat.c)
-        theo_odat['c'] = realization_of_true_cts
-        theo_odat['dc'] = np.sqrt(realization_of_true_cts)
+        # realization_of_true_cts = syndat.exp_effects.pois_noise(theo_odat.c)
+
+        if bool:
+            cycles = 35
+            theo_cycle_data = theo_odat.c/cycles
+            monitor_factors = np.random.default_rng().normal(1,0.0160*2, size=cycles)
+            noisy_cycle_data = syndat.exp_effects.pois_noise(theo_cycle_data)*monitor_factors[0]
+            for i in range(cycles-1):
+                noisy_cycle_data += syndat.exp_effects.pois_noise(theo_cycle_data)*monitor_factors[i]
+            # experiment.sdat.c = noisy_cycle_data
+
+            theo_odat['c'] = noisy_cycle_data
+            theo_odat['dc'] = np.sqrt(noisy_cycle_data)
 
         self.theo_odat = theo_odat
 
     
-    def sample_turp(self, default_exp):
+    def sample_turp(self, default_exp, bool):
         
         theo_redpar = default_exp
-        for par in theo_redpar:
-            if par == 'ab_cov':
-                continue
-            theo_redpar[par]['val'] = np.random.default_rng().normal(theo_redpar[par]['val'], theo_redpar[par]['unc'])
+        if bool:
+            for par in theo_redpar:
+                if par == 'ab_cov':
+                    continue
+                # TODO: determine if I should be sampling monitor corrections
+                # if par == 'm1':
+                #     continue
+                # if par == 'm2':
+                #     continue
+                # if par == 'm3':
+                #     continue
+                # if par == 'm4':
+                #     continue
+                theo_redpar[par]['val'] = np.random.default_rng().normal(theo_redpar[par]['val'], theo_redpar[par]['unc'])
         
         self.theo_redpar = pd.DataFrame.from_dict(theo_redpar, orient='index')
 
@@ -305,15 +334,14 @@ class experiment:
 
         monitor_array = [self.theo_redpar.val.m1, self.theo_redpar.val.m2, self.theo_redpar.val.m3, self.theo_redpar.val.m4]
 
-        self.sdat = syndat.exp_effects.generate_raw_count_data(self.sdat, self.theo_odat, add_noise,
-                                                                self.theo_redpar.val.trigo, self.theo_redpar.val.trigs, 
-                                                                self.theo_redpar.val.ks,self.theo_redpar.val.ko, 
-                                                                self.Bi, self.theo_redpar.val.b0s, self.theo_redpar.val.b0o, 
-                                                                monitor_array)
+        self.sdat, self.theo_c = syndat.exp_effects.inverse_reduction(self.sdat, self.theo_odat, add_noise,
+                                                        self.theo_redpar.val.trigo, self.theo_redpar.val.trigs, 
+                                                        self.theo_redpar.val.ks,self.theo_redpar.val.ko, 
+                                                        self.Bi, self.theo_redpar.val.b0s, self.theo_redpar.val.b0o, 
+                                                        monitor_array)
         
 
 # --------------------------------------------------------------------------------------------------------------------------
-
 
     def reduce(self):
         """
@@ -321,18 +349,29 @@ class experiment:
 
         """
 
+        if self.gfactors is not None:
+            # Re-bin the data according to new structure
+            grouped_odat = syndat.exp_effects.regroup(self.odat.tof, self.odat.c, self.gfactors, self.cpts)
+            grouped_sdat = syndat.exp_effects.regroup(self.sdat.tof, self.sdat.c, self.gfactors, self.cpts)
+            odat = pd.DataFrame(grouped_odat, columns=['tof','bw','c','dc'])
+            sdat = pd.DataFrame(grouped_sdat, columns=['tof','bw','c','dc'])
+
+            # calculate energy and redefine experiment.odat/sdat with the regrouped data
+            odat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.FP, True)
+            sdat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.FP, True) 
+            self.odat = odat
+            self.sdat = sdat
+            self.Bi = self.bkg(self.odat.tof*1e6,self.redpar.val.a,self.redpar.val.b) # calc bkg again to recalculate Bi on restructured grid
+
         # create transmission object
         self.trans = pd.DataFrame()
         self.trans['tof'] = self.sdat.tof
         self.trans['E'] = self.sdat.E
-        self.trans['theo_trans'] = self.sdat.theo_trans
-
-        # filter sdat object to be experimental 
-        sdat = self.sdat.filter(['E','tof','bw','c','dc', 'theo_cts'])
-        self.sdat = sdat
+        # self.trans['theo_trans'] = self.sdat.theo_trans
 
         # get count rates for sample in data
-        self.sdat['cps'], self.sdat['dcps'] = syndat.exp_effects.cts_to_ctr(self.sdat.c, self.sdat.dc, self.odat.bw, self.redpar.val.trigs)
+        # self.sdat['cps'], self.sdat['dcps'] = syndat.exp_effects.cts_to_ctr(self.sdat.c, self.sdat.dc, self.sdat.bw*1e-6, self.redpar.val.trigs)
+        # self.odat['cps'], self.odat['dcps'] = syndat.exp_effects.cts_to_ctr(self.odat.c, self.odat.dc, self.odat.bw*1e-6, self.redpar.val.trigs)
 
         # define systematic uncertainties
         sys_unc = self.redpar.unc[['a','b','ks','ko','b0s','b0o','m1','m2','m3','m4']].astype(float)
@@ -351,32 +390,37 @@ class experiment:
             self.trans['exp_trans_unc'] = np.sqrt(self.CovT)
             
 
-        # define open data cps
+        # define data cps
         self.odat['cps'] = rates[0]
         self.odat['dcps'] = rates[1]
+        self.sdat['cps'] = rates[2]
+        self.sdat['dcps'] = rates[3]
+
 # --------------------------------------------------------------------------------------------------------------------------
 
 
-    def approximate_open_spectra(self, energy_grid):
+    def approximate_open_spectra(self, energy_grid, smooth_open):
 
         def open_count_rate(tof):
             return (2212.70180199 * np.exp(-3365.55134779 * tof*1e-6) + 23.88486286) 
 
-        tof = syndat.exp_effects.e_to_t(energy_grid,35.185,True)*1e6 # microseconds
+        tof = syndat.exp_effects.e_to_t(energy_grid,self.redpar.val.FP,True)*1e6+self.redpar.val.t0 # microseconds
 
         # calculate a tof count rate spectra, convert to counts, add noise 
         cps_open_approx = open_count_rate(tof)
         bin_width = abs(np.append(np.diff(tof), np.diff(tof)[-1])*1e-6)
         cts_open_approx = cps_open_approx*bin_width*self.redpar.val.trigo
-        cts_open_measured = syndat.exp_effects.pois_noise(cts_open_approx)
-        cps_open_noisy = cts_open_measured/bin_width/self.redpar.val.trigo
+        if smooth_open:
+            cts_open_measured = cts_open_approx
+        else:
+            cts_open_measured = syndat.exp_effects.pois_noise(cts_open_approx)
 
         open_dataframe = pd.DataFrame({'tof'    :   tof,
                                         'bw'    :   bin_width,
                                         'c'     :   cts_open_measured,
                                         'dc'    :   np.sqrt(cts_open_measured)})
 
-        open_dataframe['E'] = syndat.exp_effects.t_to_e((open_dataframe.tof-self.redpar.val.t0)*1e-6, self.redpar.val.tof_dist, True) 
+        open_dataframe['E'] = syndat.exp_effects.t_to_e((open_dataframe.tof-self.redpar.val.t0)*1e-6, self.redpar.val.FP, True) 
 
         return open_dataframe
 
