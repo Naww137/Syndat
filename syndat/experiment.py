@@ -63,6 +63,7 @@ class experiment:
         for old_parameter in default_options:
             if old_parameter in input_options:
                 options.update({old_parameter:input_options[old_parameter]})
+        self.options = options
         
         ### Gather options
         perform_experiment = options['Perform Experiment']
@@ -147,6 +148,10 @@ class experiment:
             self.reduce()
             
 
+    def __repr__(self):
+        return f"This experiment has the following options:\n{self.options}"
+
+
     # ----------------------------------------------------------
     #    Begin Methods
     # ----------------------------------------------------------
@@ -181,7 +186,7 @@ class experiment:
             theo_df = syndat.sammy_interface.readlst(theoretical_data)
         else:
             raise ValueError("Theoretical data passed to experiment class is neither a DataFrame or path name (string).")
-            
+        
         sdat = pd.DataFrame()
         sdat['theo_trans'] = theo_df.theo_trans #
         sdat['E'] = theo_df.E
@@ -190,6 +195,7 @@ class experiment:
         sdat.reset_index(drop=True, inplace=True)
 
         self.sdat = sdat
+        self.theo = theo_df
 
 
 # --------------------------------------------------------------------------------------------------------------------------
