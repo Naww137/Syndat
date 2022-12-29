@@ -182,12 +182,14 @@ def inverse_reduction(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi, b0,B0
     # calculate expected sample in counts from count rate
     c = cr*open_df.bw*trigs
     theo_c = c
+    # if random monitor norms caused negative counts force to 0
+    theo_c = np.where(theo_c > 0, theo_c, 0)
 
     # split into cycles and apply monitor normalizations
             # TODO: also include deadtime corrections at each cycle
             # TODO: update function to take in # of cycles and std of monitor normalizations
     cycles = 35
-    c_cycle = c/cycles
+    c_cycle = theo_c/cycles
     monitor_factors = np.random.default_rng().normal(1,0.0174*2, size=cycles)
     if add_noise:
         c = pois_noise(c_cycle)*monitor_factors[0]
