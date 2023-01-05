@@ -54,11 +54,12 @@ class experiment:
                             'Sample TOCS':True, 
                             'Calculate Covariance':True,
                             'Compression Points':[],
-                            'Grouping Factors':[100], 
+                            'Grouping Factors':None, #[100]
 
                             'Smooth Open Spectrum':False } 
 
         ### redefine options dictionary if any input options are given
+        # TODO: Check for an option given by the user that is not in the defaults!
         options = default_options
         for old_parameter in default_options:
             if old_parameter in input_options:
@@ -341,10 +342,10 @@ class experiment:
         monitor_array = [self.theo_redpar.val.m1, self.theo_redpar.val.m2, self.theo_redpar.val.m3, self.theo_redpar.val.m4]
 
         self.sdat, self.theo_c = syndat.exp_effects.inverse_reduction(self.sdat, self.theo_odat, add_noise,
-                                                        self.theo_redpar.val.trigo, self.theo_redpar.val.trigs, 
-                                                        self.theo_redpar.val.ks,self.theo_redpar.val.ko, 
-                                                        self.Bi, self.theo_redpar.val.b0s, self.theo_redpar.val.b0o, 
-                                                        monitor_array)
+                                                                self.theo_redpar.val.trigo, self.theo_redpar.val.trigs, 
+                                                                self.theo_redpar.val.ks,self.theo_redpar.val.ko, 
+                                                                self.Bi, self.theo_redpar.val.b0s, self.theo_redpar.val.b0o, 
+                                                                monitor_array)
         
 
 # --------------------------------------------------------------------------------------------------------------------------
