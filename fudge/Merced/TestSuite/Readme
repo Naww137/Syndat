@@ -1,0 +1,117 @@
+This directory contains test files and sample output for the getTransferMatrix code.
+
+Note: The following parameters may be set in the input file or on the
+command line.
+  skip_logging # default  0       // if == 1, don't log errors in documentation.txt file
+  message_level # default 2       // four levels of messages - info, warn, debug, none
+                                // 0: only fatal errors
+                                // 3: only information messages and fatal errors
+                                // 2: warnings, information messages, and fatal errors
+				// 1: debugging information plus all the rest
+  datafield_precision # default 8 // 8 sig-figs in all data fields
+  num_threads # default 0 // the number of threads in parallel computing,
+                          // the default lets the computer decide
+  outputLegendreOrder  # default 3  // Legendre order of the transfer matrix
+  kinetics # default Newtonian  // relativistic is an option for discrete 2-body
+  quad_tol # default  0.0001  // relative error in the quadrature of the 0-order
+                              // Legendre coefficient of the transfer matrix
+  quad_tol_floor # default 1.0e-5 // do not do adaptive quadrature on high-order
+                                  // entries of the of the transfer matrix smaller
+				  // than this
+  quad_weight_increase # default 2.5 // for a Legendre coefficient of order j,
+                                     // the tolerance in the adaptive quadrature
+				     // is quad_tol * quad_weight_increase^j
+  short_interval # default 1e-12 // terminate the adaptive quadrature when the
+                                 // subintervals get this short
+  sqrt_wt_cutoff # default 0.1 // the Compton and coherent scattering routines
+                               // use square-root weighted Gaussian quadrature
+			       // on intervals this close to the root
+  norm_tol  # default 2e-5  // the code checks the total probability of the data;
+                            // a warning is given if the sum differs from 1
+			    // by more than this
+  check_row_sum # default  0   // if > 0, check the sums over each row
+  scale_rows # default  1    // if > 0, scale the transfer matrix to enforce the
+                             // check of the row sum
+  E_tol # default  1.0e-10   // tolerance on hitting the corner of an energy box
+  abs_tol # default  2.0e-14   // absolute tolerance if E = 0
+
+
+For example, to change quad_tol, set:
+quad_tol: 1.0e-6 # in the input file or
+-quad_tol 1.0e-6 # in the command line
+
+
+Input and output files are given only on the command line
+  input # default   ""
+  output # default   "utfil"
+  path_to_input # default  "."
+For example:
+merced -output somefile.out someinputfile
+
+
+The data is organized into subdirectories according to the type of data given.
+
+*** Traditional ENDL data:
+
+doubleDifferential: table of angular probability density for an outgoing
+  particle in the laboratory frame together with a table of joint
+  energy-angle probability density.  This is traditional ENDL I=1 data
+  along with I=3 data.
+
+isotropic: a table of energy probability density for an outgoing particle,
+  isotropic in the laboratory frame.
+
+Legendre: a table of Legendre coefficients for the energy probability density
+  of an outgoing particle in the laboratory frame.  This is traditional ENDL
+  I=4 data.
+
+twoBody: for discrete 2-body reactions this data is a table of angular
+  probability densities in the center-of-mass frame.  The reaction may be
+  elastic or inelastic (with an excited residual).  This is traditional
+  ENDL I=1 data.
+
+uncorrelated: tables of uncorrelated energy and angle probability
+  densities for an outgoing particle.  This is traditional ENDL I=1 data
+  along with I=4 data of Legendre order 0.
+
+*** Models used in ENDF which are not in ENDL:
+
+ENDFdoubleDiff: ENDF-style table of joint energy-angle probability density
+  in the labaoratory frame. 
+
+ENDFLegendre: Legendre expansions of energy-angle probability density
+  in the labaoratory frame.  The data is ordered according to ENDF rules.
+
+evaporation: energy distribution as an evaporation spectrum.
+
+GeneralEvaporation: data for energy probability densities of delayed fission
+  neutrons.  This data is independent of the energy of the incident neutron.
+
+Kalbach: data for the Kalbach-Mann model for energy-angle probability density
+  in the center-of-mass coordinate system.
+
+Legendre2Body: angular probability densities for discrete 2-body reactions
+  given as Legendre expansions.  The data is in the center-of-mass frame.
+
+Madland: data for the Madland-Nix model for fission neutrons.
+
+Maxwell: data for the Maxwell model for fission neutrons.
+
+phaseSpace: data for the N-body phase-space model for energy probability density
+  in the center-of-mass coordinate system.
+
+two_step: data for breakup into two particles following a discrete 2-body
+  reaction.
+
+Watt: data for the Watt model for fission neutrons.
+
+weights: data files to test the handling of model weights.  This feature
+  is typically used for one neutron in an (n, 2n) reaction or for multiple
+  interpolation regions.
+
+*** EPDL photon data:
+
+coherent: The form factor for coherent scattering.
+
+Compton: The scattering factor for Compton scattering.
+

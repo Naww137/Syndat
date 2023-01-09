@@ -203,6 +203,27 @@ def reduced_width_square_2_partial_width(E, ac, M, m, reduced_widths_square, orb
 
 
 def SLBW(E, pair, resonance_ladder):
+    """
+    _summary_
+
+    _extended_summary_
+
+    Parameters
+    ----------
+    E : _type_
+        _description_
+    pair : _type_
+        _description_
+    resonance_ladder : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+
+    # TODO: check types in resonance ladder
 
     xs_cap = 0; xs_scat = 0
     group_by_J = dict(tuple(resonance_ladder.groupby('J')))

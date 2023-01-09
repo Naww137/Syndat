@@ -1,0 +1,18 @@
+include *.txt
+include Makefile
+include bin/Makefile
+recursive-include doc *.txt *.pdf *.gif *.css *.html *.js *.png
+recursive-include bin *.py
+recursive-include examples *.py *.xml *.endf *.xsl *.txt *.png
+recursive-include fudge/legacy yo* *.txt *.xml
+recursive-include fudge *.xsd
+recursive-include fudge *.h Makefile *.endf
+recursive-include pqu *.py
+recursive-include pqu/doc *.html *.js *.txt *.png *.css
+recursive-include xData *.py
+recursive-include PoPs *.py
+recursive-include PoPs/Test/Answers *.out
+recursive-include numericalFunctions Makefile *.py *.c *.h *.pdf
+recursive-include crossSectionAdjustForHeatedTarget Makefile *.py *.c *.h *.pdf
+recursive-include statusMessageReporting Makefile *.py *.c *.h *.pdf
+recursive-include site_packages Makefile *.py *.xml *.endf *.txt *.dat *.001 *.json *.DAT

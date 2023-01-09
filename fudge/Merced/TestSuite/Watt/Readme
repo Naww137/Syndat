@@ -1,0 +1,9 @@
+The files in this subdirectory contain data for energy probability
+density for fission neutrons given as the Watt model.  Three quadrature 
+schemes are used, as illustrated by the input files:
+
+in.Watt-U233: The default uses adaptive quadrature for both incident energy
+  and outgoing energy.  Its output file is out.Watt-U233.
+
+in.Watt-U233.Gauss6: The same data but with 6-th order Gaussian quadrature.
+  Its output file is out.Watt-U233.Gauss6.

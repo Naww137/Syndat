@@ -1,0 +1,235 @@
+\chapter{Uncorrelated energy-angle probability densities}
+\label{Sec:uncorrelated-lab}
+The simplest form of joint energy-angle probability density data in
+\xendl\ is as tables of uncorrelated dependence on outgoing energy
+$E'$ and direction cosine~$\mu$,
+\begin{equation}
+  \pi(E', \mu   \mid E) =
+  \pi_\mu(\mu   \mid E)\pi_E(E'   \mid E).
+   \label{uncorrelated}
+\end{equation}
+The energy $E'$ and direction cosine~$\mu$ may be in either
+the laboratory or center-of-mass frame.
+
+For this model, the energy probability density is always given
+in the form of tables of pairs $\{E_{i,j}', \pi_E(E_{i,j}' \mid E_i)\}$.
+
+For uncorrelated energy-angle probability densities
+in the center-of-mass frame
+\begin{equation*}
+ \pi(\Ecm'  , \mucm   \mid E) =
+  \pi_\mu(\mucm   \mid E)\pi_E(\Ecm'   \mid E),
+  % \label{uncorrelated-cm}
+\end{equation*}
+the \gettransfer\ code currently
+handles only the case of
+$$
+ \pi_\mu(\mucm   \mid E) = \frac{1}{2}
+ \quad \text{for $-1\le \mu \le 1$}
+$$
+and for all incident energies~$E$.  Furthermore, the values
+of $\pi_\mu(\mucm   \mid E)$ must be given as pairs
+$\{\mu_{i,j}, \pi_\mu(\mu_{i,j} \mid E_i)\}$.
+Such data are treated as
+Legendre expansions Eq.~(\ref{pi-Legendre-cm}) of order zero and 
+are processed as described in Section~\ref{Ch:Legendre-cm}.
+
+For data in the laboratory frame
+\begin{equation}
+  \pi(\Elab'  , \mulab   \mid E) =
+  \pi_\mu(\mulab   \mid E)\pi_E(\Elab'   \mid E),
+   \label{uncorrelated-lab}
+\end{equation}
+the values of $\pi_\mu(\mulab   \mid E)$
+may be given either as pairs $\{\mu_{i,j}, \pi_\mu(\mu_{i,j} \mid E_i)\}$
+or as Legendre coefficients $c_\ell(E)$ in
+\begin{equation}
+  \pi_\mu( \mulab \mid  E) =
+  \sum_\ell 
+  \left(
+     \ell + \frac{1}{2}
+  \right)
+    c_\ell(E)P_\ell( \mulab ).
+  \label{uncorr-Legendre}
+\end{equation}
+For angular probability densities of the form of Eq.~(\ref{uncorr-Legendre}), the
+\gettransfer\ code converts the data to Legendre expansions of
+energy-angle probability densities Eq.~(\ref{piLegendre}) using the relation
+$$
+  \pi_\ell( E' \mid E) = c_\ell(E) \pi_E(E'   \mid E).
+$$
+These data are processed as in Section~\ref{Sec:Legendre-lab}.
+
+The discussion here proceeds with case of uncorrelated energy-angle
+probability densities Eqs.~(\ref{uncorrelated-lab}) given in the laboratory 
+coordinate system as tables of pairs $\{E_{i,j}', \pi_E(E_{i,j}' \mid E_i)\}$
+and $\{\mu_{i,j}, \pi_\mu(\mu_{i,j} \mid E_i)\}$.
+The incident energies~$E_i$ need not be the same for the two data sets,
+but the ranges of incident energy must agree.
+
+For uncorrelated energy-angle probability densities
+Eq.~(\ref{uncorrelated-lab}) the number-preserving integral Eq.~(\ref{Inum}) becomes
+\begin{multline}
+   \Inum_{gh,\ell} =
+        \int_{\calE_g} dE \, \sigma ( E ) M(E) w(E) \widetilde \phi_\ell(E) \\
+       \, \int_{\calE_h' } d\Elab'   \, \pi_E(\Elab'   \mid E)
+       \, \int_{\mulab}   d\mulab   \,  P_\ell( \mulab   ) \pi_\mu(\mulab   \mid E),
+  \label{Inum-uncorr}
+\end{multline}
+and the energy-preserving integral Eq.~(\ref{Ien}) takes the form
+\begin{multline}
+  \Ien_{gh,\ell} =
+     \int_{\calE_g} dE \, \sigma ( E ) M(E) w(E) \widetilde \phi_\ell(E) \\
+     \, \int_{\calE_h' } d\Elab'   \, \pi_E(\Elab'   \mid E) \Elab'  
+     \, \int_{\mulab}   d\mulab    \,  P_\ell ( \mulab   ) \pi_\mu(\mulab   \mid E).
+  \label{Ien-uncorr}
+\end{multline}
+
+It is clear from Eqs.~(\ref{Inum-uncorr}) and~(\ref{Ien-uncorr}) that
+one should first evaluate the integrals
+\begin{equation}
+  \calU_\ell( E ) =  \int_{\mulab}   d\mulab   \, P_\ell ( \mulab   ) \pi_\mu(\mulab   \mid E)
+  \label{angle_int_uncorr}
+\end{equation}
+for the Legendre orders $\ell$ required.  When interpolation of  $\pi_\mu(\mulab   \mid E)$
+in $\mulab$ is piecewise linear or histogram, the integrand in Eq.~(\ref{angle_int_uncorr})
+is a piecewise polynomial and the integrals are evaluated exactly using Gaussian quadrature.
+Currently, the code handles Legendre order $\ell \le 18$ in this way.  Integrals with higher
+Legendre order are evaluated using adaptive quadrature.
+
+For the integrals
+$$
+  \calV_n( E ) = \int_{\calE_h' } d\Elab'   \, \pi_E(\Elab'   \mid E)
+$$
+and
+$$
+  \calV_E( E ) = \int_{\calE_h' } d\Elab'   \, \pi_E  (\Elab'   \mid E) \Elab'  
+$$
+the same geometric considerations apply as for the integrals Eqs.~(\ref{InumI4-0}) 
+and~(\ref{IenI4-0}) of tabular isotropic data $\pi_0(\Elab'   \mid E)$
+as discussed in Section~\ref{Sec:isotropicTables}.  That is, if unit-base interpolation
+Eq.~(\ref{unitbaseMap}) is being used, then the integral $\calV_n( E )$ takes the form
+$$
+  \calV_n( E ) = \int_{\widehat\calE_h' } d\widehat \Elab'   \, \pi_E(\widehat \Elab'   \mid E),
+$$
+and the range of integration is determined by the geometry of the
+shaded region in Figure~\ref{Fig:unit-base-region}.
+
+\section{Input of data for uncorrelated energy-angle probability densities}
+The process identifier in Section~\ref{data-model} is\\
+  \Input{Process: Uncorrelated energy-angle data transfer matrix}{}\\
+These data are in either the laboratory or center-of-mass frame, 
+Section~\ref{Reference-frame},\\
+  \Input{Product Frame: lab}{}\\
+or\\
+  \Input{Product Frame:  CenterOfMass}{}
+
+In the model-dependent data in Section~\ref{model-info}
+angular probability density $\pi_\mu(\mu   \mid E)$ may be given as
+a table or as Legendre coefficients $c_\ell(E)$ in Eq.~(\ref{uncorr-Legendre}).
+The energy 
+probability density $\pi_E(E'   \mid E)$ in
+Eq.~(\ref{uncorrelated}) is given as a table.  All energies must be in the same units as
+those used for the energy groups.
+
+\subsection{Input of angular probability densities}
+For angular probability densities given as a table, the form is\\
+  \Input{Angular data: n = $K$}{}\\
+  \Input{Incident energy interpolation:}{probability interpolation flag}\\
+  \Input{Outgoing cosine interpolation:}{list interpolation flag}\\
+The interpolation flag for incident energy is one of those used for
+probability density tables in Section~\ref{interp-flags-probability}, while that for
+the cosine is for simple lists.  This information is followed
+by $K$ sections of the form\\
+  \Input{Ein: $E$:}{$\texttt{n} = J$}\\
+with $J$ pairs of values of $\mu$ and $\pi_\mu(\mu   \mid E)$.
+
+An example of such a table of angular probability densities
+in the laboratory frame with energies in MeV is\\
+  \Input{Angular data: n = 10}{}\\
+  \Input{Incident energy interpolation: lin-lin direct}{}\\
+  \Input{Outgoing cosine interpolation: lin-lin}{}\\
+  \Input{ Ein: 2.82600000e+00 : n = 2}{}\\
+  \Input{ \indent  -1  0.5}{}\\
+  \Input{ \indent  1  0.5}{}\\
+    \Input{ $\cdots$}{}\\
+  \Input{ Ein: 2.00000000e+01: n = 10}{}\\
+  \Input{ \indent  -1.00000000e+00  2.86849000e-01}{}\\
+  \Input{ \indent  -9.00000000e-01  2.98228000e-01}{}\\
+  \Input{ \indent  -6.00000000e-01  3.48724000e-01}{}\\
+  \Input{ \indent  -3.00000000e-01  4.08451000e-01}{}\\
+  \Input{ \indent  -1.00000000e-01  4.54198000e-01}{}\\
+  \Input{ \indent   1.00000000e-01  5.05334000e-01}{}\\
+  \Input{ \indent   3.00000000e-01  5.62452000e-01}{}\\
+  \Input{ \indent   7.00000000e-01  6.93910000e-01}{}\\
+  \Input{ \indent   9.00000000e-01  7.47781000e-01}{}\\
+  \Input{ \indent  1.00000000e+00  7.65990000e-01}{}
+  
+In the center-of-mass frame, the data must imply that
+$\pi_\mu(\mucm   \mid E) = 1/2$ as in \\
+  \Input{Angular data: n = 2}{}\\
+  \Input{Incident energy interpolation: lin-lin direct}{}\\
+  \Input{Outgoing cosine interpolation: lin-lin}{}\\
+  \Input{ Ein: 2.82600000e+00 : n = 2}{}\\
+  \Input{ \indent  -1  0.5}{}\\
+  \Input{ \indent  1  0.5}{}\\
+  \Input{ Ein: 20 : n = 2}{}\\
+  \Input{ \indent  -1  0.5}{}\\
+  \Input{ \indent  1  0.5}{}\\
+
+For angular probability densities given as Legendre coefficients 
+$c_\ell(E)$ in Eq.~(\ref{uncorr-Legendre}), the format is\\
+    \Input{Legendre coefficients:}{$n = K$}\\
+where $K$ is the number of incident energies~$E$.
+This is followed by the interpolation rule for simple lists
+from Section~\ref{interp-flags-list}\\
+  \Input{Interpolation:}{list interpolation flag}\\
+This is followed by $K$ sets of data\\
+    \Input{Ein: $E_k$:}{$n = L_k$}\\
+with $L_k$ Legendre coefficients $c_\ell(E_k)$ for $\ell = 0$, 1,
+\ldots\ , $L_k - 1$ in Eq.~(\ref{uncorr-Legendre}).
+These data must be in the laboratory frame.
+
+An example of such data is\\
+  \Input{Legendre coefficients: n = 2}{}\\
+  \Input{Interpolation: lin-lin}{}\\
+  \Input{ Ein: 19 : n = 2}{}\\
+    \Input{ \indent  1}{}\\
+     \Input{ \indent  0}{}\\
+  \Input{ Ein: 20 : n = 2}{}\\
+     \Input{ \indent  1}{}\\
+   \Input{ \indent  0.2}{}
+ 
+\subsection{Input of energy probability densities}
+The energy probability density table is of the form\\
+  \Input{EEpPData: n = $K$}{}\\
+  \Input{Incident energy interpolation:}{probability interpolation flag}\\
+  \Input{Outgoing energy interpolation:}{list interpolation flag}\\
+The interpolation flags are those used for
+probability density tables in Section~\ref{interp-flags-probability}.
+This information is followed
+by $K$ sections of the form\\
+  \Input{Ein: $E$:}{$\texttt{n} = J$}\\
+with $J$ pairs of values of $E'$ and $\pi_E(E'   \mid E)$.
+
+  \Input{EEpPData: n = 10}{}\\
+  \Input{Incident energy interpolation: lin-lin unitbase}{}\\
+  \Input{Outgoing energy interpolation: lin-lin}{}\\
+ \Input{ Ein:  2.826000e+00: n = 3}{}\\
+  \Input{ \indent  1.000000e-03  0.000000e+00}{}\\
+  \Input{ \indent  2.000000e-03  1.000000e+03}{}\\
+  \Input{ \indent  3.000000e-03  0.000000e+00}{}\\
+     \Input{ $\cdots$}{}\\
+ \Input{ Ein:  2.000000e+01: n = 33}{}\\
+  \Input{ \indent  0.000000e+00  0.000000e+00}{}\\
+  \Input{ \indent  1.000000e-01  1.678010e-02}{}\\
+  \Input{ \indent  2.000000e-01  2.383160e-02}{}\\
+    \Input{ \indent }{$\cdots$}\\
+  \Input{ \indent 1.530000e+01  1.150130e-02}{}\\
+  \Input{ \indent  1.560000e+01  9.260950e-03}{}
+
+
+
+
+
+

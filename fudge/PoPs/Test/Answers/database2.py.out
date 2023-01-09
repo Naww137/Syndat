@@ -1,0 +1,4 @@
+/PoPs/gaugeBosons/gaugeBoson[@id='photon']
+/PoPs/chemicalElements/chemicalElement[@symbol='O']
+/PoPs/chemicalElements/chemicalElement[@symbol='O']/isotopes/isotope[@symbol='O16']/nuclides/nuclide[@id='O16']
+/PoPs/chemicalElements/chemicalElement[@symbol='O']/isotopes/isotope[@symbol='O16']/nuclides/nuclide[@id='O16_e2']

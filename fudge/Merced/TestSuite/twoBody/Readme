@@ -1,0 +1,48 @@
+The files in this subdirectory are for discrete 2-body reactions
+with angular probability densities given as pointwise data (with
+linear-linear interpolation).  The default input gives integration
+by adaptive quadrature.  Input files specifying 6-th order Gaussian
+quadrature are included for comparison.  The Gaussian quadrature is
+about 20% faster, but the entries of the third-order transfer matrix
+are inaccurate at low incident energies.  
+
+In the input file you must provide the Q value and the rest masses of 
+the incident particle, the target, and the emitted particle, and these
+must be in the same units as the energy bins.  You may also provide
+the rest mass of the residual, but this is not used unless the residual
+is a photon.  You will get a
+warning message if the calculated rest mass of the residual differs
+too much from the one you provide.
+
+Relativistic mechanics is used if the incident particle or one of the
+outgoing particles is a photon.  Otherwise,
+the computation is done with Newtonian mechanics if the input file
+contains the line
+kinetics: Newtonian
+To specify relativistic mechanics, include the line
+kinetics: relativistic
+You get Newtonian mechanics if this command is omitted.
+
+The input files are:
+
+in.elastic-C12: elastic scattering using Newtonian kinetics and adaptive quadrature.  
+  The output file is out.elastic-C12.
+
+in.elastic-C12-Gauss6: elastic scattering using Newtonian kinetics and 6-th order 
+  Gaussian quadrature.  The output file is out.elastic-C12-Gauss6.
+
+in.elastic-C12.rel: elastic scattering using relativistic kinetics and adaptive quadrature.  
+  The output file is out.elastic-C12.rel.
+
+in.inelastic-Kr78: inelastic scattering using Newtonian kinetics and adaptive 
+  quadrature.  The output file is out.inelastic-Kr78.
+
+in.inelastic-Kr78.rel: inelastic scattering using relativistic kinetics and adaptive 
+  quadrature.  The output file is out.inelastic-Kr78.
+
+in.photon_out: data for the outgoing photon in the
+  H2 + H3 --> (He5 -> n + He4) + photon reaction.  The output file is
+  out.photon_out.
+
+in.photon_res: data for the outgoing deuteron in the
+  n + H1 --> H2 + gamma reaction.  The output file is out.photon_res.

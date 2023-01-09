@@ -1,0 +1,859 @@
+\chapter{Interpolation of the data}
+\label{Sec:interpolate}
+The data in \xendl\ representing the probability density
+$\pi(E', \mu \mid E ) = \pi_r(E', \mu \mid E )$ in the integrals (\ref{Inum}) and~(\ref{Ien})
+are given in various forms.  In the case of tabulated data, intermediate
+values must be obtained via some sort of interpolation.  Interpolation
+with respect to one independent variable is described first, followed by a discussion of
+the 2-dimensional case.  In \xendl\ full 3-dimensional interpolation
+of $\pi(E', \mu \mid E )$ data is reduced to a sequence of 2-dimensional
+interpolations.
+
+\section{Interpolation methods for a single variable}\label{Sec:1d-interp}
+For the sake of having a specific application,
+the discussion here is given in terms of tables of data $\{E_i, f(E_i)\}$,
+with values $E_i$ of the energy of the outgoing particle as independent variable.
+These ideas are applicable to one dimension for any tabular data.
+The types of interpolation method used in \xendl\ 
+for such tables are: histogram, linear-linear, 
+log-linear, linear-log, and log-log.  The algorithms for interpolation
+of $F(E)$ on an interval $E_0 < E < E_1$ with given $f(E_0)$ and~$f(E_1)$
+are as follows.  In these definitions it is assumed that the argument of a
+logarithm is positive.
+
+\subsection{Histograms}
+For histogram interpolation set
+$$
+  f(E) = f(E_0) \quad \text{for $E_0 \le E < E_1$}.
+$$
+
+\subsection{Linear-linear}
+ For linear-linear interpolation set
+\begin{equation}
+   \alpha = \frac{E - E_0}{E_1 - E_0}
+ \label{def-alpha}
+\end{equation}
+and take
+$$
+  f(E) = (1 - \alpha)f(E_0) + \alpha f(E_1)
+   \quad \text{for $E_0 \le E \le E_1$}.
+$$
+
+\subsection{Log-linear}
+For log-linear interpolation take $\alpha$ as in Eq.~(\ref{def-alpha}),
+and set
+$$
+ \log f(E) = (1 - \alpha)\log f(E_0) + \alpha \log f(E_1)
+   \quad \text{for $E_0 \le E \le E_1$}.
+$$
+This relation may also be written as
+\begin{equation}
+  f(E) = f(E_0)^{1 - \alpha} f(E_1)^\alpha.
+ \label{loglin-interp}
+\end{equation}
+
+\subsection{Linear-log}
+ For linear-log interpolation set
+\begin{equation}
+   \alpha' = \frac{\log(E / E_0)}{\log( E_1 / E_0 )}
+ \label{def-alpha-prime}
+\end{equation}
+and take
+$$
+  f(E) = (1 - \alpha')f(E_0) + \alpha' f(E_1)
+   \quad \text{for $E_0 \le E \le E_1$}.
+$$
+
+\subsection{Log-log}
+For log-log interpolation take $\alpha'$ as in Eq.~(\ref{def-alpha-prime}),
+and set
+$$
+ \log f(E) = (1 - \alpha')\log f(E_0) + \alpha' \log f(E_1)
+   \quad \text{for $E_0 \le E \le E_1$}.
+$$
+This is equivalent to
+\begin{equation}
+  f(E) = f(E_0)^{1 - \alpha'} f(E_1)^{\alpha'}.
+ \label{loglog-interp}
+\end{equation}
+
+\textbf{Remark.}
+With log-linear interpolation written in the form of Eq.~(\ref{loglin-interp})
+and log-log interpolation written as Eq.~(\ref{loglog-interp}), it is permitted
+that $f(E_0) = 0$ or $f(E_1) = 0$.  These cases all lead to the result that
+$f(E) = 0$ for $E_0 < E < E_1$, however.
+
+\section{Interpolation methods for probability densities}\label{Sec:2d-interp}
+In order to explain the methods for interpolation of probability densities, it suffices to
+consider a table of values $\pi( E' \mid E )$
+\begin{equation}
+  \{ E'_{j,k}, \pi(E'_{j,k} \mid E_k )\} \quad \text{for $j = 0$, 1, $\ldots\,$, $J_k$}
+  \label{EPtable}
+\end{equation}
+given at values of the incident energy~$E_k$, for
+$k = 0$,~1, $\ldots\,$,~$K$.
+In Eq.~(\ref{EPtable}) it is required that the outgoing energies
+be ordered
+\begin{equation}
+  E'_{0,k} < E'_{1,k} \le E'_{2,k} \le \cdots \le E'_{J_k-1,k} < E'_{J_k,k}.
+  \label{Eout-order}
+\end{equation}
+
+The condition Eq.~(\ref{Eout-order}) permits the data of
+Eq.~(\ref{EPtable}) to have equal consecutive intermediate
+outgoing energies $E'_{j-1,k} = E'_{j,k}$, so that the probability
+density~$\pi(E' \mid E_k)$ may have a jump discontinuity there.
+Jump discontinuities are not allowed at the end points $E' = E'_{0,k}$
+and~$E' = E'_{J_k,k}$.  In Eq.~(\ref{EPtable}) the possibility 
+of three or more consecutive equal outgoing energies may be ruled out,
+because all but the first and last would be redundant. 
+The convention adopted here is that the value of $\pi(E' \mid E_k)$
+at a discontinuity is the second data value
+$$
+ \pi(E' \mid E_k) = \pi(E'_{j,k} \mid E_k) \quad
+  \text{if $E' = E'_{j-1,k} = E'_{j,k}$.}
+$$
+
+For fixed incident energy $E_k$, the rules for interpolation of 
+$\pi(E' \mid E_k )$ in outgoing energy~$E'$ are as given
+in Section~\ref{Sec:1d-interp}.  The following types
+of interpolation with respect to $E$ are discussed in subsequent subsections:
+\begin{enumerate}
+ \item direct interpolation.
+ \item unit-base interpolation,
+ \item interpolation using cumulative points.
+\end{enumerate}
+
+The method referred to here as ``interpolation by cumulative points''
+is closely related to ``interpolation by corresponding energies'' as described
+in the \ENDF\ manual~\cite{ENDFB}.  
+For a more-detailed discussion of 2-dimensional interpolation methods,
+see the reference~\cite{interpolation}.
+
+For a discussion of interpolation of data Eq.~(\ref{EPtable}), it suffices
+to consider interpolation between incident energies $E_0$ and~$E_1$.
+Thus, it is desired to interpolate to incident energy~$E$ with
+$E_0 < E < E_1$ the data
+\begin{equation}
+\begin{split}
+  \{ E'_{j,0}, \pi(E'_{j,0} \mid E_0 )\} &\quad \text{for $j = 0$, 1, $\ldots\,$, $J_0$}, \\
+  \{ E'_{j,1}, \pi(E'_{j,1} \mid E_1 )\} &\quad \text{for $j = 0$, 1, $\ldots\,$, $J_1$}.
+  \label{EPtables}
+\end{split}
+\end{equation}
+The ideas presented apply equally well to interpolation of data
+in Eq.~(\ref{EPtable}) between any consecutive pair of
+incident energies $E_{k-1} < E_k$.
+
+The methods of 2-dimensional interpolation are described in turn.
+For each of these methods the interpolated probability density $\pi(E' \mid E)$
+for $E_0 < E < E_1$ has the proper norm
+\begin{equation}
+  \int
+  \pi(E' \mid E) \ dE' = 1
+  \label{piNorm}
+\end{equation}
+when the interpolation rule with respect to incident energy~$E$ for the
+data Eq.~\eqref{EPtables} is linear-linear, histogram, or linear-log.
+The norm condition Eq.~\eqref{piNorm} is not usually satisfied when
+log-linear or log-log interpolation is used for the incident energy.
+
+\subsection{Direct interpolation}\label{Sec:direct-interp}
+It is common to do direct interpolation for interpolating tables of angular probability
+density~$\pi( \mu \mid E)$ with respect to incident energy~$E$, because the
+range of direction cosines is usually $-1 \le \mu \le 1$.  For example, in order
+to determine the value of $\pi( \mu \mid E)$ for $E_0 < E < E_1$ from data
+Eq.~(\ref{EPtables}), one first interpolates in $\mu$
+at fixed incident energies to obtain $\pi( \mu \mid E_0)$ and~$\pi( \mu \mid E_1)$.
+One then obtains the value of $\pi( \mu \mid E)$ by interpolating between
+$\pi( \mu \mid E_0)$ and~$\pi( \mu \mid E_1)$.
+
+The trouble with the application of direct interpolation to tables of 
+energy distributions
+ is that the range of outgoing energy~$E'$
+usually depends on the incident energy~$E$.
+Thus, for the data in Eq.~(\ref{EPtables}), the ranges of outgoing energies
+are given by
+\begin{equation}
+\begin{split}
+  \Eminzero' =  E'_{0,0} \quad \text{and} \quad
+           \Emaxzero' = E'_{J_0,0} \quad \text{for $E = E_0$}, \\
+  \Eminone' =  E'_{0,1} \quad \text{and} \quad
+           \Emaxone' = E'_{J_1,1} \quad \text{for $E = E_1$}.
+  \label{Eout-ranges}
+\end{split}
+\end{equation}
+
+\textbf{Remark.}
+In the definition of the range of outgoing energies Eq.~(\ref{Eout-ranges}),
+it is natural to expect that the data in Eq.~(\ref{EPtables}) are such that
+for each incident energy $E_k$ with $k = 0,$~1, $\ldots\,$,~$K$, the probability
+density $\pi(E' \mid E_k )$ is not equal to zero on the entire lowest outgoing
+energy range $E'_{0,k} < E' < E'_{1,k}$ or highest outgoing energy range
+$E'_{J_k - 1,k} < E' < E'_{J_k,k}$.  That is, 
+Eq.~(\ref{Eout-ranges}) ought to give the
+actual range of outgoing energies.
+Some nuclear data libraries, e.~g.,
+\ENDFdata~\cite{ENDFdata}, have
+data of the form Eq.~(\ref{EPtable}) which imply that
+$\pi(E' \mid E_k ) = 0$ on the lowest or highest outgoing energy ranges.
+The sample input data given in
+Section~\ref{Sec:isotropic-table-lab} illustrates the problem.
+
+It is convenient to describe the process of direct interpolation using
+notation of set theory, with the sets
+\begin{equation}
+\begin{split}
+  \calA_0 = \{ E': \Eminzero' \le E' \le
+           \Emaxzero' \}, \\
+  \calA_1 = \{ E':   \Eminone' \le E' \le
+           \Emaxone' \}.
+  \label{def-calA01}
+\end{split}
+\end{equation}
+The union of these two sets is denoted by
+\begin{equation}
+   \calA_X = \calA_0 \cup \calA_1,
+ \label{def-calA-X}
+\end{equation}
+and the intersection is denoted by
+\begin{equation}
+   \calA_T = \calA_0 \cap \calA_1,
+ \label{def-calA-T}
+\end{equation}
+
+There are two obvious interpretations of direct interpolation of
+the data in Eq.~(\ref{EPtables}) when the outgoing energy ranges
+differ, $\calA_0 \ne \calA_1$.  One may do \textit{direct interpolation
+with extrapolation} or \textit{direct interpolation
+with truncation}.   Linear-linear versions of these methods are
+described here. 
+
+For direct interpolation with extrapolation the probability densities
+$\pi(E' \mid E_0 )$ and $\pi(E' \mid E_1 )$ constructed from the
+tables in Eq.~(\ref{EPtables})  are extrapolated to
+\begin{equation}
+  \pi_X(E' \mid E_0 ) = \begin{cases}
+    \pi(E' \mid E_0 ) &\quad \text{for $E'$ in $\calA_0$,} \\
+    0 &\quad \text{for $E'$ in $\calA_X \setminus \calA_0$,}
+  \end{cases}
+  \label{def-pi-X0}
+\end{equation}
+and
+\begin{equation}
+  \pi_X(E' \mid E_1 ) = \begin{cases}
+    \pi(E' \mid E_1 ) &\quad \text{for $E'$ in $\calA_1$,} \\
+    0 &\quad \text{for $E'$ in $\calA_X \setminus \calA_1$.}
+  \end{cases}
+  \label{def-pi-X1}
+\end{equation}
+For direct interpolation
+to incident energy $E$ with $E_0 < E < E_1$,
+the proportionality factor $q$ is  defined as
+\begin{equation}
+  q = \frac{ E - E_0}{ E_1 - E_0 }.
+  \label{def-q}
+\end{equation}
+In linear-linear direct interpolation with extrapolation,
+the interpolant is taken to be
+\begin{equation}
+  \pi_X(E' \mid E ) = ( 1 - q )\, \pi_X(E' \mid E_0 ) + q\, \pi_X(E' \mid E_1 )
+  \label{def-pi-X}
+\end{equation}
+for $E'$ in the set~$\calA_X$.
+
+The method of direct interpolation with truncation differs from
+that using extrapolation, in that this method uses the truncated
+probability densities
+\begin{equation}
+ \begin{split}
+   \pi_T(E' \mid E_0 )& = C_0 \pi(E' \mid E_0 ), \\
+   \pi_T(E' \mid E_1 )& = C_1 \pi(E' \mid E_1 )
+  \end{split}
+ \label{def-pi-T01}
+\end{equation}
+for outgoing energy $E'$ in the set~$\calA_T$.  Here, $C_0$ 
+and~$C_1$ are normalization constants such that
+$$
+   \int_{\calA_T} dE' \, \pi_T(E' \mid E_0 ) = 1
+   \quad \text{and} \quad
+   \int_{\calA_T} dE' \, \pi_T(E' \mid E_1 ) = 1.
+$$
+For linear-linear direct interpolation with truncation of the data in Eq.~(\ref{EPtables})
+to incident energy $E$ with $E_0 < E < E_1$, the factor~$q$
+is chosen as in Eq.~(\ref{def-q}), and the interpolant is
+$$
+  \pi_T(E' \mid E ) = ( 1 - q )\, \pi_T(E' \mid E_0 ) + q\, \pi_T(E' \mid E_1 )
+$$
+for $E'$ in the set~$\calA_T$.
+
+\textbf{Remarks.}
+The \ENDFdata\ data~\cite{ENDFdata} contains many instances in which
+linear-linear direct interpolation is specified, but the \ENDF\ manual~\cite{ENDFB}
+says nothing about how to deal with differences in range of outgoing
+energies.  Both versions can be expected to produce violation of
+energy conservation.  The {\gettransfer} code
+currently uses direct interpolation with extrapolation.
+
+\subsection{Unit-base interpolation}\label{Sec:unitBase}
+Only the linear-linear version of unit-base interpolation is discussed here.
+The first step in unit-base interpolation is the construction of the
+range of energies of the outgoing particle.  
+The minimum and maximum
+outgoing energies for the data in Eq.~(\ref{EPtables})
+are given by Eq.~(\ref{Eout-ranges}).
+For incident energy~$E$ with $E_0 < E < E_1$, the factor~$q$
+is taken as in Eq.~(\ref{def-q}), and
+ the minimum and maximum outgoing energies
+are given by
+\begin{equation}
+ \begin{split}
+   \Emin'& = ( 1 - q )\Eminzero' + q \Eminone', \\
+   \Emax' & = ( 1 - q )\Emaxzero' + q \Emaxone'.
+  \label{EoutRange}
+ \end{split}
+\end{equation}
+
+The interpolated probability density $\pi(E' \mid E)$ must
+satisfy the normalization condition
+\begin{equation}
+  \int_{\Emin'}^{\Emax'} dE' \, \pi(E' \mid E) = 1.
+ \label{probabilityNorm}
+\end{equation}
+One way to ensure this is to first map the outgoing energy ranges
+Eq.~(\ref{Eout-ranges}) to unit base $0 \le \Ehat' \le 1$
+and to scale the probability densities Eq.~(\ref{EPtables})
+accordingly.  Thus, for the data in Eq.~(\ref{EPtables}) at
+incident energy~$E_0$, set
+\begin{equation}
+  \Ehat' = \frac{ E' - \Eminzero'}{ \Emaxzero' - \Eminzero'}
+  \label{unit-base-map}
+\end{equation}
+and scale the probability density
+\begin{equation}
+  \pihat(\Ehat' \mid E_0) = ( \Emaxzero' - \Eminzero' )\pi(E' \mid E_0).
+  \label{unitbaseMap}
+\end{equation}
+For incident energy $E_1$, the outgoing energy is scaled
+as
+\begin{equation}
+    \Ehat' = \frac{ E' - \Eminone'}{ \Emaxone' - \Eminone'},
+  \label{unit-base-map1}
+\end{equation}
+and the probability density
+is scaled to define the unit-base probability
+density 
+\begin{equation}
+  \pihat(\Ehat' \mid E_1) = ( \Emaxone' - \Eminone' )\pi(E' \mid E_1)
+  \label{unitbaseMap1}
+\end{equation}
+for $0 \le \Ehat' \le 1$.
+
+If linear-linear interpolation with respect to incident energy is
+desired, the proportionality factor $q$ defined in
+Eq.~(\ref{def-q}) is used to linearly interpolate between
+$\pihat(\Ehat' \mid E_0)$ and $\pihat(\Ehat' \mid E_1)$
+by setting
+\begin{equation}
+  \pihat(\Ehat' \mid E) = (1 - q)\,\pihat(\Ehat' \mid E_0) +
+   q \,\pihat(\Ehat' \mid E_1)
+ \label{unitbaseInterp}
+\end{equation}
+for $0 \le \Ehat' \le 1$. 
+
+Finally, in order to define the interpolated probability
+density $\pi(E' \mid E)$, invert the mappings Eq.~(\ref{unit-base-map})
+and~Eq.~(\ref{unitbaseMap}).  Specifically, with $\Emin'$ and
+$\Emax'$ as in Eq.~(\ref{EoutRange}), set
+\begin{equation}
+   E' = \Emin' + ( \Emax' - \Emin')\Ehat'
+ \label{range-inv}
+\end{equation}
+and take
+\begin{equation}
+  \pi(E' \mid E) = \frac{\pihat(\Ehat' \mid E)}{ \Emax' - \Emin' }.
+ \label{unitbaseInvert}
+\end{equation}
+
+Unit-base interpolation is ordinarily not used with tables of
+angular probability densities~$\pi( \mu \mid E)$, because the
+range of direction cosines is usually~$-1 \le \mu \le 1$.  One
+may want to use it for a table with forward emission given in
+the laboratory frame, however.
+
+\subsection{Interpolation by cumulative points}\label{Sec:cumProb}
+The method of interpolation by cumulative points that is
+used in the code \gettransfer\ is proposed in~\cite{interpolation},
+and it is a modification of interpolation by corresponding energies as described
+in the \ENDF\ manual~\cite{ENDFB}.  
+Interpolation by corresponding energies requires the selection of
+$N$ equiprobable energy bins, so the result depends on the value of~$N$.
+It is shown in~\cite{interpolation} that for data Eq.~(\ref{EPtable}) which are
+histograms with respect to outgoing energy $E'$, interpolation by cumulative 
+points is equivalent to interpolation by corresponding energies with~$N = \infty$.
+The \gettransfer\ code therefore uses interpolation by cumulative points
+whenever the data specify interpolation by corresponding energies.
+
+One objection to unit-base interpolation is that the mapping
+(\ref{unitbaseMap}) depends only
+on the range of outgoing energies.
+One can often get a better approximation to the physics if the
+interpolation method incorporates
+knowledge of the local behavior of each $\pi( E' \mid E_k)$
+in Eq.~(\ref{EPtable}).
+One method of doing so is based on the cumulative
+probability function
+\begin{equation}
+  \Pi( E' \mid E_k) = \int_{E'_{k,\text{min}}}^{E'} dx\, \pi( x \mid E_k)
+  \label{cumProb}
+\end{equation}
+for $k = 0$,~1, $\ldots\,$,~$K$.
+
+
+
+
+Because the data $\pi( E' \mid E_k)$ consist of probability densities,
+it follows that $\pi( E' \mid E_k) \ge 0$.  Hence, $\pi( E' \mid E_k)$ 
+s a non-decreasing function of~$E'$.  There are
+energy distributions in the data library
+\xendl~\cite{GND} for which $\pi( E' \mid E_k ) = 0$
+on an interval $E_{j - 1,k}' < E' < E_{j,k}$ for $k = 0$~or~1
+and for some values of $j = 1$, 2, $\ldots\,$, $J_k$.
+The corresponding cumulative probability is constant
+on such intervals.  The method of cumulative points
+depends on solutions of the equation
+$$
+  \Pi(E' \mid E_k ) = Y
+$$
+for given value of  $0 \le Y \le 1$.  Denote the
+largest solution by
+$$
+  S = \max \left \{ E': \Pi(E' \mid E_k ) = Y \right \}
+$$
+and the smallest solution by
+$$
+  T = \min \left \{ E': \Pi(E' \mid E_k ) = Y \right \}.
+$$
+If $\pi( E' \mid E_k ) = 0$ only at discrete
+points, then $\Pi(E' \mid E_k )$ is strictly increasing
+and $S = T$.
+
+The cumulative points method is defined as
+follows.
+\begin{enumerate}
+\item For probability density data Eqs.~\eqref{EPtables}
+at incident energy~$E_k$ with $k = 0$ and~1, compute the cumulative
+probabilities $\Pi( E' \mid E_k )$ in Eqs.~\eqref{cumProb}
+at the data points~$E_{j,k}'$ for $j = 0$, 1, $\ldots\,$, $J_k$.  
+Denote the result as
+\begin{equation}
+  y_{j,k} = \Pi( E_{j,k}' \mid E_k ).
+ \label{def-phijk}
+\end{equation}
+\item Form the union of these two sets
+\begin{equation}
+   \{Y_\ell\} = \{y_{j,0}\} \cup \{y_{j,1}\},
+ \label{def-Phi-cup}
+\end{equation}
+remove duplicates, and arrange the remaining values
+in increasing order,
+\begin{equation}
+  0 = Y_0 < Y_1 < \cdots < Y_L = 1.
+ \label{Phi-ordered}
+\end{equation}
+\item For $k = 0$ and~1 and for each $Y = Y_\ell$ with
+$\ell = 1$, 2, $\ldots\,$, $L$,
+compute the outgoing energies
+$S_{\ell,k}'$ and~$T_{\ell,k}'$ by solving the equations
+\begin{equation}
+ \begin{split}
+     S_{\ell,k}' &= \max \left \{ E': \Pi(E' \mid E_k ) = Y_{\ell-1} \right \}, \\
+      T_{\ell,k}' &= \min \left \{ E': \Pi(E' \mid E_k ) = Y_\ell \right \}.
+ \end{split}
+  \label{T-cum-prob-inv}
+\end{equation}
+\item For $k = 0$ and~1 form the intervals $\calB_\ell(E_k)$
+\begin{equation}
+ \begin{split}
+   \calB_\ell(E_k) &= \{E' : S_{\ell,k}' \le E' < T_{\ell,k}' \} 
+     \quad \text{for $\ell = 1$,~2, $\ldots\,$,~$L-1$,} \\
+   \calB_L(E_k) &= \{E' : S_{L,k}' \le E' \le T_{L,k}' \}.
+ \end{split}
+  \label{def-B-ell}
+\end{equation}
+The reason for omitting right-hand endpoints of
+intervals $\calB_\ell(E_k)$ for $\ell < L$ in Eqs.~\eqref{def-B-ell}
+is that they may be points of discontinuity
+of the original energy distributions in Eq.~\eqref{EPtables}.
+\item For incident energy $E$ with $E_0 < E < E_1$ do unit-base
+interpolation of $\pi( E' \mid E_0 )$ on $\calB_\ell(E_0)$ with
+$\pi( E' \mid E_1 )$ on $\calB_\ell(E_1)$
+for $\ell = 1$,~2, $\ldots\,$,~$L$. The interpolation with
+respect to~$E$ may be histogram, linear-linear, or linear-log.
+The linear-linear version is as follows.  
+For $k = 0$ and~1 use
+\begin{equation}
+  \Ehat' = \frac{ E' -  S_{\ell,k}'}{  T_{\ell,k}' -  S_{\ell,k}'}
+  \label{unit-base-map-cum}
+\end{equation}
+to map the interval $\calB_\ell(E_k)$
+to $0 \le \Ehat' < 1$ for $\ell = 1$,~2, $\ldots\,$,~$L-1$ and to
+$0 \le \Ehat' \le 1$ for $\ell = L$.  Scale the probability density
+accordingly,
+\begin{equation}
+  \pihat(\Ehat' \mid E_k) = (T_{\ell,k}' -S_{\ell,k}' )\pi(E' \mid E_0).
+  \label{unit-base-scale}
+\end{equation}
+Define the proportionality factor
+\begin{equation}
+  \alpha = \frac{ E - E_0 }{ E_1 - E_0 }
+  \label{def-alpha-cum}
+\end{equation}
+and interpolate to obtain
+\begin{equation}
+  \pihat(\Ehat' \mid E) = (1 - \alpha)\pihat(\Ehat' \mid E_0) +
+   \alpha \pihat(\Ehat' \mid E_1)
+ \label{unitbaseInterpCum}
+\end{equation}
+for $0 \le \Ehat' < 1$ and $\ell < L$ and for $0 \le \Ehat' \le 1$ and $\ell = L$.
+For $\ell = 1$,~2, $\ldots\,$,~$L$
+interpolate the end points of the intervals $\calB_\ell(E_k)$ to
+obtain
+\begin{equation}
+ \begin{split}
+  S_{\ell,\alpha}' &= (1 - \alpha)S_{\ell,0}' + \alpha S_{\ell,1}', \\
+  T_{\ell,\alpha}' &= (1 - \alpha)T_{\ell,0}' + \alpha T_{\ell,1}'.
+ \end{split}
+  \label{energy-range}
+\end{equation}
+At incident energy~$E$ 
+the range of outgoing energies~$E'$ as taken as
+\begin{equation}
+ \begin{split}
+   \calB_\ell(E) &= \{E' : S_{\ell,\alpha}' \le E' < T_{\ell,\alpha}' \}
+     \quad \text{for $\ell = 1$,~2, $\ldots\,$,~$L-1$,} \\
+   \calB_L(E) &= \{E' : S_{L,\alpha}' \le E' \le T_{L,\alpha}' \}.
+ \end{split}
+  \label{def-B-ell-alpha}
+\end{equation}
+Finally, the interpolated probability
+density $\pi( E' \mid E )$ is obtained by inversion of the mapping
+Eq.~\eqref{unit-base-scale}, giving
+\begin{equation}
+  \pi(E' \mid E) = \frac{\pihat(\Ehat' \mid E)}{  T_{\ell,\alpha}' -  S_{\ell,\alpha}'}
+ \label{map-inv}
+\end{equation}
+for $E'$ in $\calB_\ell(E)$.
+Set $\pi(E' \mid E) = 0$ for all outgoing energies~$E'$ which 
+are not in any of the sets $\calB_\ell(E)$ for 
+$\ell = 1$,~2, $\ldots\,$,~$L$.
+\end{enumerate}
+
+For tables of angular probability densities~$\pi( \mu \mid E)$, direct interpolation
+is often used for interpolating with respect to incident energy~$E$,
+because the direction cosines usually range over $-1 \le \mu \le 1$.
+For angular distributions with strong local features, interpolation by cumulative points 
+may be preferable.
+
+
+\subsubsection{Practical considerations: intervals of zero length} 
+\label{Sec:cum-points-trivial}
+Experience with interpolation
+by cumulative points as described above shows that it must be
+modified to deal with the inaccuracy of
+computer arithmetic.  In particular, it may happen that 
+for $k=0$ or~1 and for some $\ell = \widehat \ell$
+the values of $S'_{ \ell,k}$ and~$T'_{ \ell,k}$
+as obtained from Eq.~(\ref{T-cum-prob-inv}) are computed to be equal.
+The mapping Eq.~(\ref{unit-base-map-cum}) to unit base is then undefined.
+
+This phenomenon may be understood in terms of the computer's
+machine epsilon, which is the smallest number $\epsilon_{\text{mach}}$
+such that $1 + \epsilon_{\text{mach}} > 1$ in the computer's arithmetic.
+In double precision arithmetic a common value is
+$$
+  \epsilon_{\text{mach}}  = 2^{-52} \approx 2.22 \times 10^{-16}.
+$$
+In particular, if the exact values of $S_{\widehat \ell,k}' $ and $T_{\widehat \ell,k}' $
+are such that $S_{\widehat \ell,k}' > 0$ and
+$$
+  T_{\widehat \ell,k}'  - S_{\widehat \ell,k}'  < \epsilon_{\text{mach}} S_{\widehat \ell,k}',
+$$
+then the computer will say that $S_{\widehat \ell,k}' = T_{\widehat \ell,k}'$.
+
+Consider first the case that the probability density $\pi(E' \mid E_k )$ is
+given as a histogram.  Then in exact arithmetic the cumulative points algorithm 
+ensures the existence of $S_{\widehat \ell,k}' $ and $T_{\widehat \ell,k}' $
+such that
+\begin{equation}
+  \Pi(S_{\widehat \ell,k}' \mid E_k ) = Y_{\widehat \ell-1}
+  \quad \text{and} \quad
+  \Pi(T_{\widehat \ell,k}' \mid E_k ) = Y_{\widehat \ell}.
+ \label{get-S-T}
+\end{equation}
+Furthermore, it is assured that $S_{\widehat \ell,k}'  < T_{\widehat \ell,k}' $
+and that
+$$
+  \pi(E' \mid E_k ) = \pi_{\widehat \ell,k}
+  \quad \text{for} \quad
+  S_{\widehat \ell,k}' \le E' < T_{\widehat \ell,k}',
+$$
+where $\pi_{\widehat \ell,k}$  is a positive constant.  Thus, if it happens
+that
+\begin{equation}
+  Y_{\widehat \ell} - Y_{\widehat \ell-1} <
+  \epsilon_{\text{mach}}  \pi_{\widehat \ell,k} S_{\widehat \ell,k}' ,
+ \label{bad-cum-prob}
+\end{equation}
+the computer will conclude that $S_{\widehat \ell,k}' = T_{\widehat \ell,k}'$.
+Because of the factor $\pi_{\widehat \ell,k}$ appearing on the right-hand
+side of Eq.~{\ref{bad-cum-prob}), this phenomenon is usually associated
+with narrow resonances in the data.  The size of $ \pi_{\widehat \ell,k}$ depends
+on the units used for energy, but the product $ \pi_{\widehat \ell,k} S_{\widehat \ell,k}' $
+is dimensionless, and it is typically large at a resonance.  For example, 
+for $S_{\widehat \ell,k}'  = 1\,\text{MeV}$ the value $ \pi_{\widehat \ell,k} 
+= 1.0 \times 10^8\,\text{MeV}^{-1}$ is reasonable, and Eq.~(\ref{bad-cum-prob})
+could easily be satisfied.
+
+The situation for a piecewise linear probability density $\pi(E' \mid E_k )$ is
+a little different.  For one thing, the value $ \pi_{\widehat \ell,k}$ in
+Eq.~(\ref{bad-cum-prob}) is replaced by the average
+$$
+  \frac{1}{2} \left(
+    \pi( S_{\widehat \ell,k}' \mid E_k ) +  \pi( T_{\widehat \ell,k}' \mid E_k ) 
+  \right).
+$$
+Another difference from the histogram case is that the determination of
+$S_{\widehat \ell,k}' $ and $T_{\widehat \ell,k}' $ in Eq.~(\ref{get-S-T}) 
+require the solution of quadratic equations, with additional inaccuracy
+introduced by the computer arithmetic.
+
+This raises the question of what to do when the solution of
+Eq.~(\ref{T-cum-prob-inv}) gives values of $S_{ \widehat \ell,k}'$ and 
+$T_{\widehat \ell,k}'$
+which are nearly equal for some $\widehat \ell$ and~$k$.
+The first requirement is a definition of equality for computer arithmetic.
+In the \gettransfer\ code $S'_{ \widehat \ell,k}$ and~$T'_{ \widehat \ell,k}$
+are considered to be essentially equal if
+\begin{equation}
+  \left| 
+    S'_{ \widehat \ell,k} - T'_{ \widehat \ell,k}
+  \right| <
+  \frac{ \delta_r} {2} \left(
+    S'_{ \widehat \ell,k} + T'_{ \widehat \ell,k}
+  \right),
+ \label{bad-unit-base}
+\end{equation}
+where $\delta_r$ is the parameter \texttt{tight\_tol}
+described in Section~\ref{Sec:floatingPoint}.  
+
+ The decision on what to do in \gettransfer\ about such near equality of
+$S'_{ \widehat \ell,k}$ and~$T'_{ \widehat \ell,k}$  is based on the size of
+$Y_{\widehat \ell} - Y_{\widehat \ell-1}$.  Let $\delta_c$
+be the parameter \texttt{cum\_prob\_skip} described in
+Section~\ref{Sec:cum-prob-skip}. 
+If Eq~(\ref{bad-unit-base})
+is satisfied and
+\begin{equation}
+  Y_{\widehat \ell} - Y_{\widehat \ell-1} < \delta_c,
+ \label{drop-B-ell}
+\end{equation}
+then the sets $\calB_{\widehat \ell}(E_k)$ with $k = 0$,~1
+in Eq.~(\ref{def-B-ell}) are omitted from the computation of the
+transfer matrix.  This omission introduces an error of at most one part
+in~$1/\delta_c$ in the transfer matrix.
+
+On the other hand, if Eq~(\ref{bad-unit-base})
+is satisfied and Eq~(\ref{drop-B-ell}) is violated for some
+$\widehat \ell$ and~$k$, then in \gettransfer\ the interval
+$\calB_{\widehat \ell}(E_k)$ is reduced to the point
+\begin{equation}
+   \calB_{\widehat \ell}(E_k) = \{E' : E' = \widetilde S_{\widehat \ell,k}' \} 
+  \label{def-B-ell-point}
+\end{equation}
+with
+\begin{equation}
+    \widetilde S_{\widehat \ell,k}' =
+     \frac{ 1} {2} \left(
+    S'_{ \widehat \ell,k} + T'_{ \widehat \ell,k}
+  \right),
+  \label{def-S-ell-point}
+\end{equation}
+and $\pi( E' \mid E_k )$ on $\calB_{\widehat \ell}(E_k)$ is taken
+to be a delta function
+\begin{equation}
+  \pi( E' \mid E_k ) = \left(
+    Y_{\widehat \ell} - Y_{\widehat \ell - 1}
+   \right)
+  \delta( E' - \widetilde S_{\widehat \ell,k}'  ).
+ \label{delta-data}
+\end{equation}
+Note that in exact arithmetic the intervals $\calB_{\ell}( E_k )$ defined
+in Eq.~(\ref{def-B-ell}) are disjoint.  For the construction here,
+however, there is no guarantee that the point $\calB_{\widehat \ell}(E_k)$
+obtained from Eqs.~(\ref{def-B-ell-point}) and~(\ref{def-S-ell-point})
+is not contained in $\calB_{\widehat \ell - 1}( E_k )$ or~$\calB_{\widehat \ell + 1}( E_k )$.
+
+If it happens that the delta function Eq.~(\ref{delta-data}) is used
+for both $k = 0$ and $k = 1$, then for incident energy~$E$ with
+$E_0 < E < E_1$, the set  $\calB_{\widehat \ell}(E)$ in
+Eq.~(\ref{def-B-ell-alpha}) is defined as the single point
+$$
+  \widetilde S_{\widehat \ell, \alpha}' = ( 1 - \alpha ) \widetilde S_{\widehat \ell, 0}' +
+  \alpha \widetilde S_{\widehat \ell,1}'
+$$
+with $\alpha$ given by Eq.~(\ref{def-alpha-cum}).  The
+probability density on $\calB_{\widehat \ell}(E)$ is taken to be
+the delta function
+$$
+   \pi( E' \mid E ) = \left(
+    Y_{\widehat \ell} - Y_{\widehat \ell - 1}
+   \right)
+  \delta( E' - \widetilde S_{\widehat \ell, \alpha}'  ).
+$$
+
+It remains to consider the case when Eq~(\ref{bad-unit-base})
+is satisfied and Eq~(\ref{drop-B-ell}) is false for only one value
+of~$k$, say $k = 0$.  In that case the set $ \calB_{\widehat \ell}(E_0)$
+reduces to a point as in Eqs.~(\ref{def-B-ell-point}) and~(\ref{def-S-ell-point}), and
+$\pi( E' \mid E_0 )$ on  $ \calB_{\widehat \ell}(E_0)$ is defined to be as
+in Eq.~(\ref{delta-data}) with $k = 0$.  For the mapping of this
+$\pi( E' \mid E_0 )$ on  $ \calB_{\widehat \ell}(E_0)$ to unit base,
+Eq.~(\ref{unit-base-scale}) is replaced by in \gettransfer\ by
+$$
+  \pihat(\Ehat' \mid E_0) = Y_{\widehat \ell} - Y_{\widehat \ell - 1}
+  \quad \text{for} \quad
+  0 \le \Ehat'  \le 1.
+$$
+At incident energy~$E$ with $E_0 < E < E_1$ the interpolation
+Eq.~(\ref{unitbaseInterpCum}) is performed using $\alpha$
+defined by Eq.~(\ref{def-B-ell-alpha}).  For inversion of the
+unit base map at incident energy~$E$, the range of outgoing
+energies Eq.~(\ref{energy-range}) is replaced by
+\begin{equation*}
+ \begin{split}
+  S_{\ell,\alpha}' &= (1 - \alpha) \widetilde S_{\widehat \ell, 0}'  + \alpha S_{\ell,1}', \\
+  T_{\ell,\alpha}' &= (1 - \alpha) \widetilde S_{\widehat \ell, 0}'  + \alpha T_{\ell,1}'.
+ \end{split}
+  %\label
+\end{equation*}
+The probability density $\pi( E' \mid E )$ for $S_{\ell,\alpha}' \le E' <
+T_{\ell,\alpha}'$ is then calculated using the scaling Eq.~(\ref{map-inv}).
+
+
+\section{Unscaled interpolation of Kalbach-Mann data}\label{Sec:Kalbach-r-interp}
+The above discussion pertains to the interpolation of tables of probability densities,
+for which maintenance of the norm condition Eq.~(\ref{probabilityNorm})
+is essential.  The parameter~$r(\Ecm', E)$ in Eq.~(\ref{Kalbach-eta}) for the
+Kalbach-Mann model of double-differential data is given as tables
+depending on the energy $E$ of the incident particle and the energy $\Ecm'$ of
+the outgoing particle in the center-of-mass frame, and it has the different
+constraint,
+\begin{equation}
+  0 \le r \le 1.
+ \label{Kalbach-r-constraint}
+\end{equation}
+
+Again, it suffices to describe interpolation between Kalbach-Mann $r$
+data between tables at incident energies $E_0$ and~$E_1$ with
+$E_0 < E_1$.  As in Eq.~(\ref{def-calA01}),
+consider the sets $\calA_0$ of outgoing energies
+at $E = E_0$ and $\calA_1$ at $E = E_1$.  For unscaled direct interpolation
+with extrapolation, take $\calA_X = \calA_0 \cup \calA_1$ as in
+Eq.~(\ref{def-calA-X}), so that the extrapolated $r$ parameter is
+\begin{equation*}
+  r_X(E', E_0 ) = \begin{cases}
+    r(E', E_0 ) &\quad \text{for $E'$ in $\calA_0$,} \\
+    0 &\quad \text{for $E'$ in $\calA_X \setminus \calA_0$,}
+  \end{cases}
+%  \label{def-r-X0}
+\end{equation*}
+and
+\begin{equation*}
+  r_X(E', E_1 ) = \begin{cases}
+    r(E', E_1 ) &\quad \text{for $E'$ in $\calA_1$,} \\
+    0 &\quad \text{for $E'$ in $\calA_X \setminus \calA_1$.}
+  \end{cases}
+%  \label{def-r-X1}
+\end{equation*}
+Then for $E_0 < E < E_1$, for $q$ as in Eq.~(\ref{def-q}) and for
+$E'$ in the set~$\calA_X$, the linear-linear form of unscaled direct interpolation
+with extrapolation becomes as in Eq.~(\ref{def-pi-X}),
+\begin{equation}
+  r_X(E', E ) = ( 1 - q )\, r_X(E', E_0 ) + q\, r_X(E', E_1 ).
+  \label{r-direct-extrapolation}
+\end{equation}
+The extrapolation version of direct interpolation of the Kallbach-Mann
+$r$ parameter as in Eq.~(\ref{r-direct-extrapolation}) is implemented in
+the \gettransfer\ code.
+
+For unscaled direct interpolation of the Kalbach-Mann $r$ parameter with
+truncation, the outgoing energy $E'$ is restricted to the common 
+domain $\calA_T = \calA_0 \cap \calA_1$, and there is no change
+of scale analogous to that used for probability densities in
+Eq.~(\ref{def-pi-T01}).  Thus, the truncated Kalbach-Mann $r$ parameters
+for incident energies $E_0$ and~$E_1$ are
+\begin{equation*}
+  r_T(E', E_0 ) = \begin{cases}
+    r(E', E_0 ) &\quad \text{for $E'$ in $\calA_T$,} \\
+    0 &\quad \text{for $E'$ in $\calA_0 \setminus \calA_T$,}
+  \end{cases}
+%  \label{def-r-T0}
+\end{equation*}
+and
+\begin{equation*}
+  r_X(E', E_1 ) = \begin{cases}
+    r(E', E_1 ) &\quad \text{for $E'$ in $\calA_T$,} \\
+    0 &\quad \text{for $E'$ in $\calA_1 \setminus \calA_T$.}
+  \end{cases}
+%  \label{def-r-T1}
+\end{equation*}
+The linear-linear version of unscaled direct
+interpolation with truncation is
+\begin{equation}
+  r_T(E', E ) = ( 1 - q )\, r_T(E', E_0 ) + q\, r_T(E', E_1 )
+  \label{r-direct-truncation}
+\end{equation}
+with $E'$ restricted to~$\calA_T$.
+The \gettransfer\ code does not currently implement unscaled direct
+interpolation with truncation of the Kalbach-Mann $r$ parameter
+given in Eq.~(\ref{r-direct-truncation}).
+
+There is also an unscaled version of unit-base interpolation with
+Eqs.~(\ref{unitbaseMap}) and~(\ref{unitbaseMap1}) replaced by
+\begin{equation*}
+ \begin{split}
+  \widehat r(\Ehat', E_0) &= r(E', E_0), \\
+  \widehat r(\Ehat', E_1) &= r(E', E_1), \\
+ \end{split}
+\end{equation*}
+for $0 \le \Ehat' \le 1$ with $\Ehat'$ as in Eq.~(\ref{unit-base-map-cum})
+for $E = E_0$ and as in Eq.~(\ref{unit-base-map1})
+for $E = E_1$.  For linear-linear unscaled unit-base interpolation
+to incident energy $E$ with $E_0 < E < E_1$, interpolate the
+minimal and maximal outgoing energies as in Eq.~(\ref{EoutRange}),
+interpolate $\widehat r$ using
+$$
+    \widehat r(E', E ) = ( 1 - q )\, \widehat r(E', E_0 ) + q\, \widehat r(E', E_1 ),
+$$
+and invert the unit-base map using Eq.~(\ref{range-inv})
+and 
+$$
+  r(E', E) = \widehat r(\Ehat', E)
+$$
+for $\Emin' \le E' \le \Emax'$.
+
+When the energy probability density $\pi_E( E' \mid E )$ in Eq.~(\ref{Kalbach-prob})
+is interpolated using the method of cumulative points, the interpolated values of
+$r(E', E)$ in Eq.~(\ref{Kalbach-eta}) are obtained using the method of
+unscaled cumulative points defined as follows.  Because the data for
+ $r( E' , E )$ and  $\pi_E( E' \mid E )$ are given at the same energy points
+ $E$ and~$E'$, it is natural to use for $r( E' , E_0 )$ and $r( E' , E_1 )$ the
+ intervals  $\calB_{ \ell}(E_k )$, k = 0,~1, constructed for $\pi_E( E' \mid E_k )$
+in Eq.~(\ref{def-B-ell}).  The \gettransfer\ code uses unscaled unit-base interpolation 
+between $r( E', E_0)$ on $\calB_{\ell}(E_0 )$ and  $r( E', E_0)$ on $\calB_{ \ell}(E_1 )$
+in sequence for $\ell = 1,$ 2, $\ldots\,$, $L$. This method is applicable
+even when a set $\calB_{ \ell}(E_k )$ reduces to a point as discussed in
+Section~\ref{Sec:cum-points-trivial}, as here is no problem of possible division by zero.
+
+

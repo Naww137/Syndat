@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fudge.institution &#8212; Fudge and GNDS 5.0.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="shortcut icon" href="../../_static/gnd-20121206-favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Fudge and GNDS 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">fudge.institution</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for fudge.institution</h1><div class="highlight"><pre>
+<span></span><span class="c1"># &lt;&lt;BEGIN-copyright&gt;&gt;</span>
+<span class="c1"># &lt;&lt;END-copyright&gt;&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module defines the &#39;institution&#39; class, used inside GNDS to store institution-specific data</span>
+<span class="sd">that does not necessarily conform to GNDS specifications.</span>
+
+<span class="sd">Within a reactionSuite (or possibly covarianceSuite), institution data is stored inside an &lt;applicationData&gt; section.</span>
+<span class="sd">Each institution has a unique label and a list of data types. The only restriction on those data types is that</span>
+<span class="sd">they be well-formed xml. Codes reading in GNDS files are free to ignore any unrecognized institution or data type.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">xml.etree</span> <span class="kn">import</span> <span class="n">ElementTree</span>
+<span class="kn">from</span> <span class="nn">xml.sax</span> <span class="kn">import</span> <span class="n">saxutils</span>
+
+<span class="kn">from</span> <span class="nn">LUPY</span> <span class="kn">import</span> <span class="n">ancestry</span> <span class="k">as</span> <span class="n">ancestryModule</span>
+
+<span class="kn">from</span> <span class="nn">fudge.reactions</span> <span class="kn">import</span> <span class="n">reaction</span> <span class="k">as</span> <span class="n">reactionModule</span>
+<span class="kn">from</span> <span class="nn">fudge</span> <span class="kn">import</span> <span class="n">outputChannel</span> <span class="k">as</span> <span class="n">outputChannelModule</span>
+<span class="kn">from</span> <span class="nn">fudge.processing</span> <span class="kn">import</span> <span class="n">nuclearPlusCoulombInterference</span> <span class="k">as</span> <span class="n">nuclearPlusCoulombInterferenceModule</span>
+<span class="kn">from</span> <span class="nn">fudge.processing.deterministic</span> <span class="kn">import</span> <span class="n">tokens</span> <span class="k">as</span> <span class="n">deterministicTokensModule</span>
+
+<div class="viewcode-block" id="Institution"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.Institution">[docs]</a><span class="k">class</span> <span class="nc">Institution</span><span class="p">(</span><span class="n">ancestryModule</span><span class="o">.</span><span class="n">AncestryIO</span><span class="p">):</span>
+
+    <span class="n">moniker</span> <span class="o">=</span> <span class="s2">&quot;institution&quot;</span>
+    <span class="n">keyName</span> <span class="o">=</span> <span class="s1">&#39;label&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+
+        <span class="n">ancestryModule</span><span class="o">.</span><span class="n">AncestryIO</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__label</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span>
+
+<div class="viewcode-block" id="Institution.append"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.Institution.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">item</span> <span class="p">)</span> <span class="p">:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">item</span> <span class="p">)</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setAncestor</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Institution.findLinks"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.Institution.findLinks">[docs]</a>    <span class="k">def</span> <span class="nf">findLinks</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">links</span> <span class="p">)</span> <span class="p">:</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span> <span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span> <span class="nb">hasattr</span><span class="p">(</span> <span class="n">item</span><span class="p">,</span> <span class="s1">&#39;findLinks&#39;</span> <span class="p">)</span> <span class="p">)</span> <span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span> <span class="n">item</span><span class="p">,</span> <span class="s1">&#39;findLinks&#39;</span> <span class="p">)(</span> <span class="n">links</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Institution.toXML_strList"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.Institution.toXML_strList">[docs]</a>    <span class="k">def</span> <span class="nf">toXML_strList</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
+
+        <span class="n">indent2</span> <span class="o">=</span> <span class="n">indent</span> <span class="o">+</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;incrementalIndent&#39;</span><span class="p">,</span><span class="s1">&#39;  &#39;</span><span class="p">)</span>
+        <span class="n">xml</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&lt;</span><span class="si">%s</span><span class="s1"> label=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">indent</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">moniker</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">xml</span> <span class="o">+=</span> <span class="n">data</span><span class="o">.</span><span class="n">toXML_strList</span><span class="p">(</span><span class="n">indent2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">xml</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">moniker</span>
+        <span class="k">return</span> <span class="n">xml</span></div>
+
+<div class="viewcode-block" id="Institution.parseNodeUsingClass"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.Institution.parseNodeUsingClass">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parseNodeUsingClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">xPath</span><span class="p">,</span> <span class="n">linkData</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span>
+        <span class="n">xPath</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">[@label=&quot;</span><span class="si">%s</span><span class="s1">&quot;]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="n">label</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;LLNL&quot;</span><span class="p">:</span>
+            <span class="n">institution</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">nuclearPlusCoulombInterferenceModule</span><span class="o">.</span><span class="n">NuclearPlusCoulombInterference</span><span class="o">.</span><span class="n">moniker</span><span class="p">:</span>
+                    <span class="n">institution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nuclearPlusCoulombInterferenceModule</span><span class="o">.</span><span class="n">NuclearPlusCoulombInterference</span><span class="o">.</span><span class="n">parseNodeUsingClass</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">xPath</span><span class="p">,</span> <span class="n">linkData</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">institution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">UnknownLLNL_child</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="n">UnknownLLNL_XML_child</span><span class="p">(</span><span class="n">child</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">label</span> <span class="o">==</span> <span class="n">deterministicTokensModule</span><span class="o">.</span><span class="n">multiGroupReactions</span><span class="p">:</span>
+            <span class="n">institution</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">reactionModule</span><span class="o">.</span><span class="n">Reaction</span><span class="o">.</span><span class="n">moniker</span><span class="p">:</span>
+                    <span class="n">institution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reactionModule</span><span class="o">.</span><span class="n">Reaction</span><span class="o">.</span><span class="n">parseNodeUsingClass</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">xPath</span><span class="p">,</span> <span class="n">linkData</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>                       <span class="c1"># This should not happen.</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unsupported child &quot;</span><span class="si">%s</span><span class="s1">&quot; for institution &quot;</span><span class="si">%s</span><span class="s1">&quot;.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="n">label</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">label</span> <span class="o">==</span> <span class="n">deterministicTokensModule</span><span class="o">.</span><span class="n">multiGroupDelayedNeutrons</span><span class="p">:</span>
+            <span class="n">institution</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">outputChannelModule</span><span class="o">.</span><span class="n">OutputChannel</span><span class="o">.</span><span class="n">moniker</span><span class="p">:</span>
+                    <span class="n">institution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outputChannelModule</span><span class="o">.</span><span class="n">OutputChannel</span><span class="o">.</span><span class="n">parseNodeUsingClass</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">xPath</span><span class="p">,</span> <span class="n">linkData</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>                       <span class="c1"># This should not happen.</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unsupported child &quot;</span><span class="si">%s</span><span class="s1">&quot; for institution &quot;</span><span class="si">%s</span><span class="s1">&quot;.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="n">label</span><span class="p">))</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">institution</span> <span class="o">=</span> <span class="n">UnknownInstitution</span><span class="p">(</span><span class="n">UnknownInstitutionXML_node</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+
+        <span class="n">xPath</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">institution</span></div></div>
+
+<div class="viewcode-block" id="UnknownInstitution"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.UnknownInstitution">[docs]</a><span class="k">class</span> <span class="nc">UnknownInstitution</span><span class="p">(</span><span class="n">ancestryModule</span><span class="o">.</span><span class="n">AncestryIO</span><span class="p">):</span>
+
+    <span class="n">moniker</span> <span class="o">=</span> <span class="s1">&#39;institution2&#39;</span>
+    <span class="n">keyName</span> <span class="o">=</span> <span class="s1">&#39;label&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+
+        <span class="n">ancestryModule</span><span class="o">.</span><span class="n">AncestryIO</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;toXML_strList&#39;</span><span class="p">)):</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Node is missing a label and/or toXML_strList method.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__node</span> <span class="o">=</span> <span class="n">node</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method returns the label of self.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__node</span><span class="o">.</span><span class="n">label</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method returns the node instance of self.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__node</span>
+
+<div class="viewcode-block" id="UnknownInstitution.toXML_strList"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.UnknownInstitution.toXML_strList">[docs]</a>    <span class="k">def</span> <span class="nf">toXML_strList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method returng the XML text that was not parsed.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__node</span><span class="o">.</span><span class="n">toXML_strList</span><span class="p">(</span><span class="n">indent</span> <span class="o">=</span> <span class="n">indent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UnknownInstitution.parseNodeUsingClass"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.UnknownInstitution.parseNodeUsingClass">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parseNodeUsingClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">xPath</span><span class="p">,</span> <span class="n">linkData</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">UnknownInstitutionXML_node</span><span class="p">(</span><span class="n">node</span><span class="p">))</span></div></div>
+
+<div class="viewcode-block" id="UnknownInstitutionXML_node"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.UnknownInstitutionXML_node">[docs]</a><span class="k">class</span> <span class="nc">UnknownInstitutionXML_node</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">XML_node</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__label</span> <span class="o">=</span> <span class="n">XML_node</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="s1">&#39;label&#39;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stringList</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">XML_node</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;unicode&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">label</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method returng the XML text that was not parsed.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__label</span> <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stringList</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method returng the XML text that was not parsed.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stringList</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="UnknownInstitutionXML_node.toXML_strList"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.UnknownInstitutionXML_node.toXML_strList">[docs]</a>    <span class="k">def</span> <span class="nf">toXML_strList</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method returng the XML text that was not parsed.&quot;&quot;&quot;</span>
+
+        <span class="n">strings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stringList</span>
+        <span class="k">if</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span> <span class="n">strings</span> <span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">)</span> <span class="p">:</span> <span class="n">strings</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">indent</span> <span class="o">+</span> <span class="n">strings</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">stringList</span> <span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="UnknownLLNL_child"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.UnknownLLNL_child">[docs]</a><span class="k">class</span> <span class="nc">UnknownLLNL_child</span><span class="p">(</span><span class="n">ancestryModule</span><span class="o">.</span><span class="n">Ancestry</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class stores a child node of &#39;applicationData/institution[&#39;[@label=&quot;LLNL&quot;]&#39; which is not supported by a class under</span>
+<span class="sd">    the fudge module (i.e., directory). Currently, only the ENDFconversionFlags class is not supported by the fudge module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moniker</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__moniker</span> <span class="o">=</span> <span class="n">moniker</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">UnknownLLNL_XML_child</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Invalid UnknownLLNL_child node.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__node</span> <span class="o">=</span> <span class="n">node</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">moniker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method returns the moniker of self.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__moniker</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method returns the node instance of self.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__node</span>
+
+<div class="viewcode-block" id="UnknownLLNL_child.toXML_strList"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.UnknownLLNL_child.toXML_strList">[docs]</a>    <span class="k">def</span> <span class="nf">toXML_strList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method returng the XML text that was not parsed.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__node</span><span class="o">.</span><span class="n">toXML_strList</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="UnknownLLNL_XML_child"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.UnknownLLNL_XML_child">[docs]</a><span class="k">class</span> <span class="nc">UnknownLLNL_XML_child</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An XML sub-node for use with an UnknownLLNL_child instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">XML_node</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__stringList</span> <span class="o">=</span> <span class="n">saxutils</span><span class="o">.</span><span class="n">unescape</span><span class="p">(</span><span class="n">ElementTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">XML_node</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;unicode&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stringList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method returng the XML text that was not parsed.&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stringList</span>
+
+<div class="viewcode-block" id="UnknownLLNL_XML_child.toXML_strList"><a class="viewcode-back" href="../../fudge/fudge.html#fudge.institution.UnknownLLNL_XML_child.toXML_strList">[docs]</a>    <span class="k">def</span> <span class="nf">toXML_strList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method returng the XML text that was not parsed.&quot;&quot;&quot;</span>
+
+        <span class="n">stringList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stringList</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stringList</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">stringList</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">:</span> <span class="n">stringList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">indent</span> <span class="o">+</span> <span class="n">stringList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">stringList</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/gnd.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Fudge and GNDS 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">fudge.institution</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2012, B.Beck, D. Brown, C. Mattoon, N. Patel, N. Summers.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>

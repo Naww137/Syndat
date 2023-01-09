@@ -1,0 +1,14 @@
+__pycache__
+*.o
+*.so
+
+fudge.egg-info
+build
+
+bin/calcUpscatterKernel
+bin/merced
+upscatter/Src/calcUpscatterKernel
+
+# test files
+fudge/covariances/test/*.xml
+fudge/processing/resonances/test/*.xml

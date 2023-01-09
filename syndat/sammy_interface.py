@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import syndat
 import pandas as pd
+import subprocess
 
 # module_dirname = os.path.dirname(__file__)
 
@@ -76,6 +77,8 @@ def write_sampar(df, pair, vary_parm, filename,
     ----------
     df : DataFrame
         _description_
+    pair : object
+        The pair object is of the particle_pair class in Syndat describing the incident and target particles.
     vary_parm : Bool
         Option to set vary parameters (0 or 1) in sammy.par file.
     filename : str
@@ -294,4 +297,63 @@ def read_sammy_par(filename, calculate_average):
 
            
 
+# =============================================================================
+# 
+# =============================================================================
+def calculate_xs(energy_grid, resonance_ladder, particle_pair):
+    """
+    Calculate a cross section using the SAMMY code.
+
+    This function executes the SAMMY code in a separate run directory called SAMMY_runDIR. 
+    The SAMMY execution is to calculate an experimentally corrected cross section given an energy grid, resonance ladder, and particle pair.
+    This execution requires a sammy input file be present in the SAMMY_runDIR. 
+    This input file must have the SAMMY input options the user wants as well as set of spin group definitions with ID's coincident with those in the resonance ladder.
+
+    Parameters
+    ----------
+    energy_grid : _type_
+        _description_
+    resonance_ladder : _type_
+        _description_
+    particle_pair : _type_
+        _description_
+
+    Raises
+    ------
+    ValueError
+        _description_
+    ValueError
+        _description_
+    ValueError
+        _description_
+    """
+
+    if os.path.isdir('SAMMY_runDIR'):
+        if os.path.isfile('./SAMMY_runDIR/sammy.inp'):
+            pass
+        else:
+            raise ValueError('No sammy.inp file in the SAMMY_runDIR')
+        if os.path.isfile('./SAMMY_runDIR/sammy.par'):
+            pass
+        else:
+            raise ValueError('No sammy.par file in the SAMMY_runDIR')
+    else:
+        os.mkdir('SAMMY_runDIR')
+
+        
+    write_estruct_file(energy_grid,'./SAMMY_runDIR/linear_tof')
+    write_sampar(resonance_ladder, particle_pair, False, "./SAMMY_runDIR/sammy.par")
+    with open('./SAMMY_runDIR/pipe.sh', 'w') as f:
+        f.write('sammy.inp\nsammy.par\nlinear_tof\n')
+
+    runsammy_process = subprocess.run(
+                                    ["zsh", "-c", "/Users/noahwalton/gitlab/sammy/sammy/build/bin/sammy<pipe.sh"], 
+                                    cwd=os.path.realpath('./SAMMY_runDIR/'),
+                                    capture_output=True
+                                    )
+
+    if len(runsammy_process.stderr) > 0:
+        raise ValueError(f'SAMMY did not run correctly\n\nSAMMY error given was: {runsammy_process.stderr}')
+    
+    return
 

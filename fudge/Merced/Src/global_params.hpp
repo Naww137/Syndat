@@ -1,0 +1,166 @@
+/*
+ * ******** merced: calculate the transfer matrix *********
+ * $Revision: 1 $
+ * $Date: 2006-02-01 19:06:56 -0800 (Wed, 01 Feb 2006) $
+ * $Author: hedstrom $
+ * $Id:global_params.hpp 1 2006-02-02 03:06:56Z hedstrom $
+ * ******** merced: calculate the transfer matrix *********
+ * 
+ * # <<BEGIN-copyright>>
+ * # <<END-copyright>>
+*/
+
+#ifndef GLOBAL_PARAMS
+#define GLOBAL_PARAMS
+
+#include <cstdio>             // standard I/O package
+#include <fstream>             // standard file streams
+#include <iostream>            // for file I/O functions
+#include <sstream>
+#include <iomanip>             // I/O formatting
+#include <string>              // for string fun
+#include <cmath>               // math library
+#include <list>
+#include <vector>
+
+namespace Glb
+{
+// ----------------------- class ss_link -------------------
+//! Links for the list of input parameters
+class ss_link
+{
+private:
+  std::string x;  // the variable name
+  std::string y;  // the value of the variable
+
+public:
+  // is this set in the command line?
+  bool set_in_command;
+
+  // default constructor
+  ss_link( ): set_in_command( false )
+  { }
+
+  // default deonstructor
+  ~ss_link( )
+  { }
+
+  //!Common name used to access the X value of this list.
+  inline std::string name( )
+  {
+    return x;
+  }
+
+  //!Common name used to access the Y value of this list.
+  inline std::string value( )
+  {
+    return y;
+  }
+
+  //!Sets the X value of this list.
+  //! \param xx the label portion of this entry
+  inline void set_name( const std::string &xx )
+  {
+    x = xx;
+  }
+
+  //!Sets the Y value of this list.
+  //! \param yy the value portion of this entry
+  inline void set_value( const std::string &yy )
+  {
+    y = yy;
+  }
+
+  //! Method for printing this link.
+  void print( );
+};
+
+// ----------------------- class ss_list -------------------
+//! List of Glb::ss_links.
+class ss_list : public std::list< Glb::ss_link >
+{
+public:
+  //! Function to get the link at "x".
+  //! Returns "false" if the entry is not found.
+  //! \param x the desired label
+  //! \param link the link with this label, if any
+  bool at(std::string x, ss_list::iterator& link);
+
+  void print( );
+
+};
+
+// ----------------------- class GlobalParameterClass -----------
+//! Read/store the global parameter settings for the translation
+class GlobalParameterClass
+{
+public:
+
+  //!The output file when we write to only one file
+  std::fstream output_file;
+
+  //!Default constructor - initializes Parameter list and values
+  GlobalParameterClass();
+
+  //!Default destructor.
+  ~GlobalParameterClass();
+
+  //! Function to get the link at "x"
+  //! Returns "false" if the entry is not found.
+  //! \param x the desired label
+  //! \param link the link with this label, if any
+  bool find(std::string x, Glb::ss_list::iterator& link);
+
+  //!The function used to input information into the Parameter list.
+  //! \param gp the label for this entry
+  //! \param gp_num the numerical value for this entry
+  void set( std::string gp, double gp_num);
+
+  //!The function used to input information into the Parameter list.
+  //! \param gp the label for this entry
+  //! \param gp_val the string value for this entry
+  void set( std::string gp, std::string gp_val);
+
+  //! Function to print a table of parameters and values used in the translation.
+  void print();
+
+  //! Function to parse command line arguments and update Parameter list.
+  //! \param argc number of words in the command line
+  //! \param argv the command line
+  void read_command_line(int argc, char* argv[] );
+
+  //! Function to print usage info & print parameter names.
+  void get_help( void );
+
+  //!Delivers the stored value of the requested parameter.
+  //! \param ParamName the desired label
+  double Value( std::string ParamName );   
+
+  //!Delivers the string representation of the requested parameter.
+  //! \param ParamName the desired label
+  std::string Flag( std::string ParamName );
+
+  //! Gets the datafield precision for output
+  int get_field_width( );
+
+  //! Sets the number of threads to use in parallel computing
+  void set_num_threads( );
+
+private:
+
+  //! Local string buffer
+  std::vector< std::string > spar;
+
+  //!Parameters stored in name indexed link list
+  Glb::ss_list Parameters;
+
+  //! Sets the set_in_command flag
+  //! \param ParamName the desired label
+  void set_command( std::string ParamName );
+};
+
+} // end of namespace Glb
+
+extern Glb::GlobalParameterClass Global;
+
+#endif

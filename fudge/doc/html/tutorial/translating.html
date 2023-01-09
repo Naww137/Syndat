@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1. Basic translating between ENDF and GNDS &#8212; Fudge and GNDS 5.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="shortcut icon" href="../_static/gnd-20121206-favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2. Checking ENDF or GNDS files" href="checking.html" />
+    <link rel="prev" title="The Fudge Tutorial" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="checking.html" title="2. Checking ENDF or GNDS files"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="The Fudge Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Fudge and GNDS 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">The Fudge Tutorial</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">1. </span>Basic translating between ENDF and GNDS</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="basic-translating-between-endf-and-gnds">
+<h1><span class="section-number">1. </span>Basic translating between ENDF and GNDS<a class="headerlink" href="#basic-translating-between-endf-and-gnds" title="Permalink to this headline">¶</a></h1>
+<p>Fudge comes with a tools for translating ENDF-6 evaluations to and from GNDS which reside in the brownies/bin directory.</p>
+<div class="section" id="translating-from-endf-into-gnds">
+<h2><span class="section-number">1.1. </span>Translating from ENDF into GNDS<a class="headerlink" href="#translating-from-endf-into-gnds" title="Permalink to this headline">¶</a></h2>
+<p>The Python script brownies/bin/endf2gnds.py translations an ENDF-6 file to a GNDS file. This script writes a GNDS file containing
+the reactionSuite node and, if covariance data are present in the ENDF-6 file, its also writes a GNDS file containing the
+covarianceSuite node. For example, the following command translating the ENDF/B-VIII.0 file n-001_H_001.endf and outputs the
+files n-001_H_001.xml and n-001_H_001-covar.xml:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">full</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">FUDGE</span><span class="o">/</span><span class="n">brownies</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">endf2gnds</span><span class="o">.</span><span class="n">py</span> <span class="n">n</span><span class="o">-</span><span class="mi">001</span><span class="n">_H_001</span><span class="o">.</span><span class="n">endf</span> <span class="n">n</span><span class="o">-</span><span class="mi">001</span><span class="n">_H_001</span><span class="o">.</span><span class="n">xml</span>
+</pre></div>
+</div>
+<p>If using the <em>pip installed</em> version of <strong>FUDGE</strong>, the one only needs the:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">brownies</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">endf2gnds</span><span class="o">.</span><span class="n">py</span> <span class="n">n</span><span class="o">-</span><span class="mi">001</span><span class="n">_H_001</span><span class="o">.</span><span class="n">endf</span> <span class="n">n</span><span class="o">-</span><span class="mi">001</span><span class="n">_H_001</span><span class="o">.</span><span class="n">xml</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="translating-gnds-files-back-into-endf">
+<h2><span class="section-number">1.2. </span>Translating GNDS files back into ENDF<a class="headerlink" href="#translating-gnds-files-back-into-endf" title="Permalink to this headline">¶</a></h2>
+<p>The Python script brownies/bin/gnds2endf.py translations a GNDS file to an ENDF-6 file. This script will look for a corresponding
+covariance file and, if present, add its data to the outputted ENDF-6 file. For example, the following translates the n-001_H_001.xml
+file generated in the endf2gnds.py comannd above back into an ENDF-6 file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">full</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">FUDGE</span><span class="o">/</span><span class="n">brownies</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">gnds2endf</span><span class="o">.</span><span class="n">py</span> <span class="n">n</span><span class="o">-</span><span class="mi">001</span><span class="n">_H_001</span><span class="o">.</span><span class="n">xml</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reading-gnds-xml-files">
+<h2><span class="section-number">1.3. </span>Reading GNDS XML files<a class="headerlink" href="#reading-gnds-xml-files" title="Permalink to this headline">¶</a></h2>
+<p>If I didn’t have pre-made instances of <code class="docutils literal notranslate"><span class="pre">reactionSuite</span></code> and <code class="docutils literal notranslate"><span class="pre">covarianceSuite</span></code>, how would I read in the XML files?
+For this purpose, both the <code class="docutils literal notranslate"><span class="pre">fudge.reactionSuite</span></code> and <code class="docutils literal notranslate"><span class="pre">fudge.covariances</span></code> have the factory function <code class="docutils literal notranslate"><span class="pre">readXML()</span></code>.
+To use them do:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fudge</span> <span class="kn">import</span> <span class="n">reactionSuite</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">fudge.covariances</span> <span class="kn">import</span> <span class="n">covarianceSuite</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_H1</span> <span class="o">=</span> <span class="n">reactionSuite</span><span class="o">.</span><span class="n">readXML</span><span class="p">(</span> <span class="s2">&quot;n-001_H_001.gnds.xml&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>This reads in the evaluation itself.  To read in the covariances, we need to tell the <cite>covariances.readXML()</cite> function
+where the evaluation is so that it can set up the hyperlinks correctly:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">myOtherCov</span> <span class="o">=</span> <span class="n">covarianceSuite</span><span class="o">.</span><span class="n">readXML</span><span class="p">(</span> <span class="s2">&quot;n-001_H_001.gndsCov.xml&quot;</span><span class="p">,</span> <span class="n">reactionSuite</span><span class="o">=</span><span class="n">myOtherEval</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/gnd.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">1. Basic translating between ENDF and GNDS</a><ul>
+<li><a class="reference internal" href="#translating-from-endf-into-gnds">1.1. Translating from ENDF into GNDS</a></li>
+<li><a class="reference internal" href="#translating-gnds-files-back-into-endf">1.2. Translating GNDS files back into ENDF</a></li>
+<li><a class="reference internal" href="#reading-gnds-xml-files">1.3. Reading GNDS XML files</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">The Fudge Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="checking.html"
+                        title="next chapter"><span class="section-number">2. </span>Checking ENDF or GNDS files</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/tutorial/translating.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="checking.html" title="2. Checking ENDF or GNDS files"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="The Fudge Tutorial"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Fudge and GNDS 5.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >The Fudge Tutorial</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">1. </span>Basic translating between ENDF and GNDS</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2012, B.Beck, D. Brown, C. Mattoon, N. Patel, N. Summers.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>
