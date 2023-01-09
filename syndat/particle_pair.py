@@ -236,7 +236,7 @@ class particle_pair:
             J_ID += 1
 
             # sample resonance levels for each spin group with negative parity
-            [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, average_parameters.dE[f'{j[0]}'])
+            [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, average_parameters.dE[f'{j[0]}'], method='GOE')
             
             # a single radiative capture width is sampled w/large DOF because of many 'partial' radiative transitions to ground state
             # must divide average by the 2*DOF in order to maintain proper magnitude
