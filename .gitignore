@@ -2,6 +2,7 @@
 *.DS_Store
 workspace/
 examples/SAMMY_runDIR/
+examples/MMDA_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
