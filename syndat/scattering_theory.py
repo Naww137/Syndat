@@ -225,6 +225,13 @@ def SLBW(E, pair, resonance_ladder):
 
     # TODO: check types in resonance ladder
 
+    if resonance_ladder.empty:
+        xs_cap = 0
+        xs_scat = 1/np.sqrt(E)
+        xs_tot = xs_scat + xs_cap
+        return xs_tot, xs_scat, xs_cap
+    # TODO: if resonance ladder is empty, calculate nominal cross section - the scattering phase shift still exists, but what is the Jpi to calculate it? 1/np.sqrt(E)?
+        
     xs_cap = 0; xs_scat = 0
     group_by_J = dict(tuple(resonance_ladder.groupby('J')))
 

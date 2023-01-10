@@ -53,8 +53,8 @@ def sample_chisquare(N_samples, DOF):
     array([18.7081546 ,  7.46151704])
     """
     samples = np.random.chisquare(DOF, size=N_samples)
-    if N_samples == 1:
-        samples = samples.item()
+    # if N_samples == 1:
+    #     samples = samples.item()
     return samples
     
 def chisquare_PDF(x, DOF, avg_reduced_width_square):
@@ -127,7 +127,7 @@ def sample_RRR_widths(level_vector, avg_reduced_width_square, DOF):
     """
     reduced_widths_square = avg_reduced_width_square*sample_chisquare(len(level_vector), DOF)
     
-    return reduced_widths_square 
+    return np.array(reduced_widths_square)
 
 
 def compare_pdf_to_samples(reduced_widths_square_vector, avg_reduced_width_square, dof):
