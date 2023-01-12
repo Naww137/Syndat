@@ -16,10 +16,8 @@ import syndat
 
 class experiment:
     
-    def __init__(self, theoretical_data,
-
-                    open_data=None, energy_domain = None,
-
+    def __init__(self,
+                    energy_domain=None,
                     experiment_parameters = {} , 
                     input_options = {}, 
                                                      ):
@@ -31,8 +29,6 @@ class experiment:
 
         Parameters
         ----------
-        theoretical_data : DataFrame or str
-            Theoretical cross section expected to be seen in the laboratory setting. If DataFrame needs columns 'E' and 'theo_trans'. If string, must be filepath to sammy.lst.
         open_data : DataFrame or str, optional
             Open count data. If passing a DataFrame, needs columns 'tof', 'bw', 'c', 'dc'. If passing a string, must be filepath to csv with format from Brown, et al.
             If empty (Default), the open count spectra will be approximated with an exponential function as detailed in Walton, et al.
@@ -59,19 +55,21 @@ class experiment:
                             'Smooth Open Spectrum':False } 
 
         ### redefine options dictionary if any input options are given
-        # TODO: Check for an option given by the user that is not in the defaults!
         options = default_options
         for old_parameter in default_options:
             if old_parameter in input_options:
                 options.update({old_parameter:input_options[old_parameter]})
+        for input_parameter in input_options:
+            if input_parameter not in default_options:
+                raise ValueError('User provided an unrecognized input option')
         self.options = options
         
         ### Gather options
         perform_experiment = options['Perform Experiment']
-        add_noise = options['Add Noise']
-        sample_turp = options['Sample TURP']
-        sample_odat = options['Sample TOCS']
-        smooth_open = options['Smooth Open Spectrum']
+        self.add_noise = options['Add Noise']
+        self.sample_turp_bool = options['Sample TURP']
+        self.sample_odat = options['Sample TOCS']
+        self.smooth_open = options['Smooth Open Spectrum']
         self.calc_cov = options['Calculate Covariance']
         self.cpts = options['Compression Points']
         self.gfactors = options['Grouping Factors']
@@ -83,6 +81,7 @@ class experiment:
                         'trigs'     :   {'val'  :   18476117,            'unc'  :   0},
                         'FP'        :   {'val'  :   35.185,              'unc'  :   0},
                         't0'        :   {'val'  :   3.326,               'unc'  :   0},
+                        'bw'        :   {'val'  :   0.3,                 'unc'  :   0},
                         'm1'        :   {'val'  :   1,                   'unc'  :   0.016},
                         'm2'        :   {'val'  :   1,                   'unc'  :   0.008},
                         'm3'        :   {'val'  :   1,                   'unc'  :   0.018},
@@ -100,54 +99,95 @@ class experiment:
         for old_parameter in default_exp:
             if old_parameter in experiment_parameters:
                 pardict.update({old_parameter:experiment_parameters[old_parameter]})
-
+        self.pardict = pardict
         ### set reduction parameter attributes from input
         self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
-        ### sample true underlying resonance parameters from measured values
-        self.sample_turp(default_exp, sample_turp)
 
-        
-    
+
+        ### Check energy grid
+        if energy_domain is None:
+            # Keep as None, self.run() will take the energy grid from the given theoretical data
+            self.energy_domain = energy_domain
+        else:
+            if len(energy_domain) == 2:
+                # take an energy domain of len=2 as min/max and generate an energy grid linear in tof
+                # TODO: add option to randomly sample energy grid
+                tof_min_max = syndat.exp_effects.e_to_t(np.array(energy_domain),self.redpar.val.FP, True)*1e6+self.redpar.val.t0 #micro s
+                tof_grid = np.arange(min(tof_min_max), max(tof_min_max), self.redpar.val.bw )#micro s
+                energy_domain = syndat.exp_effects.t_to_e((tof_grid-self.redpar.val.t0)*1e-6,self.redpar.val.FP,True) #back to s for conversion to eV
+            if len(energy_domain) > 2:
+                # if a vector is given, take that as the energy grid
+                self.energy_domain = energy_domain
+            else:
+                raise ValueError("Input for energy_domain not recognized")
+
+
+
+
+    def run(self, theoretical_data,
+                        open_data=None):
+        """
+        _summary_
+
+        _extended_summary_
+
+        Parameters
+        ----------
+        theoretical_data : DataFrame or str
+            Theoretical cross section expected to be seen in the laboratory setting. If DataFrame needs columns 'E' and 'theo_trans'. If string, must be filepath to sammy.lst.
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
+
+        ### sample true underlying resonance parameters from measured values - defines self.theo_redpar
+        self.sample_turp(self.pardict, self.sample_turp_bool)
+
         ### read in theoretical cross section/transmission data - defines self.sdat
         self.read_theoretical(theoretical_data)
 
 
-
-        ### Determine energy grid
-        if energy_domain is None:
+        ### Check that energy grid aligns with theoretical and open
+        if self.energy_domain is None:
+            # if energy_domain given is None, use the one from the theoretical data
             self.energy_domain = self.sdat.E
         else:
-            if len(energy_domain) != len(self.sdat.E):
-                self.sdat = self.sdat[(self.sdat.E>=min(energy_domain))&(self.sdat.E<=max(energy_domain))].reset_index(drop=True)
-            if len(energy_domain) == 2:
+            if len(self.energy_domain) != len(self.sdat.E):
+                # if given energy domain is not equal to the theoretical, try to truncate
+                self.sdat = self.sdat[(self.sdat.E>=min(self.energy_domain))&(self.sdat.E<=max(self.energy_domain))].reset_index(drop=True)
+            if len(self.energy_domain) == 2:
+                # if given energy domain is of len=2, take as min/max
                 self.energy_domain = self.sdat.E
             if np.array_equal(np.array(self.energy_domain), np.array(self.sdat.E)):
+                # check to make sure everything lines up 
                 pass
             else:
                 raise ValueError("An energy grid was given but it does not line up with that of the theoretical data")
 
 
-
         ### Decide on an open spectra
         if open_data is None:
-            self.odat = self.approximate_open_spectra(self.energy_domain, smooth_open)
+            self.odat = self.approximate_open_spectra(self.energy_domain, self.smooth_open)
         else:
-            if smooth_open == True:
+            if self.smooth_open == True:
                 print("Warning: The user option 'Smooth Open Spectrum' was set to true but you are reading an open spectrum - this option will have no effect")
             self.read_odat(open_data)
             
         ### sample a realization of the theoretical, true-underlying open count spectra
-        self.sample_true_open_spectrum(sample_odat)
+        self.sample_true_open_spectrum(self.sample_odat)
 
         ### Automatically perform experiment
-        if perform_experiment:
-            # vectorize the background function from jesse's experiment
-            self.Bi = self.bkg(self.odat.tof,self.redpar.val.a,self.redpar.val.b)
-            # generate raw count data for sample in given theoretical transmission and assumed true reduction parameters/open count data
-            self.generate_sdat(add_noise)
-            # reduce the experimental data
-            self.reduce()
+
+        # vectorize the background function from jesse's experiment
+        self.Bi = self.bkg(self.odat.tof,self.redpar.val.a,self.redpar.val.b)
+        # generate raw count data for sample in given theoretical transmission and assumed true reduction parameters/open count data
+        self.generate_sdat(self.add_noise)
+        # reduce the experimental data
+        self.reduce()
             
+
 
     def __repr__(self):
         return f"This experiment has the following options:\n{self.options}"
@@ -298,9 +338,8 @@ class experiment:
         self.theo_odat = theo_odat
 
     
-    def sample_turp(self, default_exp, bool):
+    def sample_turp(self, theo_redpar, bool):
         
-        theo_redpar = default_exp
         if bool:
             for par in theo_redpar:
                 if par == 'ab_cov':
