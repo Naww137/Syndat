@@ -3,7 +3,8 @@
 workspace/
 examples/SAMMY_runDIR/
 examples/MMDA_data/
-syndat/SAMMY_runDIR/
+SAMMY_runDIR/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
