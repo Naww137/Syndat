@@ -5,6 +5,7 @@ examples/SAMMY_runDIR/
 examples/MMDA_data/
 SAMMY_runDIR/
 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

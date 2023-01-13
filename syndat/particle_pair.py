@@ -8,7 +8,6 @@ Created on Thu Jun 16 12:18:04 2022
 
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 from syndat import sample_widths
 from syndat import sample_levels
 from syndat import scattering_theory
@@ -31,7 +30,9 @@ class particle_pair:
         Samples a full resonance parameter ladder for each possible spin group.
     """
 
-    def __init__(self, ac, M, m, I, i, l_max):
+    def __init__(self, ac, M, m, I, i, l_max,
+                    input_options={},   
+                                                ):
         """
         Initialization of particle pair object for a given reaction.
 
@@ -54,25 +55,54 @@ class particle_pair:
             Highest order waveform to consider (l-value).
         """
 
-        # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
+        ### Default options
+        default_options = { 'Sample Physical Constants' :   False ,
+                            'Use FUDGE'                 :   False,
+                            'Sample Average Parameters' :   False  } 
+        
+        ### redefine options dictionary if any input options are given
+        options = default_options
+        for old_parameter in default_options:
+            if old_parameter in input_options:
+                options.update({old_parameter:input_options[old_parameter]})
+        for input_parameter in input_options:
+            if input_parameter not in default_options:
+                raise ValueError('User provided an unrecognized input option')
+        self.options = options
 
+        ### Gather options
+        self.sample_physical_constants = self.options['Sample Physical Constants']
+        self.use_fudge = self.options['Use FUDGE']
+        self.sample_average_parameters = self.options['Sample Average Parameters']
+        # TODO: implement 3 options above
+        if self.sample_physical_constants:
+            raise ValueError('Need to implement "Sample Physical Constants" capability')
+
+        ### Gather other variables passed to __init__
+        # self.spin_groups = spin_groups
+        # self.average_parameters = average_parameters
+
+
+        ### Gather physical constants until sampling function is implemented
+
+        # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
         if ac < 1e-7:
             print("WARNING: scattering radius seems to be given in m rather than sqrt(barns) a.k.a. cm^-12")
-
         self.ac = ac # 6.7e-15 # m or 6.7 femtometers
         self.M = M # amu
         self.m = m # 1
         self.I = I
         self.i = i
         self.l_max = l_max
-
         # generalized
         ac_expected = (1.23*M**(1/3))+0.8 # fermi or femtometers
 
-        # constants
+        ### define some constants
         self.hbar = 6.582119569e-16 # eV-s
         self.c = 2.99792458e8 # m/s
         self.m_eV = 939.565420e6 # eV/c^2
+
+
 
 
     def quant_vec_sum(self, a,b):

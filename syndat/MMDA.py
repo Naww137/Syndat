@@ -10,16 +10,9 @@ import os
 import syndat
 import shutil
 import pandas as pd
-
-
-
-
-import os
-import syndat
-import shutil
-import pandas as pd
 import numpy as np
 
+#class : MMDA
 
 def check_case_directory(case_directory):
     if os.path.isdir(case_directory):
@@ -32,7 +25,6 @@ def check_case_directory(case_directory):
 
 def check_sample_directory(sample_directory):
     if os.path.isdir(sample_directory):
-        # look for existing csv's - option to overwrite
         pass
     else:
         os.mkdir(sample_directory)
@@ -50,12 +42,16 @@ def write_sample_data(sample_directory, resonance_ladder, pw_df, i):
 
 def compute_theoretical(solver, energy_grid, particle_pair, resonance_ladder):
 
-    if solver == 'syndat':
+    if solver == 'syndat_SLBW':
         xs_tot, xs_scat, xs_cap = syndat.scattering_theory.SLBW(energy_grid, particle_pair, resonance_ladder)
         # convert to transmisison and put in an appropriate dataframe
         n = 0.067166 # atoms per barn or atoms/(1e-12*cm^2)
         trans = np.exp(-n*xs_tot)
         theoretical_df = pd.DataFrame({'E':energy_grid, 'theo_trans':trans})
+    elif solver == 'sammy_SLBW':
+        pass
+    elif solver == 'sammy_RM':
+        pass
     else:
         raise ValueError("Need to implement ability to compute theoretical transmission with solver other that 'syndat' (SLBW)")
     
@@ -63,9 +59,40 @@ def compute_theoretical(solver, energy_grid, particle_pair, resonance_ladder):
 
 
 
-def generate(particle_pair, spin_groups, average_parameters, energy_grid, 
-                            syndat_input_options, syndat_experiment_parameters,
-                            solver, number_of_datasets, case_directory):
+def sample_syndat(particle_pair, experiment, solver,
+                    open_data, fixed_resonance_ladder):
+
+    # either sample resonance ladder or set it to fixed resonance ladder
+    if fixed_resonance_ladder is None:
+        resonance_ladder = particle_pair.sample_resonance_ladder(experiment.energy_domain, particle_pair.spin_groups, particle_pair.average_parameters)
+    else:
+        resonance_ladder = fixed_resonance_ladder
+
+    # Compute expected xs or transmission
+    theoretical_df = compute_theoretical(solver, experiment.energy_domain, particle_pair, resonance_ladder)
+
+    # run the experiment
+    experiment.run(theoretical_df, open_data)
+
+    # Build data frame for export
+    pw_df = pd.DataFrame({  'E':experiment.trans.E, 
+                            'theo_trans':experiment.theo.theo_trans,
+                            'exp_trans':experiment.trans.exp_trans,
+                            'exp_trans_unc':experiment.trans.exp_trans_unc
+                                                                    })
+
+    return resonance_ladder, pw_df
+
+
+
+def generate(particle_pair, experiment, 
+                solver, 
+                number_of_datasets, 
+                case_directory,
+                fixed_resonance_ladder=None, 
+                open_data=None,
+                overwrite=True
+                                                            ):
     """
     Generate multiple synthetic experimental datasets in a convenient directory structure. 
 
@@ -91,35 +118,33 @@ def generate(particle_pair, spin_groups, average_parameters, energy_grid,
         Number of datasets to generate.
     case_directory : str
         Top level directory to this 'case' of generated data, each sample dataset will get a folder within this directory.
+    case_directory : bool
+        Option to overwrite existing syndat data.
     """
 
+    # check for case directory
     check_case_directory(case_directory)
 
     for i in range(number_of_datasets):
 
-        # sample resonance ladder
-        resonance_ladder = particle_pair.sample_resonance_ladder(energy_grid, spin_groups, average_parameters)
-        # Compute total cross section
-        theoretical_df = compute_theoretical(solver, energy_grid, particle_pair, resonance_ladder)
-
-        # Generate experimental data
-        exp = syndat.experiment(theoretical_df, 
-                                input_options=syndat_input_options,
-                                experiment_parameters=syndat_experiment_parameters)
-
-        # Build data frame for export
-        pw_df = pd.DataFrame({  'E':exp.trans.E, 
-                                'theo_trans':exp.theo.theo_trans,
-                                'exp_trans':exp.trans.exp_trans,
-                                'exp_trans_unc':exp.trans.exp_trans_unc
-                                                                        })
-
-        # TODO: have this function skip over already existing samples
+        # check for sample directory
         sample_directory = os.path.join(case_directory,f'sample_{i}')
         check_sample_directory(sample_directory)
 
-        # write the synthetic data to csvs
-        write_sample_data(sample_directory, resonance_ladder, pw_df, i)
+        # check for existing syndat in sample_directory
+        syndat_pw = os.path.join(sample_directory, f'syndat_{i}_pw.csv')
+        syndat_par = os.path.join(sample_directory, f'syndat_{i}_par.csv')
+
+        if os.path.isfile(syndat_pw) and os.path.isfile(syndat_par):
+            if overwrite:
+                resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                write_sample_data(sample_directory, resonance_ladder, pw_df, i)
+            else:
+                continue
+        else:
+            resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+            write_sample_data(sample_directory, resonance_ladder, pw_df, i)
+
 
     return
 
