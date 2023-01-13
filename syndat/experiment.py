@@ -160,7 +160,7 @@ class experiment:
             if len(self.energy_domain) == 2:
                 # if given energy domain is of len=2, take as min/max
                 self.energy_domain = self.sdat.E
-            if np.array_equal(np.array(self.energy_domain), np.array(self.sdat.E)):
+            if np.allclose(np.array(self.energy_domain), np.array(self.sdat.E), rtol=1e-08, atol=0, equal_nan=False):
                 # check to make sure everything lines up 
                 pass
             else:
