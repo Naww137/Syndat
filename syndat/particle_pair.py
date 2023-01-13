@@ -32,7 +32,11 @@ class particle_pair:
 
     def __init__(self, ac, M, m, I, i, l_max,
                     input_options={},   
-                                                ):
+                    spin_groups=None, 
+                    average_parameters=pd.DataFrame({  'dE'    :   {'3.0':20.0, '4.0':15.0, '-4.0':15.0},
+                                                        'Gg'    :   {'3.0':80.0, '4.0':55.0, '-4.0':55.0},
+                                                        'gn2'    :   {'3.0':50.0, '4.0':10.0, '-4.0':10.0}  })
+                                                                                                                    ):
         """
         Initialization of particle pair object for a given reaction.
 
@@ -79,8 +83,8 @@ class particle_pair:
             raise ValueError('Need to implement "Sample Physical Constants" capability')
 
         ### Gather other variables passed to __init__
-        # self.spin_groups = spin_groups
-        # self.average_parameters = average_parameters
+        self.spin_groups = spin_groups
+        self.average_parameters = average_parameters
 
 
         ### Gather physical constants until sampling function is implemented
