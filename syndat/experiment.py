@@ -11,6 +11,7 @@ Created on Wed Jul 27 12:19:52 2022
 import numpy as np     
 import pandas as pd
 import syndat
+from copy import deepcopy
     
 
 
@@ -338,8 +339,10 @@ class experiment:
         self.theo_odat = theo_odat
 
     
-    def sample_turp(self, theo_redpar, bool):
+    def sample_turp(self, redpar, bool):
         
+        theo_redpar = deepcopy(redpar)
+
         if bool:
             for par in theo_redpar:
                 if par == 'ab_cov':
