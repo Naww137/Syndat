@@ -77,7 +77,7 @@ class experiment:
 
         ### Default experiment parameter dictionary
         default_exp = {
-                        'n'         :   {'val'  :   0.12,                'unc'  :   0},
+                        'n'         :   {'val'  :   0.067166,            'unc'  :   0},
                         'trigo'     :   {'val'  :   9758727,             'unc'  :   0},
                         'trigs'     :   {'val'  :   18476117,            'unc'  :   0},
                         'FP'        :   {'val'  :   35.185,              'unc'  :   0},

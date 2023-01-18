@@ -40,12 +40,13 @@ def write_sample_data(sample_directory, resonance_ladder, pw_df, i):
     return 
 
 
-def compute_theoretical(solver, energy_grid, particle_pair, resonance_ladder):
+def compute_theoretical(solver, experiment, particle_pair, resonance_ladder):
+
+    energy_grid = experiment.energy_domain
 
     if solver == 'syndat_SLBW':
         xs_tot, xs_scat, xs_cap = syndat.scattering_theory.SLBW(energy_grid, particle_pair, resonance_ladder)
-        # convert to transmisison and put in an appropriate dataframe
-        n = 0.067166 # atoms per barn or atoms/(1e-12*cm^2)
+        n = experiment.redpar.val.n  # atoms per barn or atoms/(1e-12*cm^2)
         trans = np.exp(-n*xs_tot)
         theoretical_df = pd.DataFrame({'E':energy_grid, 'theo_trans':trans})
     elif solver == 'sammy_SLBW':
@@ -69,7 +70,7 @@ def sample_syndat(particle_pair, experiment, solver,
         resonance_ladder = fixed_resonance_ladder
 
     # Compute expected xs or transmission
-    theoretical_df = compute_theoretical(solver, experiment.energy_domain, particle_pair, resonance_ladder)
+    theoretical_df = compute_theoretical(solver, experiment, particle_pair, resonance_ladder)
 
     # run the experiment
     experiment.run(theoretical_df, open_data)
