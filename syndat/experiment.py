@@ -45,8 +45,7 @@ class experiment:
         """
         
         ### Default options
-        default_options = { 'Perform Experiment':True, 
-                            'Add Noise':True, 
+        default_options = { 'Add Noise':True, 
                             'Sample TURP':True,
                             'Sample TOCS':True, 
                             'Calculate Covariance':True,
@@ -66,7 +65,6 @@ class experiment:
         self.options = options
         
         ### Gather options
-        perform_experiment = options['Perform Experiment']
         self.add_noise = options['Add Noise']
         self.sample_turp_bool = options['Sample TURP']
         self.sample_odat = options['Sample TOCS']
