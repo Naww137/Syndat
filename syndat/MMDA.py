@@ -11,33 +11,19 @@ import syndat
 import shutil
 import pandas as pd
 import numpy as np
+from pandas import HDFStore
+import h5py
+
 
 #class : MMDA
 
-def check_case_directory(case_directory):
-    if os.path.isdir(case_directory):
+def check_case_file(case_file):
+    if os.path.isfile(case_file):
         pass
     else:
-        print(f'User provided data directory does not exist, making directory at : {os.path.abspath(case_directory)}')
-        os.mkdir(case_directory)
+        print(f'User provided case file does not exist, making file at : {os.path.abspath(case_file)}')
     return
 
-
-def check_sample_directory(sample_directory):
-    if os.path.isdir(sample_directory):
-        pass
-    else:
-        os.mkdir(sample_directory)
-    return
-
-
-def write_sample_data(sample_directory, resonance_ladder, pw_df, i):
-    syndat_pw_csv = os.path.join(sample_directory, f'syndat_{i}_pw.csv')
-    syndat_data_csv = os.path.join(sample_directory, f'syndat_{i}_par.csv')
-
-    resonance_ladder.to_csv(syndat_data_csv, index=False)
-    pw_df.to_csv(syndat_pw_csv, index=False)
-    return 
 
 
 def compute_theoretical(solver, experiment, particle_pair, resonance_ladder):
@@ -89,7 +75,7 @@ def sample_syndat(particle_pair, experiment, solver,
 def generate(particle_pair, experiment, 
                 solver, 
                 number_of_datasets, 
-                case_directory,
+                case_file,
                 fixed_resonance_ladder=None, 
                 open_data=None,
                 overwrite=True
@@ -102,50 +88,52 @@ def generate(particle_pair, experiment,
     Parameters
     ----------
     particle_pair : syndat.particle_pair.particle_pair
-        Syndat particle pair class
-    spin_groups : _type_
-        Spin groups to consider, same format as in the user example.
-    average_parameters : _type_
-        Average parameters of the considered spin groups to be used for resonance parameter sampling.
-    energy_grid : array-like
-        Energy_grid on which experimental data will be generated.
-    syndat_input_options : dict
-        User input options for a Syndat experiment, if empty dict default options will be used.
-    syndat_experiment_parameters : dict
-        Experimental parameters for a Syndat experiment, if empty dict default options will be used.
+        Syndat particle pair object
+    experiment : syndat.experiment.experiment
+        Syndat experiment object
     solver : str
-        Whether to use Syndat or SAMMY to calculate theoretical cross section/transmission.
+        Which solver will be used to calculate theoretical cross section/transmission.
     number_of_datasets : int
         Number of datasets to generate.
-    case_directory : str
-        Top level directory to this 'case' of generated data, each sample dataset will get a folder within this directory.
-    case_directory : bool
+    case_file : str
+        Full path to hdf5 file.
+    fixed_resonance_ladder : DataFrame or None
+        If a DataFrame is given, resonance parameters will not be sampled. Must be given in proper Syndat format.
+    open_data : DataFrame or None
+        If a DataFrame is given, this sample out spectra (open) will be fixed for each generated sample. Must be given in proper Syndat format.
+    overwrite : bool
         Option to overwrite existing syndat data.
     """
 
-    # check for case directory
-    check_case_directory(case_directory)
+    # check for exiting test case file
+    check_case_file(case_file)
+    h5f = h5py.File(case_file, "a")
 
+    # loop over given number of samples
     for i in range(number_of_datasets):
 
-        # check for sample directory
-        sample_directory = os.path.join(case_directory,f'sample_{i}')
-        check_sample_directory(sample_directory)
+        sample_group = f'sample_{i}'
+        if sample_group in h5f:
 
-        # check for existing syndat in sample_directory
-        syndat_pw = os.path.join(sample_directory, f'syndat_{i}_pw.csv')
-        syndat_par = os.path.join(sample_directory, f'syndat_{i}_par.csv')
-
-        if os.path.isfile(syndat_pw) and os.path.isfile(syndat_par):
-            if overwrite:
-                resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
-                write_sample_data(sample_directory, resonance_ladder, pw_df, i)
+            if ('syndat_pw' in h5f[sample_group]) and ('syndat_par' in h5f[sample_group]):
+                if overwrite:
+                    resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                    pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
+                    resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par") 
+                else:
+                    continue
             else:
-                continue
-        else:
-            resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
-            write_sample_data(sample_directory, resonance_ladder, pw_df, i)
+                resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
+                resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
 
+        else:
+            # f.create_group(sample_group)
+            resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+            pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
+            resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
+
+    h5f.close()
 
     return
 
