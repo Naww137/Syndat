@@ -12,7 +12,7 @@ import scipy.stats as stat
 # Constants:
 c       = 299792458       # m/s
 jev     = 1.6022e-19      # J/eV
-mn_eVc2 = 939.56542052e6  # eV/c2
+mn_eV = 939.56542052e6  # eV/c2
 mn_kg   = 1.674927498e-27 # kg
 import pandas as pd
 
@@ -33,7 +33,7 @@ def t_to_e(t, d, rel=True):
     -------
     Energy array in electron Volts (eV).
     """
-    if rel:     E = mn_eVc2*(1/np.sqrt(1-(d/(c*t))**2)-1)
+    if rel:     E = mn_eV*(1/np.sqrt(1-(d/(c*t))**2)-1)
     else:       E = 0.5*mn_kg*(d/t)**2 /jev
     return E # eV
 
@@ -55,7 +55,7 @@ def e_to_t(E, d, rel=True):
     -------
     Time array in seconds (s).
     """
-    if rel:     t = d/c * 1/np.sqrt(1-1/(E/mn_eVc2+1)**2)
+    if rel:     t = d/c * 1/np.sqrt(1-1/(E/mn_eV+1)**2)
     else:       t = d/np.sqrt(E*jev*2/mn_kg)
     return t
 
