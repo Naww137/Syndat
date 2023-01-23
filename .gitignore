@@ -3,6 +3,7 @@
 workspace/
 examples/SAMMY_runDIR/
 examples/MMDA_data/
+examples/MMDA_data.hdf5
 SAMMY_runDIR/
 
 
