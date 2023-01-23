@@ -48,12 +48,9 @@ def check_sample_directory(sample_directory):
     return
 
 ###
-def write_sample_data(sample_directory, resonance_ladder, pw_df, i):
-    syndat_pw_csv = os.path.join(sample_directory, f'syndat_{i}_pw.csv')
-    syndat_data_csv = os.path.join(sample_directory, f'syndat_{i}_par.csv')
-
-    resonance_ladder.to_csv(syndat_data_csv, index=False)
-    pw_df.to_csv(syndat_pw_csv, index=False)
+def write_sample_data(syndat_pw_filepath, syndat_par_filepath, resonance_ladder, pw_df):
+    resonance_ladder.to_csv(syndat_par_filepath, index=False)
+    pw_df.to_csv(syndat_pw_filepath, index=False)
     return 
 
 ###
@@ -144,13 +141,10 @@ def generate(particle_pair, experiment,
         # check for exiting test case file
         check_case_file(case_file)
         h5f = h5py.File(case_file, "a")
-
         # loop over given number of samples
         for i in range(number_of_datasets):
-
             sample_group = f'sample_{i}'
             if sample_group in h5f:
-
                 if ('syndat_pw' in h5f[sample_group]) and ('syndat_par' in h5f[sample_group]):
                     if overwrite:
                         resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
@@ -162,13 +156,11 @@ def generate(particle_pair, experiment,
                     resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
                     pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
                     resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
-
             else:
                 # f.create_group(sample_group)
                 resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
                 pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
                 resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
-
         h5f.close()
 
     # use nested directory structure and csv's to store data
@@ -189,12 +181,12 @@ def generate(particle_pair, experiment,
             if os.path.isfile(syndat_pw) and os.path.isfile(syndat_par):
                 if overwrite:
                     resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
-                    write_sample_data(sample_directory, resonance_ladder, pw_df, i)
+                    write_sample_data(syndat_pw, syndat_par, resonance_ladder, pw_df)
                 else:
                     continue
             else:
                 resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
-                write_sample_data(sample_directory, resonance_ladder, pw_df, i)
+                write_sample_data(syndat_pw, syndat_par, resonance_ladder, pw_df)
 
 
 
