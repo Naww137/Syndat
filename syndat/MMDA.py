@@ -9,6 +9,194 @@ Created on Thu Jun 23 11:26:07 2022
 import os
 import syndat
 import shutil
+import pandas as pd
+import numpy as np
+from pandas import HDFStore
+import h5py
+
+
+###
+def check_case_file(case_file):
+    if os.path.isfile(case_file):
+        if case_file.endswith('.hdf5'):
+            pass
+        else:
+            raise ValueError("User supplied an unknown file type, must have extension .hdf5")
+    elif os.path.isdir(case_file):
+        raise ValueError("User supplied True for 'use_hdf5' but supplied a path to a directory rather than an hdf5 file.")
+    else:
+        print(f'User provided case file does not exist, making file at : {os.path.abspath(case_file)}')
+    return
+
+###
+def check_case_directory(case_directory):
+    if os.path.isdir(case_directory):
+        pass
+    elif os.path.isfile(case_directory):
+        raise ValueError("User supplied False for 'use_hdf5' but supplied a path to a file rather than a directory.")
+    else:
+        print(f'User provided data directory does not exist, making directory at : {os.path.abspath(case_directory)}')
+        os.mkdir(case_directory)
+    return
+
+###
+def check_sample_directory(sample_directory):
+    if os.path.isdir(sample_directory):
+        pass
+    else:
+        os.mkdir(sample_directory)
+    return
+
+###
+def write_sample_data(syndat_pw_filepath, syndat_par_filepath, resonance_ladder, pw_df):
+    resonance_ladder.to_csv(syndat_par_filepath, index=False)
+    pw_df.to_csv(syndat_pw_filepath, index=False)
+    return 
+
+###
+def compute_theoretical(solver, experiment, particle_pair, resonance_ladder):
+
+    energy_grid = experiment.energy_domain
+
+    if solver == 'syndat_SLBW':
+        xs_tot, xs_scat, xs_cap = syndat.scattering_theory.SLBW(energy_grid, particle_pair, resonance_ladder)
+        n = experiment.redpar.val.n  # atoms per barn or atoms/(1e-12*cm^2)
+        trans = np.exp(-n*xs_tot)
+        theoretical_df = pd.DataFrame({'E':energy_grid, 'theo_trans':trans})
+    elif solver == 'sammy_SLBW':
+        pass
+    elif solver == 'sammy_RM':
+        pass
+    else:
+        raise ValueError("Need to implement ability to compute theoretical transmission with solver other that 'syndat' (SLBW)")
+    
+    return theoretical_df
+
+###
+def sample_syndat(particle_pair, experiment, solver,
+                    open_data, fixed_resonance_ladder):
+
+    # either sample resonance ladder or set it to fixed resonance ladder
+    if fixed_resonance_ladder is None:
+        resonance_ladder = particle_pair.sample_resonance_ladder(experiment.energy_domain, particle_pair.spin_groups, particle_pair.average_parameters)
+    else:
+        resonance_ladder = fixed_resonance_ladder
+
+    # Compute expected xs or transmission
+    theoretical_df = compute_theoretical(solver, experiment, particle_pair, resonance_ladder)
+
+    # run the experiment
+    experiment.run(theoretical_df, open_data)
+
+    # Build data frame for export
+    pw_df = pd.DataFrame({  'E':experiment.trans.E, 
+                            'theo_trans':experiment.theo.theo_trans,
+                            'exp_trans':experiment.trans.exp_trans,
+                            'exp_trans_unc':experiment.trans.exp_trans_unc
+                                                                    })
+
+    return resonance_ladder, pw_df
+
+
+
+
+def generate(particle_pair, experiment, 
+                solver, 
+                number_of_datasets, 
+                case_file,
+                fixed_resonance_ladder=None, 
+                open_data=None,
+                use_hdf5=True,
+                overwrite=True
+                                                            ):
+    """
+    Generate multiple synthetic experimental datasets in a convenient directory structure. 
+
+    _extended_summary_
+
+    Parameters
+    ----------
+    particle_pair : syndat.particle_pair.particle_pair
+        Syndat particle pair object
+    experiment : syndat.experiment.experiment
+        Syndat experiment object
+    solver : str
+        Which solver will be used to calculate theoretical cross section/transmission.
+    number_of_datasets : int
+        Number of datasets to generate.
+    case_file : str
+        Full path to hdf5 file or top level case directory where data will be stored.
+    fixed_resonance_ladder : DataFrame or None
+        If a DataFrame is given, resonance parameters will not be sampled. Must be given in proper Syndat format.
+    open_data : DataFrame or None
+        If a DataFrame is given, this sample out spectra (open) will be fixed for each generated sample. Must be given in proper Syndat format.
+    use_hdf5 : bool
+        If True, generated data will be stored in an hdf5 case file. If False, generated data will be stored in csv's in a nested directory structure.
+    overwrite : bool
+        Option to overwrite existing syndat data.
+    """
+
+    # use hdf5 file to store data for this case
+    if use_hdf5:
+        # check for exiting test case file
+        check_case_file(case_file)
+        h5f = h5py.File(case_file, "a")
+        # loop over given number of samples
+        for i in range(number_of_datasets):
+            sample_group = f'sample_{i}'
+            if sample_group in h5f:
+                if ('syndat_pw' in h5f[sample_group]) and ('syndat_par' in h5f[sample_group]):
+                    if overwrite:
+                        resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                        pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
+                        resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par") 
+                    else:
+                        continue
+                else:
+                    resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                    pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
+                    resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
+            else:
+                # f.create_group(sample_group)
+                resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
+                resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
+        h5f.close()
+
+    # use nested directory structure and csv's to store data
+    else:
+        # check for case directory
+        check_case_directory(case_file)
+
+        for i in range(number_of_datasets):
+
+            # check for sample directory
+            sample_directory = os.path.join(case_file,f'sample_{i}')
+            check_sample_directory(sample_directory)
+
+            # check for existing syndat in sample_directory
+            syndat_pw = os.path.join(sample_directory, f'syndat_pw.csv')
+            syndat_par = os.path.join(sample_directory, f'syndat_par.csv')
+
+            if os.path.isfile(syndat_pw) and os.path.isfile(syndat_par):
+                if overwrite:
+                    resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                    write_sample_data(syndat_pw, syndat_par, resonance_ladder, pw_df)
+                else:
+                    continue
+            else:
+                resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                write_sample_data(syndat_pw, syndat_par, resonance_ladder, pw_df)
+
+
+
+    return
+
+
+
+
+
+#  =============----------------------===========================
 
 
 def wrapped_sammy_file_creator(number_of_realizations, case_directory, Estruct, \
@@ -204,3 +392,9 @@ def create_sammy_runfiles(case_basename, samples, energy, ladder_sample_function
         syndat.MMDA.copy_syndat(run_directory,case_basename,1,samples)
     else:
         irunsammy = 0
+
+
+
+
+
+
