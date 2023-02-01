@@ -513,9 +513,3 @@ class particle_pair:
 
 
 
-
-
-
-
-
-
