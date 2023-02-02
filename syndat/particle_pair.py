@@ -33,10 +33,10 @@ class particle_pair:
     def __init__(self, ac, M, m, I, i, l_max,
                     input_options={},   
                     spin_groups=None, 
-                    average_parameters=pd.DataFrame({  'dE'    :   {'3.0':20.0, '4.0':15.0, '-4.0':15.0},
-                                                        'Gg'    :   {'3.0':80.0, '4.0':55.0, '-4.0':55.0},
-                                                        'gn2'    :   {'3.0':50.0, '4.0':10.0, '-4.0':10.0}  })
-                                                                                                                    ):
+                    average_parameters=pd.DataFrame({   'dE'    :   {'3.0':8.79, '4.0':4.99},
+                                                        'Gg'    :   {'3.0':46.4, '4.0':35.5},
+                                                        'gn2'   :   {'3.0':64.0, '4.0':64.0}  })
+                                                                                                    ):
         """
         Initialization of particle pair object for a given reaction.
 
