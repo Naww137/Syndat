@@ -32,7 +32,7 @@ class particle_pair:
         Samples a full resonance parameter ladder for each possible spin group.
     """
 
-    def __init__(self, settings:str):
+    def __init__(self, *args, **kwargs):
         """
         Initialization of particle pair object for a given reaction.
 
@@ -45,60 +45,113 @@ class particle_pair:
             JSON file name for the settings.
         """
 
-        with open(settings, 'r') as file:
-            pair_data = json.load(file)
+        if (len(args) == 1 and kwargs == {}):
+            with open(args[0], 'r') as file:
+                pair_data = json.load(file)
+            json_input = True
+        elif 'json' in kwargs.keys():
+            with open(kwargs['json'], 'r') as file:
+                pair_data = json.load(file)
+            json_input = True
+        else:
+            json_input = False
+
+        if json_input:
+            # Particle pair data:
+            # print(pair_data.keys())
+            self.I = pair_data['target']['i']
+            assert self.I % 0.5 == 0
+            
+            self.i = pair_data['projectile']['i']
+            assert self.i % 0.5 == 0
+            
+            assert pair_data['l_max'] % 1 == 0
+            self.l_max = int(pair_data['l_max'])
+            
+            self.M = pair_data['target']['m']     # amu
+            self.m = pair_data['projectile']['m'] # amu
+            if 'ac' not in pair_data['target'].keys():
+                self.ac = (1.23*self.M**(1/3))+0.8 # fermi or femtometers
+            elif pair_data['target']['ac'] < 1e-7:
+                print("WARNING: scattering radius seems to be given in m rather than sqrt(barns) a.k.a. cm^-12")
+            else:
+                self.ac = pair_data['target']['ac'] # 6.7e-15 # m or 6.7 femtometers
+
+            # Mean parameters:
+            self.spin_groups = pair_data['spin_groups']
+            all_groups = pair_data['mean_parameters'].keys()
+            self.average_parameters = pd.DataFrame({param: {sg: pair_data['mean_parameters'][sg][param] for sg in all_groups} \
+                                                    for param in ('dE', 'Gg', 'gn2')})
+
+            # Fudge:
+            if pair_data['resonances']['fudge'] == 'auto':
+                try:
+                    import fudge
+                except ModuleNotFoundError:
+                    self.use_fudge = True
+                else:
+                    self.use_fudge = False
+            elif pair_data['resonances']['fudge'] in (True, False):
+                self.use_fudge = pair_data['resonances']['fudge']
+            else:
+                raise ValueError(f'Unknown value for fudge usage. Possible values:\nTrue, False, \'auto\'')
+
+            # Generate resonances:
+            ensembles = ['wigner', 'picket fence', 'poisson', 'goe', 'auto']
+            if pair_data['resonances']['ensemble'].lower() in ensembles:
+                self.ensemble = pair_data['resonances']['ensemble'].lower()
+                if self.ensemble == 'auto':
+                    self.ensemble = ('goe' if self.use_fudge else 'wigner')
+                elif self.ensemble != 'wigner' and not self.use_fudge:
+                    raise ValueError(f'"{self.ensemble}" ensemble cannot be used without fudge installed.')
+            else:
+                raise ValueError(f'Unknown ensemble for resonance energy generation. Possible ensembles:\n{ensembles}')
+        else:
+            if len(args) >= 1: self.ac = args[0]
+            elif 'ac' in kwargs.keys(): self.ac = kwargs['ac']
+            if len(args) >= 2: self.M = args[1]
+            elif 'M' in kwargs.keys(): self.M = kwargs['M']
+            if len(args) >= 3: self.m = args[2]
+            elif 'm' in kwargs.keys(): self.m = kwargs['m']
+            if len(args) >= 4: self.I = args[3]
+            elif 'I' in kwargs.keys(): self.I = kwargs['I']
+            if len(args) >= 5: self.i = args[4]
+            elif 'i' in kwargs.keys(): self.i = kwargs['i']
+            if len(args) >= 6: self.l_max = args[5]
+            elif 'l_max' in kwargs.keys(): self.l_max = kwargs['l_max']
+            if len(args) >= 7: input_options = args[6]
+            elif 'input_options' in kwargs.keys(): input_options = kwargs['input_options']
+            else: input_options = {}
+            if len(args) >= 8: self.spin_groups = args[7]
+            elif 'spin_groups' in kwargs.keys(): self.spin_groups = kwargs['spin_groups']
+            else: self.spin_groups = None
+            if len(args) >= 9: self.average_parameters = args[8]
+            elif 'average_parameters' in kwargs.keys(): self.average_parameters = kwargs['average_parameters']
+            else:
+                average_parameters = {  'dE'    :   {'3.0':8.79, '4.0':4.99},
+                                        'Gg'    :   {'3.0':46.4, '4.0':35.5},
+                                        'gn2'   :   {'3.0':64.0, '4.0':64.0}}
+            
+            # Options:
+            default_options = { 'Sample Physical Constants' :   False,
+                                'Use FUDGE'                 :   False,
+                                'Sample Average Parameters' :   False}
+            options = default_options
+            for old_parameter in default_options:
+                if old_parameter in input_options:
+                    options.update({old_parameter:input_options[old_parameter]})
+            for input_parameter in input_options:
+                if input_parameter not in default_options:
+                    raise ValueError('User provided an unrecognized input option')
+            self.options = options
+
+            self.sample_physical_constants = self.options['Sample Physical Constants']
+            self.use_fudge = self.options['Use FUDGE']
+            self.sample_average_parameters = self.options['Sample Average Parameters']
+            if self.sample_physical_constants:
+                raise ValueError('Need to implement "Sample Physical Constants" capability')
 
         # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
-
-        # Particle pair data:
-        print(pair_data.keys())
-        self.I = pair_data['target']['i']
-        assert self.I % 0.5 == 0
-        
-        self.i = pair_data['projectile']['i']
-        assert self.i % 0.5 == 0
-        
-        assert pair_data['l_max'] % 1 == 0
-        self.l_max = int(pair_data['l_max'])
-        
-        self.M = pair_data['target']['m']     # amu
-        self.m = pair_data['projectile']['m'] # amu
-        if 'ac' in pair_data['target'].keys():
-            self.ac = (1.23*self.M**(1/3))+0.8 # fermi or femtometers
-        elif pair_data['target']['ac'] < 1e-7:
-            print("WARNING: scattering radius seems to be given in m rather than sqrt(barns) a.k.a. cm^-12")
-        else:
-            self.ac = pair_data['target']['ac'] # 6.7e-15 # m or 6.7 femtometers
-
-        # Mean parameters:
-        self.spin_groups = pair_data['spin_groups']
-        all_groups = pair_data['mean_parameters'].keys()
-        self.average_parameters = pd.DataFrame({param: {sg: pair_data['mean_parameters'][sg][param] for sg in all_groups} \
-                                                for param in ('dE', 'Gg', 'gn2')})
-
-        # Fudge:
-        if pair_data['resonances']['fudge'] == 'auto':
-            try:
-                import fudge
-            except ModuleNotFoundError:
-                self.use_fudge = True
-            else:
-                self.use_fudge = False
-        elif pair_data['resonances']['fudge'] in (True, False):
-            self.use_fudge = pair_data['resonances']['fudge']
-        else:
-            raise ValueError(f'Unknown value for fudge usage. Possible values:\nTrue, False, \'auto\'')
-
-        # Generate resonances:
-        ensembles = ['wigner', 'picket fence', 'poisson', 'goe', 'auto']
-        if pair_data['resonances']['ensemble'].lower() in ensembles:
-            self.ensemble = pair_data['resonances']['ensemble'].lower()
-            if self.ensemble == 'auto':
-                self.ensemble = ('goe' if self.use_fudge else 'wigner')
-            elif self.ensemble != 'wigner' and not self.use_fudge:
-                raise ValueError(f'"{self.ensemble}" ensemble cannot be used without fudge installed.')
-        else:
-            raise ValueError(f'Unknown ensemble for resonance energy generation. Possible ensembles:\n{ensembles}')
 
         # Constants:
         self.hbar = 6.582119569e-16 # eV-s
@@ -266,9 +319,8 @@ class particle_pair:
                 # Mean capture width:
                 aveWidths = {}
                 Gg = self.average_parameters.Gg[f'{j[0]}']
-                # raise TypeError([[EB[0], Gg], [EB[1], Gg]])
                 aveWidths['captureWidth'] = XYs1dModule.XYs1d(
-                                                data=[[EB[0], Gg], [EB[1], Gg]],
+                                                data=[[float(EB[0]), Gg], [float(EB[1]), Gg]],
                                                 axes=XYs1dModule.XYs1d.defaultAxes(
                                                     labelsUnits={
                                                         XYs1dModule.yAxisIndex: ('width', 'eV'),
@@ -277,22 +329,21 @@ class particle_pair:
                 gn2 = self.average_parameters.gn2[f'{j[0]}']
                 Gn = gn2 # NOTE: THIS MAY NOT BE CORRECT!!!!
                 aveWidths['neutronWidth'] = XYs1dModule.XYs1d(
-                                                data=[[EB[0], Gn], [EB[1], Gn]],
+                                                data=[[float(EB[0]), Gn], [float(EB[1]), Gn]],
                                                 axes=XYs1dModule.XYs1d.defaultAxes(
                                                     labelsUnits={
                                                         XYs1dModule.yAxisIndex: ('width', 'eV'),
                                                         XYs1dModule.xAxisIndex: ('excitation_energy', 'eV')}))
                 # Level density:
-                level_density = XYs1dModule.XYs1d([[EB[0], 1/dE], [EB[1], 1/dE]],
+                level_density = XYs1dModule.XYs1d([[float(EB[0]), 1/dE], [float(EB[1]), 1/dE]],
                                                 axes=XYs1dModule.XYs1d.defaultAxes(
                                                     labelsUnits={
                                                         XYs1dModule.yAxisIndex: ('width', 'eV'),
                                                         XYs1dModule.xAxisIndex: ('excitation_energy', 'eV')}))
-                resonances = getFakeResonanceSet(EB[0], dE, N, self.ensemble, L=j[1], J=j[0], levelDensity=level_density, aveWidthFuncs=aveWidths, DOFs={'neutronWidth': 1, 'captureWidth': 0}, domainMin=EB[0], domainMax=EB[1], widthKeys=('neutronWidth', 'captureWidth'))
-                # raise TypeError(resonances.data)
+                resonances = getFakeResonanceSet(float(EB[0]), dE, N, self.ensemble, L=j[1], J=j[0], levelDensity=level_density, aveWidthFuncs=aveWidths, DOFs={'neutronWidth': 1, 'captureWidth': 0}, domainMin=EB[0], domainMax=EB[1], widthKeys=('neutronWidth', 'captureWidth'))
                 levels = resonances[:,0]
-                red_nwidth = resonances[:,3] # NOTE: Check if its is the correct width
-                Gwidth = resonances[:,4] # NOTE: Check if its is the correct width
+                red_nwidth = resonances[:,3]
+                Gwidth = resonances[:,4]
 
                 E_Gn_gnx2 = pd.DataFrame([levels, Gwidth, red_nwidth, [j[0]]*len(levels), [j[1]]*len(levels), [j[2]]*len(levels), [J_ID]*len(levels)], index=['E','Gg', 'gnx2', 'J', 'chs', 'lwave', 'J_ID'])   
                 # assert len(np.unique(j[2]))==1, "Code cannot consider different l-waves contributing to a spin group"
