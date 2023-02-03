@@ -54,6 +54,19 @@ def write_sample_data(syndat_pw_filepath, syndat_par_filepath, resonance_ladder,
     return 
 
 ###
+def random_energy_domain(Erange_total, maxres, probability, average_spacing):
+
+    prob_lessthan_comb = np.power(probability, (1/maxres))
+    val = (2*np.sqrt(np.log(1/(1 - prob_lessthan_comb))))/np.sqrt(np.pi)
+    eV_spacing = val*average_spacing
+    window_size = eV_spacing*maxres
+
+    random_window_start = np.random.default_rng().uniform(min(Erange_total),max(Erange_total)-window_size,1)
+    window_energy_domain = np.append(random_window_start, random_window_start+window_size)
+
+    return window_energy_domain
+
+###
 def compute_theoretical(solver, experiment, particle_pair, resonance_ladder):
 
     energy_grid = experiment.energy_domain
@@ -74,13 +87,18 @@ def compute_theoretical(solver, experiment, particle_pair, resonance_ladder):
 
 ###
 def sample_syndat(particle_pair, experiment, solver,
-                    open_data, fixed_resonance_ladder):
+                    open_data, fixed_resonance_ladder, vary_Erange):
 
     # either sample resonance ladder or set it to fixed resonance ladder
     if fixed_resonance_ladder is None:
         resonance_ladder = particle_pair.sample_resonance_ladder(experiment.energy_domain, particle_pair.spin_groups, particle_pair.average_parameters)
     else:
         resonance_ladder = fixed_resonance_ladder
+
+    # option to vary energy window
+    if vary_Erange is not None:
+        new_energy_domain = random_energy_domain(vary_Erange['fullrange'], vary_Erange['maxres'], vary_Erange['prob'], particle_pair.average_parameters['dE']['3.0'])
+        experiment.def_self_energy_grid(new_energy_domain)
 
     # Compute expected xs or transmission
     theoretical_df = compute_theoretical(solver, experiment, particle_pair, resonance_ladder)
@@ -106,6 +124,7 @@ def generate(particle_pair, experiment,
                 case_file,
                 fixed_resonance_ladder=None, 
                 open_data=None,
+                vary_Erange = None,
                 use_hdf5=True,
                 overwrite=True
                                                             ):
@@ -136,6 +155,13 @@ def generate(particle_pair, experiment,
         Option to overwrite existing syndat data.
     """
 
+    # check inputs
+    if vary_Erange is not None:
+        if not np.all([key in vary_Erange for key in ['fullrange', 'maxres','prob']]):
+            raise ValueError("User supplied a vary_Erange input without proper dict_keys. Requires keys: ['fullrange', 'maxres','prob'].")
+
+    samples_not_being_generated = [] 
+
     # use hdf5 file to store data for this case
     if use_hdf5:
         # check for exiting test case file
@@ -147,18 +173,18 @@ def generate(particle_pair, experiment,
             if sample_group in h5f:
                 if ('syndat_pw' in h5f[sample_group]) and ('syndat_par' in h5f[sample_group]):
                     if overwrite:
-                        resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                        resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
                         pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
                         resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par") 
                     else:
-                        continue
+                        samples_not_being_generated.append(i)
                 else:
-                    resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                    resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
                     pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
                     resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
             else:
                 # f.create_group(sample_group)
-                resonance_ladder, pw_df = syndat.MMDA.sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
                 pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
                 resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
         h5f.close()
@@ -180,17 +206,17 @@ def generate(particle_pair, experiment,
 
             if os.path.isfile(syndat_pw) and os.path.isfile(syndat_par):
                 if overwrite:
-                    resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                    resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
                     write_sample_data(syndat_pw, syndat_par, resonance_ladder, pw_df)
                 else:
-                    continue
+                    samples_not_being_generated.append(i)
             else:
-                resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder)
+                resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
                 write_sample_data(syndat_pw, syndat_par, resonance_ladder, pw_df)
 
 
 
-    return
+    return samples_not_being_generated
 
 
 

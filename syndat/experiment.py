@@ -103,23 +103,8 @@ class experiment:
         self.redpar = pd.DataFrame.from_dict(pardict, orient='index')
 
 
-        ### Check energy grid
-        if energy_domain is None:
-            # Keep as None, self.run() will take the energy grid from the given theoretical data
-            self.energy_domain = energy_domain
-        else:
-            if len(energy_domain) == 2:
-                # take an energy domain of len=2 as min/max and generate an energy grid linear in tof
-                # TODO: add option to randomly sample energy grid
-                tof_min_max = syndat.exp_effects.e_to_t(np.array(energy_domain),self.redpar.val.FP, True)*1e6+self.redpar.val.t0 #micro s
-                tof_grid = np.arange(min(tof_min_max), max(tof_min_max), self.redpar.val.bw )#micro s
-                energy_domain = syndat.exp_effects.t_to_e((tof_grid-self.redpar.val.t0)*1e-6,self.redpar.val.FP,True) #back to s for conversion to eV
-            if len(energy_domain) > 2:
-                # if a vector is given, take that as the energy grid
-                self.energy_domain = energy_domain
-            else:
-                raise ValueError("Input for energy_domain not recognized")
-
+        ### define self.energy_grid upon init
+        self.def_self_energy_grid(energy_domain)
 
 
 
@@ -195,6 +180,31 @@ class experiment:
     # ----------------------------------------------------------
     #    Begin Methods
     # ----------------------------------------------------------
+
+    def def_self_energy_grid(self, energy_domain):
+
+        if energy_domain is None:
+            # Keep as None, self.run() will take the energy grid from the given theoretical data
+            self.energy_domain = energy_domain
+        else:
+            if len(energy_domain) == 2:
+                # take an energy domain of len=2 as min/max and generate an energy grid linear in tof
+                # TODO: add option to randomly sample energy grid
+                tof_min_max = syndat.exp_effects.e_to_t(np.array(energy_domain),self.redpar.val.FP, True)*1e6+self.redpar.val.t0 #micro s
+                tof_grid = np.arange(min(tof_min_max), max(tof_min_max), self.redpar.val.bw )#micro s
+                energy_domain = syndat.exp_effects.t_to_e((tof_grid-self.redpar.val.t0)*1e-6,self.redpar.val.FP,True) #back to s for conversion to eV
+            if len(energy_domain) > 2:
+                # if a vector is given, take that as the energy grid
+                self.energy_domain = energy_domain
+            elif len(energy_domain) == 1:
+                raise ValueError("Energy domain is too small for tof bin width.")
+            else:
+                raise ValueError("Input for energy_domain not recognized")
+            
+        return
+
+# --------------------------------------------------------------------------------------------------------------------------
+
 
     def read_theoretical(self, theoretical_data):
         """
