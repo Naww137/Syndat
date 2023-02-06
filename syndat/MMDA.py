@@ -13,6 +13,7 @@ import pandas as pd
 import numpy as np
 from pandas import HDFStore
 import h5py
+from syndat.scattering_theory import SLBW
 
 
 ###
@@ -48,16 +49,10 @@ def check_sample_directory(sample_directory):
     return
 
 ###
-def write_sample_data(syndat_pw_filepath, syndat_par_filepath, resonance_ladder, pw_df):
-    resonance_ladder.to_csv(syndat_par_filepath, index=False)
-    pw_df.to_csv(syndat_pw_filepath, index=False)
-    return 
-
-###
 def random_energy_domain(Erange_total, maxres, probability, average_spacing):
 
-    prob_lessthan_comb = np.power(probability, (1/maxres))
-    val = (2*np.sqrt(np.log(1/(1 - prob_lessthan_comb))))/np.sqrt(np.pi)
+    prob_comb = np.power(probability, (1/maxres))
+    val = np.sqrt(2/np.pi) * np.sqrt(np.log(1/(1 - 2*prob_comb))) # (2*np.sqrt(np.log(1/(1 - prob_lessthan_comb))))/np.sqrt(np.pi)
     eV_spacing = val*average_spacing
     window_size = eV_spacing*maxres
 
@@ -67,22 +62,37 @@ def random_energy_domain(Erange_total, maxres, probability, average_spacing):
     return window_energy_domain
 
 ###
-def compute_theoretical(solver, experiment, particle_pair, resonance_ladder):
+def fine_egrid(energy):
+    minE = min(energy); maxE = max(energy)
+    n = int((maxE - minE)*1e2)
+    new_egrid = np.linspace(minE, maxE, n)
+    return new_egrid
 
-    energy_grid = experiment.energy_domain
+###
+def compute_theoretical(solver, experiment, particle_pair, resonance_ladder, theo_pw):
+
+    if theo_pw:
+        energy_grid = fine_egrid(experiment.energy_domain)
+    else:
+        energy_grid = experiment.energy_domain
 
     if solver == 'syndat_SLBW':
         xs_tot, xs_scat, xs_cap = syndat.scattering_theory.SLBW(energy_grid, particle_pair, resonance_ladder)
         n = experiment.redpar.val.n  # atoms per barn or atoms/(1e-12*cm^2)
         trans = np.exp(-n*xs_tot)
-        theoretical_df = pd.DataFrame({'E':energy_grid, 'theo_trans':trans})
+
     elif solver == 'sammy_SLBW':
-        pass
+        raise ValueError("Need to implement ability to compute theoretical transmission with solver other that 'syndat' (SLBW)")
     elif solver == 'sammy_RM':
-        pass
+        raise ValueError("Need to implement ability to compute theoretical transmission with solver other that 'syndat' (SLBW)")
     else:
         raise ValueError("Need to implement ability to compute theoretical transmission with solver other that 'syndat' (SLBW)")
     
+    if theo_pw:
+        theoretical_df = pd.DataFrame({'E':energy_grid, 'theo_xs':xs_tot})
+    else:
+        theoretical_df = pd.DataFrame({'E':energy_grid, 'theo_trans':trans})
+
     return theoretical_df
 
 ###
@@ -101,7 +111,7 @@ def sample_syndat(particle_pair, experiment, solver,
         experiment.def_self_energy_grid(new_energy_domain)
 
     # Compute expected xs or transmission
-    theoretical_df = compute_theoretical(solver, experiment, particle_pair, resonance_ladder)
+    theoretical_df = compute_theoretical(solver, experiment, particle_pair, resonance_ladder, False)
 
     # run the experiment
     experiment.run(theoretical_df, open_data)
@@ -109,18 +119,45 @@ def sample_syndat(particle_pair, experiment, solver,
     # Build data frame for export
     pw_df = pd.DataFrame({  'E':experiment.trans.E, 
                             'theo_trans':experiment.theo.theo_trans,
-                            'exp_trans':experiment.trans.exp_trans,
-                            'exp_trans_unc':experiment.trans.exp_trans_unc
+                            'exp_trans':experiment.trans.exp_trans
                                                                     })
+    
+    CoV = experiment.CovT
 
-    return resonance_ladder, pw_df
+    return resonance_ladder, pw_df, CoV
 
+###
+def sample_and_write_syndat(case_file, isample, particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange, use_hdf5):
+
+    # sample theoretical parameters and compute transmission on experimentaal fine-grid theoretical pw cross section
+    resonance_ladder, exp_pw_df, CovT = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
+    theo_pw_df = compute_theoretical(solver, experiment, particle_pair, resonance_ladder, True)
+
+    # write data
+    if use_hdf5:
+        exp_pw_df.to_hdf(case_file, f"sample_{isample}/exp_pw")
+        theo_pw_df.to_hdf(case_file, f"sample_{isample}/theo_pw")
+        resonance_ladder.to_hdf(case_file, f"sample_{isample}/theo_par") 
+        f = h5py.File(case_file, 'a')
+        if 'exp_cov' in f[f"sample_{isample}"].keys():
+            del f[f'sample_{isample}/exp_cov']
+        else:
+            pass
+        f.create_dataset(f'sample_{isample}/exp_cov', data=CovT)
+        f.close()
+    else:
+        exp_pw_df.to_csv(os.path.join(case_file,f'sample_{isample}','exp_pw'), index=False)
+        theo_pw_df.to_csv(os.path.join(case_file,f'sample_{isample}','theo_pw'), index=False) 
+        resonance_ladder.to_csv(os.path.join(case_file,f'sample_{isample}','theo_par'), index=False)
+        pd.DataFrame(CovT).to_csv(os.path.join(case_file,f'sample_{isample}','exp_cov'))
+
+    return
 
 
 
 def generate(particle_pair, experiment, 
                 solver, 
-                number_of_datasets, 
+                dataset_range, 
                 case_file,
                 fixed_resonance_ladder=None, 
                 open_data=None,
@@ -141,8 +178,8 @@ def generate(particle_pair, experiment,
         Syndat experiment object
     solver : str
         Which solver will be used to calculate theoretical cross section/transmission.
-    number_of_datasets : int
-        Number of datasets to generate.
+    dataset_range : int
+        Min/Max samples to generate.
     case_file : str
         Full path to hdf5 file or top level case directory where data will be stored.
     fixed_resonance_ladder : DataFrame or None
@@ -168,51 +205,38 @@ def generate(particle_pair, experiment,
         check_case_file(case_file)
         h5f = h5py.File(case_file, "a")
         # loop over given number of samples
-        for i in range(number_of_datasets):
+        for i in range(min(dataset_range), max(dataset_range)):
             sample_group = f'sample_{i}'
             if sample_group in h5f:
-                if ('syndat_pw' in h5f[sample_group]) and ('syndat_par' in h5f[sample_group]):
+                if ('exp_pw' in h5f[sample_group]) and ('theo_pw' in h5f[sample_group]) and ('theo_par' in h5f[sample_group]):
                     if overwrite:
-                        resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
-                        pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
-                        resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par") 
+                        sample_and_write_syndat(case_file, i, particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange, use_hdf5)
                     else:
                         samples_not_being_generated.append(i)
                 else:
-                    resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
-                    pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
-                    resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
+                    sample_and_write_syndat(case_file, i, particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange, use_hdf5)
             else:
-                # f.create_group(sample_group)
-                resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
-                pw_df.to_hdf(case_file, f"sample_{i}/syndat_pw")
-                resonance_ladder.to_hdf(case_file, f"sample_{i}/syndat_par")
+                sample_and_write_syndat(case_file, i, particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange, use_hdf5)
         h5f.close()
 
     # use nested directory structure and csv's to store data
     else:
         # check for case directory
         check_case_directory(case_file)
-
-        for i in range(number_of_datasets):
-
+        for i in range(min(dataset_range), max(dataset_range)):
             # check for sample directory
             sample_directory = os.path.join(case_file,f'sample_{i}')
             check_sample_directory(sample_directory)
-
             # check for existing syndat in sample_directory
-            syndat_pw = os.path.join(sample_directory, f'syndat_pw.csv')
-            syndat_par = os.path.join(sample_directory, f'syndat_par.csv')
-
+            syndat_pw = os.path.join(sample_directory, 'exp_pw.csv')
+            syndat_par = os.path.join(sample_directory, 'theo_par.csv')
             if os.path.isfile(syndat_pw) and os.path.isfile(syndat_par):
                 if overwrite:
-                    resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
-                    write_sample_data(syndat_pw, syndat_par, resonance_ladder, pw_df)
+                    sample_and_write_syndat(case_file, i, particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange, use_hdf5)
                 else:
                     samples_not_being_generated.append(i)
             else:
-                resonance_ladder, pw_df = sample_syndat(particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange)
-                write_sample_data(syndat_pw, syndat_par, resonance_ladder, pw_df)
+                sample_and_write_syndat(case_file, i, particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange, use_hdf5)
 
 
 

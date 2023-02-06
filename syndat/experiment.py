@@ -80,7 +80,7 @@ class experiment:
                         'trigs'     :   {'val'  :   18476117,            'unc'  :   0},
                         'FP'        :   {'val'  :   35.185,              'unc'  :   0},
                         't0'        :   {'val'  :   3.326,               'unc'  :   0},
-                        'bw'        :   {'val'  :   0.3,                 'unc'  :   0},
+                        'bw'        :   {'val'  :   0.0064,              'unc'  :   0},
                         'm1'        :   {'val'  :   1,                   'unc'  :   0.016},
                         'm2'        :   {'val'  :   1,                   'unc'  :   0.008},
                         'm3'        :   {'val'  :   1,                   'unc'  :   0.018},
