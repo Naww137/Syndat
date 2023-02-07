@@ -101,14 +101,16 @@ def sample_syndat(particle_pair, experiment, solver,
 
     # either sample resonance ladder or set it to fixed resonance ladder
     if fixed_resonance_ladder is None:
+        if vary_Erange is not None:
+            new_energy_domain = random_energy_domain(vary_Erange['fullrange'], vary_Erange['maxres'], vary_Erange['prob'], particle_pair.average_parameters['dE']['3.0'])
+            experiment.def_self_energy_grid(new_energy_domain)
+        else:
+            pass
         resonance_ladder = particle_pair.sample_resonance_ladder(experiment.energy_domain, particle_pair.spin_groups, particle_pair.average_parameters)
     else:
+        if vary_Erange:
+            raise ValueError("Options to vary the energy range were provided, but so was a fixed resonance ladder.")
         resonance_ladder = fixed_resonance_ladder
-
-    # option to vary energy window
-    if vary_Erange is not None:
-        new_energy_domain = random_energy_domain(vary_Erange['fullrange'], vary_Erange['maxres'], vary_Erange['prob'], particle_pair.average_parameters['dE']['3.0'])
-        experiment.def_self_energy_grid(new_energy_domain)
 
     # Compute expected xs or transmission
     theoretical_df = compute_theoretical(solver, experiment, particle_pair, resonance_ladder, False)
