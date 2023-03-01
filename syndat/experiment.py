@@ -159,13 +159,10 @@ class experiment:
                 print("Warning: The user option 'Smooth Open Spectrum' was set to true but you are reading an open spectrum - this option will have no effect")
             self.read_odat(open_data)
             
-        ### sample a realization of the theoretical, true-underlying open count spectra
-        self.sample_true_open_spectrum(self.sample_odat)
-
-        ### Automatically perform experiment
-
-        # vectorize the background function from jesse's experiment
-        self.Bi = self.bkg(self.odat.tof,self.redpar.val.a,self.redpar.val.b)
+        # sample a realization of the theoretical, true-underlying open count spectra
+        self.sample_true_open_spectrum(self.sample_odat) 
+        # calculate a vectorized true underlying background function
+        self.theo_Bi = self.bkg(self.odat.tof,self.theo_redpar.val.a,self.theo_redpar.val.b)
         # generate raw count data for sample in given theoretical transmission and assumed true reduction parameters/open count data
         self.generate_sdat(self.add_noise)
         # reduce the experimental data
@@ -189,7 +186,6 @@ class experiment:
         else:
             if len(energy_domain) == 2:
                 # take an energy domain of len=2 as min/max and generate an energy grid linear in tof
-                # TODO: add option to randomly sample energy grid
                 tof_min_max = syndat.exp_effects.e_to_t(np.array(energy_domain),self.redpar.val.FP, True)*1e6+self.redpar.val.t0 #micro s
                 tof_grid = np.arange(min(tof_min_max), max(tof_min_max), self.redpar.val.bw )#micro s
                 energy_domain = syndat.exp_effects.t_to_e((tof_grid-self.redpar.val.t0)*1e-6,self.redpar.val.FP,True) #back to s for conversion to eV
@@ -391,10 +387,10 @@ class experiment:
 
         monitor_array = [self.theo_redpar.val.m1, self.theo_redpar.val.m2, self.theo_redpar.val.m3, self.theo_redpar.val.m4]
 
-        self.sdat, self.theo_c = syndat.exp_effects.inverse_reduction(self.sdat, self.theo_odat, add_noise,
+        self.sdat, self.theo_c = syndat.exp_effects.inverse_reduction(self.sdat, self.theo_odat, add_noise, self.sample_turp_bool,
                                                                 self.theo_redpar.val.trigo, self.theo_redpar.val.trigs, 
                                                                 self.theo_redpar.val.ks,self.theo_redpar.val.ko, 
-                                                                self.Bi, self.theo_redpar.val.b0s, self.theo_redpar.val.b0o, 
+                                                                self.theo_Bi, self.theo_redpar.val.b0s, self.theo_redpar.val.b0o, 
                                                                 monitor_array)
         
 
@@ -418,7 +414,6 @@ class experiment:
             sdat['E'] = syndat.exp_effects.t_to_e((odat.tof-self.redpar.val.t0)*1e-6, self.redpar.val.FP, True) 
             self.odat = odat
             self.sdat = sdat
-            self.Bi = self.bkg(self.odat.tof*1e6,self.redpar.val.a,self.redpar.val.b) # calc bkg again to recalculate Bi on restructured grid
 
         # create transmission object
         self.trans = pd.DataFrame()
@@ -429,6 +424,9 @@ class experiment:
         # get count rates for sample in data
         # self.sdat['cps'], self.sdat['dcps'] = syndat.exp_effects.cts_to_ctr(self.sdat.c, self.sdat.dc, self.sdat.bw*1e-6, self.redpar.val.trigs)
         # self.odat['cps'], self.odat['dcps'] = syndat.exp_effects.cts_to_ctr(self.odat.c, self.odat.dc, self.odat.bw*1e-6, self.redpar.val.trigs)
+
+        # estimated background function
+        self.Bi = self.bkg(self.odat.tof*1e6,self.redpar.val.a,self.redpar.val.b) # calc bkg again to recalculate Bi on restructured grid
 
         # define systematic uncertainties
         sys_unc = self.redpar.unc[['a','b','ks','ko','b0s','b0o','m1','m2','m3','m4']].astype(float)
