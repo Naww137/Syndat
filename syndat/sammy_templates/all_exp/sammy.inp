@@ -9,8 +9,8 @@ BROADENING IS WANTED
 %%%formalism%%%
 
 304.50000  35.185   0.049600               
-  7.860000  0.067166                       0.00000          
-TRANSMISSION                                                                
+%%%scattering_radius%%%
+%%%reaction%%%                                                                
   1      1    0  3.0       1.0  3.5
     1    1    0    0       3.0
   2      1    0  4.0       1.0  3.5
