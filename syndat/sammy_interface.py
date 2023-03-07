@@ -306,13 +306,18 @@ def copy_template_to_runDIR(exp, file, target_dir):
                 os.path.join(target_dir,file))
     return
 
-def write_saminp(model, filepath):
+def write_saminp(model, particle_pair, reaction, filepath):
+    ac = particle_pair.ac*10
     with open(filepath,'r') as f:
         old_lines = f.readlines()
     with open(filepath,'w') as f:
         for line in old_lines:
             if line.startswith("%%%formalism%%%"):
                 f.write(f'{model}\n')
+            elif line.startswith('%%%scattering_radius%%%'):
+                f.write(f'  {ac: <8}  0.067166                       0.00000          \n')
+            elif line.startswith('%%%reaction%%%'):
+                f.write(f'{reaction}\n')
             else:
                 f.write(line)
            
@@ -322,8 +327,10 @@ def write_saminp(model, filepath):
 # =============================================================================
 def calculate_xs(energy_grid, resonance_ladder, particle_pair,
                                                 model   = 'XCT',
+                                                reaction = 'total',
                                                 expertimental_corrections = 'all_exp',
-                                                sammy_runDIR='SAMMY_runDIR'   
+                                                sammy_runDIR='SAMMY_runDIR',
+                                                keep_runDIR = False  
                                                                                         ):
     """
     Calculate a cross section using the SAMMY code.
@@ -370,7 +377,7 @@ def calculate_xs(energy_grid, resonance_ladder, particle_pair,
     write_estruct_file(energy_grid, os.path.join(sammy_runDIR,'estruct'))
 
     # edit copied runtime template files
-    write_saminp(model, os.path.join(sammy_runDIR, 'sammy.inp'))
+    write_saminp(model, particle_pair, reaction, os.path.join(sammy_runDIR, 'sammy.inp'))
     write_sampar(resonance_ladder, particle_pair, False, os.path.join(sammy_runDIR,"sammy.par"))
     with open('./SAMMY_runDIR/pipe.sh', 'w') as f:
         f.write('sammy.inp\nsammy.par\nestruct\n')
