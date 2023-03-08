@@ -159,7 +159,7 @@ def cts_to_ctr(cts, d_cts, bw, trig):
 
     
 
-def inverse_reduction(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi, b0,B0, alpha):
+def inverse_reduction(sample_df, open_df, add_noise, sample_turp, trigo,trigs, k,K, Bi, b0,B0, alpha):
     """
     Generates raw count data for sample-in given a theoretical tranmission. 
     
@@ -173,6 +173,10 @@ def inverse_reduction(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi, b0,B0
         Sample in dataframe with a column for theoretical tranmission ['theo_trans'] and energy ['E'].
     open_df : pandas.DataFrame
         Open dataframe, columns ['E'], ['bw']
+    add_noise : bool
+        Option to sample noise on expected counts.
+    sample_turp : bool
+        Option to sample true underlying resonance parameters - here this is monitor corrections.
     trigo : int
         Number of times the LINAC is fired for the open counts, corresponding to the number of times each channel is openned for counts.
     trigs : int
@@ -216,7 +220,12 @@ def inverse_reduction(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi, b0,B0
             # TODO: update function to take in # of cycles and std of monitor normalizations
     cycles = 35
     c_cycle = theo_c/cycles
-    monitor_factors = np.random.default_rng().normal(1,0.0174*2, size=cycles)
+    
+    if sample_turp:
+        monitor_factors = np.random.default_rng().normal(1,0.0174*2, size=cycles)
+    else:
+        monitor_factors = np.ones((cycles))
+
     if add_noise:
         c = pois_noise(c_cycle)*monitor_factors[0]
         for i in range(cycles-1):
@@ -229,8 +238,8 @@ def inverse_reduction(sample_df, open_df, add_noise, trigo,trigs, k,K, Bi, b0,B0
     assert(c.all() >= 0)
     dc = np.sqrt(c)
     
-    sample_df['c'] = c
-    sample_df['dc'] = dc
+    sample_df.loc[:,'c'] = c
+    sample_df.loc[:,'dc'] = dc
 
     return sample_df, theo_c
 

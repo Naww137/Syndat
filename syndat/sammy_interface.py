@@ -8,6 +8,7 @@ Created on Wed Jun 22 12:30:52 2022
 
 import numpy as np
 import os
+import shutil
 from pathlib import Path
 import syndat
 import pandas as pd
@@ -52,7 +53,7 @@ def samtools_fmtpar(a, filename, template):
     with open(filename,'w+') as f:
         for line in template_lines:
             
-            if line.startswith('%%%ResParms%%%'):
+            if line.startswith("%%%ResParms%%%"):
                 for row in a:
                     # for some reason, the first format string has had problems with the width definition,
                     #if using a different sized energy range (digits before decimal) this may become an issue
@@ -110,6 +111,8 @@ def write_sampar(df, pair, vary_parm, filename,
         binary_array = np.zeros([len(par_array),5])
 
     samtools_array = np.insert(par_array, [5], binary_array, axis=1)
+    if np.any([each is None for each in df.J_ID]):
+        raise ValueError("NoneType was passed as J_ID in the resonance ladder")
     j_array = np.array([df.J_ID]).T
     samtools_array = np.hstack((samtools_array, j_array))
 
@@ -293,22 +296,49 @@ def read_sammy_par(filename, calculate_average):
 
     return avg_df, df
     
-     
 
+
+# =============================================================================
+# 
+# ============================================================================= 
+def copy_template_to_runDIR(exp, file, target_dir):
+    shutil.copy(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sammy_templates', f'{exp}', file), 
+                os.path.join(target_dir,file))
+    return
+
+def write_saminp(model, particle_pair, reaction, filepath):
+    ac = particle_pair.ac*10
+    with open(filepath,'r') as f:
+        old_lines = f.readlines()
+    with open(filepath,'w') as f:
+        for line in old_lines:
+            if line.startswith("%%%formalism%%%"):
+                f.write(f'{model}\n')
+            elif line.startswith('%%%scattering_radius%%%'):
+                f.write(f'  {ac: <8}  0.067166                       0.00000          \n')
+            elif line.startswith('%%%reaction%%%'):
+                f.write(f'{reaction}\n')
+            else:
+                f.write(line)
            
 
 # =============================================================================
 # 
 # =============================================================================
-def calculate_xs(energy_grid, resonance_ladder, particle_pair):
+def calculate_xs(energy_grid, resonance_ladder, particle_pair,
+                                                model   = 'XCT',
+                                                reaction = 'total',
+                                                expertimental_corrections = 'all_exp',
+                                                sammy_runDIR='SAMMY_runDIR',
+                                                keep_runDIR = False  
+                                                                                        ):
     """
     Calculate a cross section using the SAMMY code.
 
-    This function executes the SAMMY code in a separate run directory called SAMMY_runDIR. 
-    The SAMMY execution is to calculate an experimentally corrected cross section given an energy grid, resonance ladder, and particle pair.
-    This execution requires a sammy input file be present in the SAMMY_runDIR. 
-    This input file must have the SAMMY input options the user wants as well as set of spin group definitions with ID's coincident with those in the resonance ladder.
-
+    This function executes the SAMMY code in a separate run directory defined by the user. 
+    If no directory is given, the default will be 'SAMMY_runDIR'. 
+    For running batch jobs, the user should specify different directories for each job.
+    
     Parameters
     ----------
     energy_grid : _type_
@@ -317,6 +347,12 @@ def calculate_xs(energy_grid, resonance_ladder, particle_pair):
         _description_
     particle_pair : _type_
         _description_
+    model : str
+        SAMMY input key for R-Matrix approximation: SLBW, MLBW, XCT (Reich-Moore) are most common. XCT is default.
+    experimental_corrections : str
+        Directory name in syndat/sammy_templates for input file, current templates just allow for different experimental corrections.
+    sammy_runDIR : str
+        Full or relative path to the temporary directory in which SAMMY will be run. Default is realtive 'SAMMY_runDIR'.
 
     Raises
     ------
@@ -328,32 +364,37 @@ def calculate_xs(energy_grid, resonance_ladder, particle_pair):
         _description_
     """
 
-    if os.path.isdir('SAMMY_runDIR'):
-        if os.path.isfile('./SAMMY_runDIR/sammy.inp'):
-            pass
-        else:
-            raise ValueError('No sammy.inp file in the SAMMY_runDIR')
-        if os.path.isfile('./SAMMY_runDIR/sammy.par'):
-            pass
-        else:
-            raise ValueError('No sammy.par file in the SAMMY_runDIR')
+    if os.path.isdir(sammy_runDIR):
+        pass
     else:
-        os.mkdir('SAMMY_runDIR')
+        os.mkdir(sammy_runDIR)
 
-        
-    write_estruct_file(energy_grid,'./SAMMY_runDIR/linear_tof')
-    write_sampar(resonance_ladder, particle_pair, False, "./SAMMY_runDIR/sammy.par")
+    # fill temporary sammy_runDIR with runtime appropriate template files
+    copy_template_to_runDIR(expertimental_corrections, 'sammy.inp', sammy_runDIR)
+    copy_template_to_runDIR(expertimental_corrections, 'sammy.par', sammy_runDIR)
+
+    # write estruct file to runDIR
+    write_estruct_file(energy_grid, os.path.join(sammy_runDIR,'estruct'))
+
+    # edit copied runtime template files
+    write_saminp(model, particle_pair, reaction, os.path.join(sammy_runDIR, 'sammy.inp'))
+    write_sampar(resonance_ladder, particle_pair, False, os.path.join(sammy_runDIR,"sammy.par"))
     with open('./SAMMY_runDIR/pipe.sh', 'w') as f:
-        f.write('sammy.inp\nsammy.par\nlinear_tof\n')
+        f.write('sammy.inp\nsammy.par\nestruct\n')
 
+    # run sammy and wait for completion with subprocess
     runsammy_process = subprocess.run(
                                     ["zsh", "-c", "/Users/noahwalton/gitlab/sammy/sammy/build/bin/sammy<pipe.sh"], 
-                                    cwd=os.path.realpath('./SAMMY_runDIR/'),
+                                    cwd=os.path.realpath(sammy_runDIR),
                                     capture_output=True
                                     )
-
     if len(runsammy_process.stderr) > 0:
         raise ValueError(f'SAMMY did not run correctly\n\nSAMMY error given was: {runsammy_process.stderr}')
-    
-    return
+
+    # read output lst and delete sammy_runDIR
+    lst_df = readlst(os.path.join(sammy_runDIR, 'SAMMY.LST'))
+    if not keep_runDIR:
+        shutil.rmtree(sammy_runDIR)
+
+    return lst_df
 

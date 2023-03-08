@@ -226,11 +226,17 @@ def SLBW(E, pair, resonance_ladder):
     # TODO: check types in resonance ladder
 
     if resonance_ladder.empty:
+        
+        # window potential scattering
+        lwave=0; Jpi=3.0
+        window_shift, window_penetration, window_phi, window_k = FofE_explicit(E, pair.ac, pair.M, pair.m, lwave)
+        g = gstat(Jpi, pair.I, pair.i)
+        potential_scattering = (4*np.pi*g/(window_k**2)) * np.sin(window_phi)**2
+        # TODO: if resonance ladder is empty, need to calculate scattering phase shift for EACH JPI
         xs_cap = 0
-        xs_scat = 1/np.sqrt(E)
+        xs_scat = potential_scattering
         xs_tot = xs_scat + xs_cap
         return xs_tot, xs_scat, xs_cap
-    # TODO: if resonance ladder is empty, calculate nominal cross section - the scattering phase shift still exists, but what is the Jpi to calculate it? 1/np.sqrt(E)?
         
     xs_cap = 0; xs_scat = 0
     group_by_J = dict(tuple(resonance_ladder.groupby('J')))
