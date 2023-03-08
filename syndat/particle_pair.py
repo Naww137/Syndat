@@ -45,6 +45,7 @@ class particle_pair:
             JSON file name for the settings.
         """
 
+        # JSON input checking:
         if (len(args) == 1 and kwargs == {}):
             with open(args[0], 'r') as file:
                 pair_data = json.load(file)
@@ -57,8 +58,6 @@ class particle_pair:
             json_input = False
 
         if json_input:
-            # Particle pair data:
-            # print(pair_data.keys())
             self.I = pair_data['target']['i']
             assert self.I % 0.5 == 0
             
@@ -88,9 +87,9 @@ class particle_pair:
                 try:
                     import fudge
                 except ModuleNotFoundError:
-                    self.use_fudge = True
-                else:
                     self.use_fudge = False
+                else:
+                    self.use_fudge = True
             elif pair_data['resonances']['fudge'] in (True, False):
                 self.use_fudge = pair_data['resonances']['fudge']
             else:
@@ -106,6 +105,7 @@ class particle_pair:
                     raise ValueError(f'"{self.ensemble}" ensemble cannot be used without fudge installed.')
             else:
                 raise ValueError(f'Unknown ensemble for resonance energy generation. Possible ensembles:\n{ensembles}')
+
         else:
             if len(args) >= 1: self.ac = args[0]
             elif 'ac' in kwargs.keys(): self.ac = kwargs['ac']
@@ -135,7 +135,8 @@ class particle_pair:
             # Options:
             default_options = { 'Sample Physical Constants' :   False,
                                 'Use FUDGE'                 :   False,
-                                'Sample Average Parameters' :   False}
+                                'Sample Average Parameters' :   False,
+                                'Ensemble'                  :   'auto'}
             options = default_options
             for old_parameter in default_options:
                 if old_parameter in input_options:
@@ -151,6 +152,11 @@ class particle_pair:
             if self.sample_physical_constants:
                 raise ValueError('Need to implement "Sample Physical Constants" capability')
 
+            if self.options['Ensemble'] == 'auto':
+                self.ensemble = ('goe' if self.use_fudge else 'wigner')
+            else:
+                self.ensemble = self.options['Ensemble']
+
         # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
 
         # Constants:
@@ -160,8 +166,8 @@ class particle_pair:
 
 
 
-
-    def quant_vec_sum(self, a,b):
+    @staticmethod
+    def quant_vec_sum(a,b):
         """
         Calculates a quantum vector sum.
 
