@@ -68,14 +68,13 @@ def k_wavenumber(E, M, m):
     return k
     
 
-def PS_recursive(E, ac, M, m, orbital_angular_momentum):
+def FofE_recursive(E, ac, M, m, orbital_angular_momentum):
         """
-        Calculates penetrability and shift functions using recursion.
+        Calculates functions of energy using recursion.
 
-        This function calculates the centifugal barrier penetrability as well as
-        the shift factor for a neutron incident on Cu-63. The recursive implementation
-        will allow for high l values. Some nucelar parameters are housed within 
-        this function, this could be updated for other nuclei.
+        This function calculates the centifugal barrier penetrability,
+        the shift factor, and the potential scattering phase shift. The recursive implementation
+        will allow for high l values. 
 
         Parameters
         ----------
@@ -88,7 +87,7 @@ def PS_recursive(E, ac, M, m, orbital_angular_momentum):
         m : float or int
             Mass of the incident particle.
         orbital_angular_momentum : int
-            Orbital angular momentum of the pair, describes waveform (l).
+            Maximum orbital angular momentum of the pair (describes waveform l) to be considered.
 
         Returns
         -------
@@ -96,35 +95,47 @@ def PS_recursive(E, ac, M, m, orbital_angular_momentum):
             Array shift factors, each row is an l value, columns traverse energy vector given.
         P_array : numpy.ndarray
             Array penetrability, each row is an l value, columns traverse energy vector given.
+        arcphi_array : numpy.ndarray
+            Array of scattering phase shifts, each row is an l value, columns traverse energy vector given.
 
         See Also
         --------
-        PS_explicit : Calculates penetrability and shift functions using explicit definitions.
+        FofE_explicit : Calculates functions of energy using explicit definitions, limited to l=3.
         
         Examples
         --------
-        >>> from sample_resparm import PS_functions
-        >>> PS_functions.PS_recursive(np.array([10.4]), 6.7e-15, 2)
-        [array([[ 0.        ],
-                [-0.99997817],
-                [-1.99999272]]),
-        array([[4.67244381e-03],
-                [1.02005310e-07],
-                [2.47442770e-13]])]
+        >>> from scattering_theor import FofE_recursive
+        >>> FofE_recursive(np.array([10.4]), 0.786, 180.948030, 1, 2)
+        (array([[ 0.        ],
+                [-0.99996933],
+                [-1.99998978]]),
+        array([[5.53780625e-03],
+                [1.69824347e-07],
+                [5.78684482e-13]]),
+        array([[5.53780625e-03],
+                [5.66088100e-08],
+                [1.15736946e-13]]))
         """
-        rho = k_wavenumber(E, M, m)*ac
+        k = k_wavenumber(E, M, m)
+        rho = k*ac
 
         S_array = np.zeros([orbital_angular_momentum+1,len(E)])
         P_array = np.ones([orbital_angular_momentum+1,len(E)])
+        arcphi_array = np.ones([orbital_angular_momentum+1,len(E)])
         P_array[0,:] *= rho
-        
+        arcphi_array[0,:] *= rho
+
         for l in range(1,orbital_angular_momentum+1):
             S = (rho**2*(l-S_array[l-1]) / ((l-S_array[l-1])**2 + P_array[l-1]**2)) - l
             P = rho**2*P_array[l-1] / ((l-S_array[l-1])**2 + P_array[l-1]**2)
+            arcphi = arcphi_array[l-1] - np.arctan(P_array[l-1]/(l-S_array[l-1]))
             
-            S_array[l,:]=S; P_array[l,:]=P
+            S_array[l,:] = S
+            P_array[l,:] = P
+            arcphi_array[l,:] = arcphi
             
-        return S_array, P_array
+        return S_array, P_array, arcphi_array, k
+
 
 
 def FofE_explicit(E, ac, M, m, orbital_angular_momentum):
@@ -160,13 +171,8 @@ def FofE_explicit(E, ac, M, m, orbital_angular_momentum):
 
     See Also
     --------
-    PS_recursive : Calculates penetrability and shift functions using recursion.
+    PS_recursive : Calculates functions of energy using recursion.
     
-    Examples
-    --------
-    >>> from sample_resparm import PS_functions
-    >>> PS_functions.PS_explicit(np.array([10.4, 10.5]), 6.7e-15, 2)
-    [array([-1.99999272, -1.99999265]), array([2.4744277e-13, 2.5343386e-13])]
     """
     
     assert(orbital_angular_momentum == 0, "Phase shift function in syndat.scattering theory needs to be updated for higher-order waveforms")
@@ -222,7 +228,7 @@ def SLBW(E, pair, resonance_ladder):
     _type_
         _description_
     """
-
+    
     # TODO: check types in resonance ladder
 
     if resonance_ladder.empty:
@@ -299,7 +305,7 @@ def SLBW(E, pair, resonance_ladder):
 
 
 
-def SLBW_capture(g, k, E, resonance_ladder):
+def SLBW_capture(g, k, ac, E, resonance_ladder):
     """
     Calculates a multi-level capture cross section using SLBW formalism.
 
@@ -329,8 +335,9 @@ def SLBW_capture(g, k, E, resonance_ladder):
     constant = (np.pi*g/(k**2))
     for index, row in resonance_ladder.iterrows():
         E_lambda = row.E
-        gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3
-        Gnx = 2*P(E)*gnx2
+        # gnx2 = sum([row[ign] for ign in range(2,len(row))]) * 1e-3
+        # Gn = 2*(k*ac)*gnx2
+        Gn = row.Gn *1e-3
         Gg = row.Gg * 1e-3
         d = (E-E_lambda)**2 + ((Gg+Gn)/2)**2 
         xs += (Gg*Gn) / ( d )

@@ -89,32 +89,35 @@ def write_sampar(df, pair, vary_parm, filename,
     """
 
     def gn2G(row):
-        S, P, phi, k = syndat.scattering_theory.FofE_explicit([row.E], pair.ac, pair.M, pair.m, row.lwave[0])
-        Gnx = 2*P*row.gnx2
+        S, P, phi, k = syndat.scattering_theory.FofE_recursive([row.E], pair.ac, pair.M, pair.m, max(row.lwave))
+        Gnx = 2*np.sum(P)*row.gnx2
         return Gnx.item()
 
-    if "Gnx" not in df:   
-        df['Gnx'] = df.apply(lambda row: gn2G(row), axis=1)
+    if df.empty:
+        samtools_array = []
     else:
-        pass
+        
+        if "Gnx" not in df:
+            df['Gnx'] = df.apply(lambda row: gn2G(row), axis=1)
+        else:
+            pass
 
-    
-    par_array = np.array([df.E, df.Gg, df.Gnx]).T
-    zero_neutron_widths = 5-(len(par_array[0]))
-    zero_neutron_array = np.zeros([len(par_array),zero_neutron_widths])
-    par_array = np.insert(par_array, [5-zero_neutron_widths], zero_neutron_array, axis=1)
+        par_array = np.array([df.E, df.Gg, df.Gnx]).T
+        zero_neutron_widths = 5-(len(par_array[0]))
+        zero_neutron_array = np.zeros([len(par_array),zero_neutron_widths])
+        par_array = np.insert(par_array, [5-zero_neutron_widths], zero_neutron_array, axis=1)
 
-    #vary_parm = True
-    if vary_parm:
-        binary_array = np.hstack((np.ones([len(par_array),5-zero_neutron_widths]), np.zeros([len(par_array),zero_neutron_widths])))
-    else:
-        binary_array = np.zeros([len(par_array),5])
+        #vary_parm = True
+        if vary_parm:
+            binary_array = np.hstack((np.ones([len(par_array),5-zero_neutron_widths]), np.zeros([len(par_array),zero_neutron_widths])))
+        else:
+            binary_array = np.zeros([len(par_array),5])
 
-    samtools_array = np.insert(par_array, [5], binary_array, axis=1)
-    if np.any([each is None for each in df.J_ID]):
-        raise ValueError("NoneType was passed as J_ID in the resonance ladder")
-    j_array = np.array([df.J_ID]).T
-    samtools_array = np.hstack((samtools_array, j_array))
+        samtools_array = np.insert(par_array, [5], binary_array, axis=1)
+        if np.any([each is None for each in df.J_ID]):
+            raise ValueError("NoneType was passed as J_ID in the resonance ladder")
+        j_array = np.array([df.J_ID]).T
+        samtools_array = np.hstack((samtools_array, j_array))
 
     samtools_fmtpar(samtools_array, filename, template)
     

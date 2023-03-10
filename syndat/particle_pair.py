@@ -92,7 +92,7 @@ class particle_pair:
         # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
         if ac < 1e-7:
             print("WARNING: scattering radius seems to be given in m rather than sqrt(barns) a.k.a. cm^-12")
-        self.ac = ac # 6.7e-15 # m or 6.7 femtometers
+        self.ac = ac # sqrt(barns) == cm^-12
         self.M = M # amu
         self.m = m # 1
         self.I = I
@@ -216,7 +216,7 @@ class particle_pair:
                 ls = []; ss = []
                 for i, jtot in enumerate(J_total[:,2]):
                     if jtot == j:
-                        ls.append(J_total[i,0])
+                        ls.append(int(J_total[i,0]))
                         ss.append(J_total[i,1])
                         
                 Jall.append((j,entrance_channels,ls))
@@ -272,7 +272,8 @@ class particle_pair:
         if use_fudge:
             raise ValueError("Need to implement this option")
         else:
-            resonance_ladder = pd.DataFrame()
+            # resonance_ladder = pd.DataFrame()
+            resonance_ladder = pd.DataFrame({'E':[], 'Gg':[], 'gnx2':[], 'J':[], 'chs':[], 'lwave':[], 'J_ID':[]})
             J_ID = 0
             for ij, j in enumerate(spin_groups):
                 J_ID += 1
