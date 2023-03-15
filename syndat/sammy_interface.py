@@ -129,6 +129,10 @@ def write_sampar(df, pair, vary_parm, filename,
 # =============================================================================
 def write_estruct_file(Energies, filename):
     # print("WARNING: if 'twenty' is not specified in sammy.inp, the data file format will change.\nSee 'sammy_interface.write_estruct_file'")
+    if np.all([isinstance(E,float) for E in Energies]):
+        pass
+    else:
+        Energies = np.array([float(E) for E in Energies])
     with open(filename,'w') as f:
         for ept in Energies:
             f.write(f'{ept:0<19} {1.0:<19} {1.0:0<7}\n')
