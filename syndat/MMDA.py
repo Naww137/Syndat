@@ -212,14 +212,17 @@ def generate(particle_pair, experiment,
             if sample_group in h5f:
                 if ('exp_pw' in h5f[sample_group]) and ('theo_pw' in h5f[sample_group]) and ('theo_par' in h5f[sample_group]):
                     if overwrite:
+                        h5f.close()
                         sample_and_write_syndat(case_file, i, particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange, use_hdf5)
                     else:
+                        h5f.close()
                         samples_not_being_generated.append(i)
                 else:
+                    h5f.close()
                     sample_and_write_syndat(case_file, i, particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange, use_hdf5)
             else:
+                h5f.close()
                 sample_and_write_syndat(case_file, i, particle_pair, experiment, solver, open_data, fixed_resonance_ladder, vary_Erange, use_hdf5)
-        h5f.close()
 
     # use nested directory structure and csv's to store data
     else:
