@@ -205,9 +205,9 @@ def generate(particle_pair, experiment,
     if use_hdf5:
         # check for exiting test case file
         check_case_file(case_file)
-        h5f = h5py.File(case_file, "a")
         # loop over given number of samples
         for i in range(min(dataset_range), max(dataset_range)):
+            h5f = h5py.File(case_file, "a")
             sample_group = f'sample_{i}'
             if sample_group in h5f:
                 if ('exp_pw' in h5f[sample_group]) and ('theo_pw' in h5f[sample_group]) and ('theo_par' in h5f[sample_group]):
