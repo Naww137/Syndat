@@ -140,18 +140,12 @@ def sample_and_write_syndat(case_file, isample, particle_pair, experiment, solve
         exp_pw_df.to_hdf(case_file, f"sample_{isample}/exp_pw")
         theo_pw_df.to_hdf(case_file, f"sample_{isample}/theo_pw")
         resonance_ladder.to_hdf(case_file, f"sample_{isample}/theo_par") 
-        f = h5py.File(case_file, 'a')
-        if 'exp_cov' in f[f"sample_{isample}"].keys():
-            del f[f'sample_{isample}/exp_cov']
-        else:
-            pass
-        f.create_dataset(f'sample_{isample}/exp_cov', data=CovT)
-        f.close()
+        pd.DataFrame(CovT, index=np.array(exp_pw_df.E), columns=exp_pw_df.E).to_hdf(case_file, f"sample_{isample}/exp_cov")
     else:
         exp_pw_df.to_csv(os.path.join(case_file,f'sample_{isample}','exp_pw'), index=False)
         theo_pw_df.to_csv(os.path.join(case_file,f'sample_{isample}','theo_pw'), index=False) 
         resonance_ladder.to_csv(os.path.join(case_file,f'sample_{isample}','theo_par'), index=False)
-        pd.DataFrame(CovT).to_csv(os.path.join(case_file,f'sample_{isample}','exp_cov'))
+        pd.DataFrame(CovT, index=np.array(exp_pw_df.E), columns=exp_pw_df.E).to_csv(os.path.join(case_file,f'sample_{isample}','exp_cov'))
 
     return
 
