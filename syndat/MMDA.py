@@ -106,7 +106,8 @@ def sample_syndat(particle_pair, experiment, solver,
             experiment.def_self_energy_grid(new_energy_domain)
         else:
             pass
-        resonance_ladder = particle_pair.sample_resonance_ladder(experiment.energy_domain, particle_pair.spin_groups, particle_pair.average_parameters)
+        # resonance_ladder = particle_pair.sample_resonance_ladder(experiment.energy_domain, particle_pair.spin_groups, particle_pair.average_parameters)
+        resonance_ladder = particle_pair.sample_resonance_ladder(experiment.energy_domain)
     else:
         if vary_Erange:
             raise ValueError("Options to vary the energy range were provided, but so was a fixed resonance ladder.")
