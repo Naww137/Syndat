@@ -274,7 +274,7 @@ class particle_pair:
                 ls = []; ss = []
                 for i, jtot in enumerate(J_total[:,2]):
                     if jtot == j:
-                        ls.append(J_total[i,0])
+                        ls.append(int(J_total[i,0]))
                         ss.append(J_total[i,1])
                         
                 Jall.append((j,entrance_channels,ls))

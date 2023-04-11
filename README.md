@@ -1,4 +1,4 @@
-# [Full Syndat Documentation](https://naww137.github.io/nuc_syndat/build/html/index.html)
+# [Full Syndat Documentation](https://naww137.github.io/Syndat/build/html/index.html)
 
 ## Quick and easy install instructions
 
