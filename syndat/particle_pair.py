@@ -157,8 +157,6 @@ class particle_pair:
             else:
                 self.ensemble = self.options['Ensemble']
 
-        # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
-
         # Constants:
         self.hbar = 6.582119569e-16 # eV-s
         self.c    = 2.99792458e8 # m/s
