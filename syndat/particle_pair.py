@@ -6,13 +6,15 @@ Created on Thu Jun 16 12:18:04 2022
 @author: noahwalton
 """
 
-import os
+# import os
 import numpy as np
+# import matplotlib.pyplot as plt
+import pandas as pd
+import json
+
 from syndat import sample_widths
 from syndat import sample_levels
-from syndat import scattering_theory
-import pandas as pd
-
+# from syndat import scattering_theory
 
 class particle_pair:
     """
@@ -30,6 +32,11 @@ class particle_pair:
         Samples a full resonance parameter ladder for each possible spin group.
     """
 
+    ### Class constants
+    m_eV = 939.565420e6 # eV/c^2
+    c    = 2.99792458e8 # m/s
+    m_eV = 939.565420e6 # eV/c^2
+
     def __init__(self, ac, M, m, I, i, l_max,
                     input_options={},   
                     spin_groups=None, 
@@ -39,10 +46,9 @@ class particle_pair:
                                                                                                     ):
         """
         Initialization of particle pair object for a given reaction.
-
         The particle_pair class houses information about the incident and target particle for a reaction of interest. 
         The methods for this class include functions to calculate the open channels 
-
+        
         Parameters
         ----------
         ac : float
@@ -60,24 +66,45 @@ class particle_pair:
         """
 
         ### Default options
-        default_options = { 'Sample Physical Constants' :   False ,
+        default_options = { 'Sample Physical Constants' :   False,
                             'Use FUDGE'                 :   False,
-                            'Sample Average Parameters' :   False  } 
+                            'Sample Average Parameters' :   False,
+                            'ensemble'                  :   'auto' }
+        
+        possible_options = {'Sample Physical Constants' :   (True, False),
+                            'Use FUDGE'                 :   (True, False, 'auto'),
+                            'Sample Average Parameters' :   (True, False),
+                            'ensemble'                  :   ('wigner', 'picket fence', 'poisson', 'goe', 'auto') }
         
         ### redefine options dictionary if any input options are given
         options = default_options
         for old_parameter in default_options:
             if old_parameter in input_options:
-                options.update({old_parameter:input_options[old_parameter]})
+                if input_options[old_parameter] not in possible_options[old_parameter]:
+                    raise ValueError(f'Input option value does not exist. Possible values:\n{possible_options[old_parameter]}')
+                options.update({old_parameter: input_options[old_parameter]})
         for input_parameter in input_options:
-            if input_parameter not in default_options:
-                raise ValueError('User provided an unrecognized input option')
+            if input_parameter not in possible_options:
+                raise ValueError(f'User provided an unrecognized input option, {input_parameter}. Possible options:\n{possible_options.keys()}')
         self.options = options
 
         ### Gather options
         self.sample_physical_constants = self.options['Sample Physical Constants']
-        self.use_fudge = self.options['Use FUDGE']
+        if self.options['Use FUDGE'] == 'auto':
+            try:
+                import fudge
+            except ModuleNotFoundError:
+                self.use_fudge = False
+            else:
+                self.use_fudge = True
+        else:
+            self.use_fudge = self.options['Use FUDGE']
         self.sample_average_parameters = self.options['Sample Average Parameters']
+        if self.options['ensemble'] == 'auto':
+            self.ensemble = ('goe' if self.use_fudge else 'wigner')
+        else:
+            self.ensemble = self.options['ensemble']
+
         # TODO: implement 3 options above
         if self.sample_physical_constants:
             raise ValueError('Need to implement "Sample Physical Constants" capability')
@@ -88,28 +115,94 @@ class particle_pair:
 
 
         ### Gather physical constants until sampling function is implemented
+        # Error checking is included
 
         # assuming boundary condition selected s.t. shift factor is eliminated for s wave but not others!
         if ac < 1e-7:
             print("WARNING: scattering radius seems to be given in m rather than sqrt(barns) a.k.a. cm^-12")
+        elif ac == None:
+            ac = (1.23*M**(1/3))+0.8 # fermi or femtometers
         self.ac = ac # sqrt(barns) == cm^-12
+
         self.M = M # amu
         self.m = m # 1
+        if I % 0.5 != 0:
+            raise ValueError('Target particle spin must be an integer or half-integer')
         self.I = I
+        if i % 0.5 != 0:
+            raise ValueError('Incident particle spin must be an integer or half-integer')
         self.i = i
-        self.l_max = l_max
-        # generalized
-        ac_expected = (1.23*M**(1/3))+0.8 # fermi or femtometers
+        if l_max % 1 != 0:
+            raise ValueError('Highest order waveform number must be an integer')
+        self.l_max = int(l_max)
 
-        ### define some constants
-        self.hbar = 6.582119569e-16 # eV-s
-        self.c = 2.99792458e8 # m/s
-        self.m_eV = 939.565420e6 # eV/c^2
+    @classmethod
+    def json(cls, file:str):
+        """
+        'json' is a factory method for 'particle_pair' that reads from a JSON file, given by 'file'.
+        
+        Parameters
+        ----------
+        file: str
+            json file path containing particle pair information.
 
+        Example JSON File
+        -----------------
+        {
+            "target": {
+                "m":  180.948030,
+                "i":  3.5,
+                "ac": 0.81271
+            },
+            "projectile": {
+                "m":  1,
+                "i":  0.5
+            },
+            "l_max": 1,
+            "spin_groups": [[3.0, 1, [0]]],
+            "mean_parameters": {
+                "dE"  : {"3.0": 20.0, "4.0": 20.0, "-4.0": 20.0},
+                "Gg"  : {"3.0": 15.0, "4.0": 55.0, "-4.0": 10.0},
+                "gn2" : {"3.0": 15.0, "4.0": 55.0, "-4.0": 10.0}
+            },
+            "ensemble": "auto",
+            "fudge": true
+        }
+        """
 
+        # Reading JSON file:
+        with open(file, 'r') as f:
+            pair_data = json.load(f)
+        
+        I = pair_data['target']['i']
+        M = pair_data['target']['m']
+        if 'ac' not in pair_data['target'].keys():
+            ac = None
+        ac = pair_data['target']['ac']
+        
+        i = pair_data['projectile']['i']
+        m = pair_data['projectile']['m']
+        
+        l_max = pair_data['l_max']
 
+        # Mean parameters:
+        spin_groups = pair_data['spin_groups']
+        all_groups = pair_data['mean_parameters'].keys()
+        average_parameters = pd.DataFrame({param: {sg: pair_data['mean_parameters'][sg][param] for sg in all_groups} \
+                                                for param in ('dE', 'Gg', 'gn2')})
 
-    def quant_vec_sum(self, a,b):
+        # Options:
+        input_options = {}
+        if 'fudge' in pair_data.keys():
+            input_options['Use FUDGE'] = pair_data['fudge']
+        if 'ensemble' in pair_data.keys():
+            input_options['ensemble'] = pair_data['ensemble']
+        
+        # Make the "particle_pair" object:
+        return cls(ac, M, m, I, i, l_max, input_options=input_options, spin_groups=spin_groups, average_parameters=average_parameters)
+
+    @staticmethod
+    def quant_vec_sum(a,b):
         """
         Calculates a quantum vector sum.
 
@@ -128,12 +221,12 @@ class particle_pair:
         numpy.ndarray
             Array of all possible quantum values.
         """
-        a = abs(a); b=abs(b)
+        a=abs(a); b=abs(b)
         vec = np.arange(abs(a-b), a+b+1, 1)
         return vec
 
 
-    def map_quantum_numbers(self, print_out):
+    def map_quantum_numbers(self, print_out:bool):
         """
         Maps the possible quantum numbers for pair.
 
@@ -243,50 +336,26 @@ class particle_pair:
         return
 
 
-    def sample_resonance_ladder(self, Erange, spin_groups, average_parameters, 
-                                                                        use_fudge=False):
+    def sample_resonance_ladder(self, Erange, spin_groups=None, average_parameters=None):
         """
-        Samples a full resonance ladder.
-
-        _extended_summary_
-
-        Parameters
-        ----------
-        Erange : array-like
-            _description_
-        spin_groups : list
-            List of tuples defining the spin groups being considered.
-        average_parameters : DataFrame
-            DataFrame containing the average resonance parameters for each spin group.
-        use_fudge : bool, optional
-            Option to use Syndat for resonance sampling or the higher-fidelity implementation in Fudge.
-            The latter option is dependent on a user install of the Fudge code, by default False.
-
-        Returns
-        -------
-        DataFrame
-            Resonance ladder information.
+        ...
         """
+        if spin_groups is None:
+            spin_groups = self.spin_groups
+        if average_parameters is None:
+            average_parameters = self.average_parameters
 
-        # TODO implement option to use Fudge for resonance sampling. Calling a single function would be nice. I will clean up the 'else' option to also be a single function
-        if use_fudge:
-            raise ValueError("Need to implement this option")
+        resonance_ladder = pd.DataFrame()
+        if self.use_fudge:
+            resonance_ladder = self.__fudge_sample(Erange, resonance_ladder, spin_groups, average_parameters)
         else:
-            # resonance_ladder = pd.DataFrame()
-            resonance_ladder = pd.DataFrame({'E':[], 'Gg':[], 'gnx2':[], 'J':[], 'chs':[], 'lwave':[], 'J_ID':[]})
             J_ID = 0
             for ij, j in enumerate(spin_groups):
                 J_ID += 1
 
-                # sample resonance levels for each spin group with negative parity
+                # sample resonance levels for each spin group with negative parity:
                 [levels, level_spacing] = sample_levels.sample_RRR_levels(Erange, average_parameters.dE[f'{j[0]}'])
                 
-                # if no resonance levels sampled
-                if len(levels) == 0:
-                    continue
-                # elif len(levels) == 1:
-
-
                 # a single radiative capture width is sampled w/large DOF because of many 'partial' radiative transitions to ground state
                 # must divide average by the 2*DOF in order to maintain proper magnitude
                 red_gwidth = sample_widths.sample_RRR_widths(levels, average_parameters.Gg[f'{j[0]}']/2000, 1000)
@@ -294,16 +363,68 @@ class particle_pair:
 
                 # sample observable width as sum of multiple single-channel width with the same average (chi2, DOF=channels)
                 red_nwidth = sample_widths.sample_RRR_widths(levels, average_parameters.gn2[f'{j[0]}']/j[1], j[1])
-                E_Gn_gnx2 = pd.DataFrame([levels, Gwidth, red_nwidth, [j[0]]*len(levels), [j[1]]*len(levels), [j[2]]*len(levels), [J_ID]*len(levels)], index=['E','Gg', 'gnx2', 'J', 'chs', 'lwave', 'J_ID'])  
+                E_Gn_gnx2 = pd.DataFrame([levels, Gwidth, red_nwidth, [j[0]]*len(levels), [j[1]]*len(levels), [j[2]]*len(levels), [J_ID]*len(levels)], index=['E','Gg', 'gnx2', 'J', 'chs', 'lwave', 'J_ID'])   
                 # assert len(np.unique(j[2]))==1, "Code cannot consider different l-waves contributing to a spin group"
                 resonance_ladder = pd.concat([resonance_ladder, E_Gn_gnx2.T])
-
-            resonance_ladder.reset_index(inplace=True, drop=True)
     
+        # resonance_ladder.sort_values(by=['E'])
+        resonance_ladder.reset_index(inplace=True, drop=True)
         return resonance_ladder
 
+    def __fudge_sample(self, Erange, spin_groups, average_parameters, resonance_ladder):
+        """
+        Samples resonance ladder using fudge.
+        """
 
+        import sys
+        if '/Users/colefritsch/opt/anaconda3/lib/python3.8/site-packages/fudge' not in sys.path:
+            sys.path.append('/Users/colefritsch/opt/anaconda3/lib/python3.8/site-packages')
+            sys.path.append('/Users/colefritsch/opt/anaconda3/lib/python3.8/site-packages/fudge')
+        import fudge.xData.XYs1d as XYs1dModule
+        from fudge.brownies.BNL.restools.resonance_generator import getFakeResonanceSet
 
+        J_ID = 0
+        for ij, j in enumerate(spin_groups):
+            J_ID += 1
+
+            EB = (np.min(Erange), np.max(Erange))
+            dE = average_parameters.dE[f'{j[0]}']
+            N = round((EB[1]-EB[0])/dE) + 10
+
+            # Mean capture width:
+            aveWidths = {}
+            Gg = average_parameters.Gg[f'{j[0]}']
+            aveWidths['captureWidth'] = XYs1dModule.XYs1d(
+                                            data=[[float(EB[0]), Gg], [float(EB[1]), Gg]],
+                                            axes=XYs1dModule.XYs1d.defaultAxes(
+                                                labelsUnits={
+                                                    XYs1dModule.yAxisIndex: ('width', 'eV'),
+                                                    XYs1dModule.xAxisIndex: ('excitation_energy', 'eV')}))
+            # Mean neutron width:
+            gn2 = average_parameters.gn2[f'{j[0]}']
+            Gn = gn2 # NOTE: THIS MAY NOT BE CORRECT!!!!
+            aveWidths['neutronWidth'] = XYs1dModule.XYs1d(
+                                            data=[[float(EB[0]), Gn], [float(EB[1]), Gn]],
+                                            axes=XYs1dModule.XYs1d.defaultAxes(
+                                                labelsUnits={
+                                                    XYs1dModule.yAxisIndex: ('width', 'eV'),
+                                                    XYs1dModule.xAxisIndex: ('excitation_energy', 'eV')}))
+            # Level density:
+            level_density = XYs1dModule.XYs1d([[float(EB[0]), 1/dE], [float(EB[1]), 1/dE]],
+                                            axes=XYs1dModule.XYs1d.defaultAxes(
+                                                labelsUnits={
+                                                    XYs1dModule.yAxisIndex: ('width', 'eV'),
+                                                    XYs1dModule.xAxisIndex: ('excitation_energy', 'eV')}))
+            # Generating Resonances:
+            resonances = getFakeResonanceSet(float(EB[0]), dE, N, self.ensemble, L=j[1], J=j[0], levelDensity=level_density, aveWidthFuncs=aveWidths, DOFs={'neutronWidth': 1, 'captureWidth': 0}, domainMin=EB[0], domainMax=EB[1], widthKeys=('neutronWidth', 'captureWidth'))
+            levels = resonances[:,0]
+            red_nwidth = resonances[:,3]
+            Gwidth = resonances[:,4]
+
+            E_Gn_gnx2 = pd.DataFrame([levels, Gwidth, red_nwidth, [j[0]]*len(levels), [j[1]]*len(levels), [j[2]]*len(levels), [J_ID]*len(levels)], index=['E','Gg', 'gnx2', 'J', 'chs', 'lwave', 'J_ID'])   
+            # assert len(np.unique(j[2]))==1, "Code cannot consider different l-waves contributing to a spin group"
+            resonance_ladder = pd.concat([resonance_ladder, E_Gn_gnx2.T])
+        return resonance_ladder
 
 ### legacy code 
 
@@ -448,14 +569,51 @@ class particle_pair:
 
 
 
-    
-            
-            
-            
 
 
-        
-    
+
+
+
+
+
+# if __name__ == '__main__':
+#     import sys
+#     sys.path.insert(0, '/Users/colefritsch/ENCORE/syndat/nuc_syndat/fudge')
+#     from brownies.BNL.restools.resonance_generator import getFakeResonanceSet
+#     import xData.XYs1d as XYs1dModule
+
+#     l = 1; j = 0.5
+#     N = 100
+#     EB = (10, 10000)
+
+#     dE = 1.0
+#     Gg = 1.0
+#     Gn = 1.0
+
+#     # Mean capture width:
+#     aveWidths = {}
+#     aveWidths['captureWidth'] = XYs1dModule.XYs1d(
+#                                     data=[[EB[0], Gg], [EB[1], Gg]],
+#                                     axes=XYs1dModule.XYs1d.defaultAxes(
+#                                         labelsUnits={
+#                                             XYs1dModule.yAxisIndex: ('width', 'eV'),
+#                                             XYs1dModule.xAxisIndex: ('excitation_energy', 'eV')}))
+#     # Mean neutron width:
+#     aveWidths['neutronWidth'] = XYs1dModule.XYs1d(
+#                                     data=[[EB[0], Gn], [EB[1], Gn]],
+#                                     axes=XYs1dModule.XYs1d.defaultAxes(
+#                                         labelsUnits={
+#                                             XYs1dModule.yAxisIndex: ('width', 'eV'),
+#                                             XYs1dModule.xAxisIndex: ('excitation_energy', 'eV')}))
+#     # Level density:
+#     level_density = XYs1dModule.XYs1d([[EB[0], 1/dE], [EB[1], 1/dE]],
+#                                     axes=XYs1dModule.XYs1d.defaultAxes(
+#                                         labelsUnits={
+#                                             XYs1dModule.yAxisIndex: ('width', 'eV'),
+#                                             XYs1dModule.xAxisIndex: ('excitation_energy', 'eV')}))
+#     resonances = getFakeResonanceSet(EB[0], dE, N, 'goe', L=l, J=j, levelDensity=level_density, aveWidthFuncs=aveWidths, domainMin=EB[0], domainMax=EB[1], widthKeys=('neutronWidth', 'captureWidth'))
+
+
 
 
 

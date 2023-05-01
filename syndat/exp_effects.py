@@ -8,29 +8,55 @@ Created on Thu Jun 23 10:34:17 2022
 
 import numpy as np
 import scipy.stats as stat
+
+# Constants:
+c       = 299792458       # m/s
+jev     = 1.6022e-19      # J/eV
+mn_eV = 939.56542052e6  # eV/c2
+mn_kg   = 1.674927498e-27 # kg
 import pandas as pd
 
-def t_to_e(t,d,rel):
-    if rel:
-        mn = 939.56542052e6 # eV/c2
-        c = 299792458 # m/s
-        E = mn*(1/np.sqrt(1-(d/t/c)**2)-1)
-    else:
-        mn = 1.674927498e-27 #kg
-        jev = 1.6022e-19 # J/eV
-        E = 0.5*mn*(d/t)**2 /jev # eV
-    return E
+def t_to_e(t, d, rel=True):
+    """
+    Converts a time array to an energy array.
+
+    Parameters
+    ----------
+    t : array-like
+        Time array in seconds (s).
+    d : float
+        Flight distance in meters (m).
+    rel : bool
+        Relativistic Condition. Default = True.
+
+    Returns
+    -------
+    Energy array in electron Volts (eV).
+    """
+    if rel:     E = mn_eV*(1/np.sqrt(1-(d/(c*t))**2)-1)
+    else:       E = 0.5*mn_kg*(d/t)**2 /jev
+    return E # eV
 
 
-def e_to_t(E,d,rel):
-    if rel:
-        mn = 939.56542052e6 # eV/c2
-        c = 299792458 # m/s
-        t = d/c * 1/np.sqrt(1-1/(E/mn+1)**2)
-    else:
-        jev = 1.6022e-19 # J/eV
-        mn = 1.674927498e-27 #kg
-        t = d/np.sqrt(E*jev*2/mn)
+def e_to_t(E, d, rel=True):
+    """
+    Converts an energy array to a time array.
+
+    Parameters
+    ----------
+    E : array-like
+        Energy array in electron Volts (eV).
+    d : float
+        Flight distance in meters (m).
+    rel : bool
+        Relativistic Condition. Default = True.
+
+    Returns
+    -------
+    Time array in seconds (s).
+    """
+    if rel:     t = d/c * 1/np.sqrt(1-1/(E/mn_eV+1)**2)
+    else:       t = d/np.sqrt(E*jev*2/mn_kg)
     return t
 
 def gaus_noise(vector, std_vec):

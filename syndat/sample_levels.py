@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jun  2 13:28:37 2022
-
 @author: noahwalton
 """
 
@@ -14,20 +13,16 @@ import os
 def sample_wigner_invCDF(N_samples):
     """
     Sample the wigner distribution.
-
     This function simply samples from the wigner distribution using inverse
     CDF sampling and is used by other functions for generating resonance level spacing.
-
     Parameters
     ----------
     N_samples : int
         Number of samples and/or length of sample vector.
-
     Returns
     -------
     numpy.ndarray or float
         Array of i.i.d. samples from wigner distribution.
-
     Notes
     -----
     See preliminary methods for sampling resonance level spacing from GOE.
@@ -57,6 +52,7 @@ def wigner_PDF(x, avg_level_spacing):
     y = y/avg_level_spacing
     return y
 
+# NOTE: THIS IS A DUPLICATE
 def sample_resonance_levels(E0, N_levels, avg_level_spacing, method):
     
     if method == 'invCDF':
@@ -86,30 +82,25 @@ def sample_resonance_levels(E0, N_levels, avg_level_spacing, method):
 def sample_RRR_levels(E_range, avg_level_spacing):
     """
     Sample the resonance energy levels.
-
     This function samples the wigner distribution using invCDF method in order 
     to get a ladder of resonance energy levels within a specified range. The energy range given
     is expanded by 5-6 times the average level spacing, a resonance ladder is sampled over that, 
     then the ladder is filtered to the energy range of interest.
-
     Parameters
     ----------
     E_range : array-like
         Array energies in RRR, only need min/max.
     avg_level_spacing : float
         Average level spacing value to scale wigner distribution.
-
     Returns
     -------
     levels : numpy.ndarray
         Array of resonance energy levels.
     spacings : numpy.ndarray
         Array of i.i.d. resonance level spacing samples.
-
     See Also
     --------
     sample_resonance_levels : Samples a specified number of resonance energy levels.
-
     Notes
     -----
     
@@ -175,5 +166,3 @@ def compare_pdf_to_samples(level_spacing_vector, avg_level_spacing, method):
     plt.show(); plt.close()
     
     return
-
-
