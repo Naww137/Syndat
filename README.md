@@ -1,8 +1,10 @@
 ## [Full Syndat Documentation](https://naww137.github.io/Syndat/build/html/index.html)
 
+
 If you use this software or the methodology behind it, please cite the following journal article:
 
 Walton, N., Brown, J., Fritsch, W., Brown, D., Nobre, G., Sobes, V., "Methodology for physics-informed generation of synthetic neutron time-of-flight measurement data," arXiv (pre-print), https://doi.org/10.48550/arXiv.2303.09698.
+
 
 ## Quick and easy install instructions
 
