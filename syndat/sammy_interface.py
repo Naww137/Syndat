@@ -89,7 +89,7 @@ def write_sampar(df, pair, vary_parm, filename,
     """
 
     def gn2G(row):
-        S, P, phi, k = syndat.scattering_theory.FofE_recursive([row.E], pair.ac, pair.M, pair.m, max(row.lwave))
+        S, P, phi, k = syndat.scattering_theory.FofE_recursive([row.E], pair.ac, pair.M, pair.m, row.lwave)
         Gnx = 2*np.sum(P)*row.gnx2
         return Gnx.item()
 
