@@ -3,7 +3,10 @@
 
 If you use this software or the methodology behind it, please cite the following journal article:
 
-Walton, N., Brown, J., Fritsch, W., Brown, D., Nobre, G., Sobes, V., "Methodology for physics-informed generation of synthetic neutron time-of-flight measurement data," arXiv (pre-print), https://doi.org/10.48550/arXiv.2303.09698.
+Walton, N., Brown, J., Fritsch, W., Brown, D., Nobre, G., Sobes, V., "Methodology for physics-informed generation of synthetic neutron time-of-flight measurement data," Computer Physics Communications., vol. 294, pg. 108927, ISSN 0010-4655, https://doi.org/10.1016/j.cpc.2023.108927.
+
+A pre-print manuscript is also available at:
+https://doi.org/10.48550/arXiv.2303.09698.
 
 
 ## Quick and easy install instructions
