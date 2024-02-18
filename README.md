@@ -1,5 +1,5 @@
 ## [Full Syndat Documentation](https://naww137.github.io/Syndat/build/html/index.html)
-### The Syndat code is now being developed as a part of the [ATARI](https://github.com/Naww137/ATARI) code
+### The Syndat code is now being developed as a part of the [ATARI](https://github.com/Naww137/ATARI) code. The most up-to-data capabilities can be found there.
 
 If you use this software or the methodology behind it, please cite the following journal article:
 
